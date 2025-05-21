@@ -39,7 +39,11 @@ Un neurone $i$ avec un voltage $v in {0, 1, dots, theta}$ quelconque qui se dés
 $ bold(1)_(phi.alt(V_t^i) <= U_(t+1)^i <= lambda A_t^i + phi.alt(V_t^i)). $
 
 == Évolution du voltage
+#set math.vec(delim: none)
+
 $ forall t, forall i, space V_(t+1)^i = underbrace(bold(1)_(U_(t+1)^i > phi.alt(V_t^i)), "= 0 si spike")(V_t^i + sum_vec(j = 0, j != i)^N A_t^j bold(1)_(U_(t+1)^j <= phi.alt(V_t^j))). $
+
+#set math.vec(delim: "(")
 
 == Évolution de l'activation
 $ forall t, forall i, space A_(t+1)^i = A_t^i + underbrace((1 - A_t^i)bold(1)_(U_(t+1)^i <= phi.alt(V_t^i)), "Réactivation par le spike") - underbrace(A_t^i bold(1)_(phi.alt(V_t^i) <= U_(t+1)^i <= lambda + phi.alt(V_t^i)), "Désactivation spontanée"). $
@@ -123,12 +127,74 @@ Par construction, les états $y^l$ sont tous bien dans $cal(X)_"irr"$.\
 
 == Limite en champ moyen
 L'hypothèse de champ moyen que nous allons faire dans cette partie consiste à considérer un grand nombre de neurones $N$ et à les considérer comme étant tous identiques. Cela permet plusieurs simplifications :
+#set math.vec(delim: none)
 - Au lieu d'écrire $sum_vec(j = 0, j != i)^N$, nous écrirons $sum_(j = 1)^N$.
-- 
+- Nous allons poser $Y_t^i = A_t^i bold(1)_(U_(t+1)^j <= phi.alt(V_t^i)).$
 
-=== Convergence vers le modèle Limite
-$ bb(E)|Y_(t+1)^j - overline(Y)_(t+1)^j| <= bb(E)|V_t^j - overline(V)_t^j| $
+Nous allons supposer l'existence d'une "loi des grands nombres" permettant d'affirmer que $ 1/N sum_(i=0)^N V_i^t ~ bb(E)[V_i^t]. $
+et que $ 1/N sum_(i=0)^N Y_i^t ~ bb(E)[Y_i^t]. $
 
+=== Processus limites
+Nous allons noter $overline(V)_t^i$ et $overline(A)_t^i$ les processus limites de voltage et d'activation pour le neurone $i$. Leur dynamique obéit aux équations suivantes :
+$ overline(V)_(t+1)^i = bold(1)_(U_(t+1)^i > phi.alt(overline(V)_t^i))(overline(V)_t^i + sum_vec(j = 0, j != i)^N overline(Y)_t^j), $
+$ overline(A)_(t+1)^i = overline(A)_t^i + (1 - overline(A)_t^i)bold(1)_(U_(t+1)^i <= phi.alt(overline(V)_t^i)) - overline(A)_t^i bold(1)_(phi.alt(overline(V)_t^i) <= U_(t+1)^i <= lambda + phi.alt(overline(V)_t^i)). $
+
+=== Existence des processus limites
+
+
+=== Convergence vers les processus limites
+Commençons par définir la distance entre les processus limites et les processus classiques :
+$ D^i_(t+1) = d^i_(t+1) + delta^i_(t+1), $ avec $d^i_(t+1) = bb(E)|V^i_(t+1) - overline(V)^i_(t+1)|$ et $delta^i_(t+1) = bb(E)|A_(t+1)^i - overline(A)^i_(t+1)|$.
+Nous allons prouver que cette distance converge $D^i_(t+1)$ vers $0$ presque-sûrement.
+
+
+$ V_(t+1)^i = bold(1)_(U_(t+1)^i > phi.alt(V_t^i)) [V_t^i + 1/N sum_(j≠i)^N Y_t^j] $
+
+$ overline(V)_(t+1)^i = bold(1)_(U_(t+1)^i > phi.alt(overline(V)_t^i)) [overline(V)_t^i + bb(E)[overline(Y)_t^j]] $
+
+$ d_(t+1)^i = bb(E)| bold(1)_(U_(t+1)^i > phi.alt(V_t^i)) (V_t^i + (1/N) sum_(j≠i)^N Y_t^j) - bold(1)_(U_(t+1)^i > phi.alt(overline(V)_t^i)) (overline(V)_t^i + bb(E)[overline(Y)_t^j]) | $
+
+Nous pouvons distinguer trois événements disjoints :
+
+#set enum(numbering: "I")
++ Les deux processus sautent en même temps, c'est-à-dire que $U_(t+1)^i < phi.alt(V_t^i) $ et $ U_(t+1)^i < phi.alt(overline(V)_t^i)$. Dans ce cas, les indicatrices s'annulent et $d_(t+1)^(i, "I") = 0$.
+
++ Les deux processus ne sautent pas, c'est-à-dire que $U_(t+1)^i > phi.alt(V_t^i)$ et $U_(t+1)^i > phi.alt(overline(V)_t^i). $ Dans ce cas, on se retrouve avec :
+    $ d_(t+1)^(i,"II") = |V_t^i - overline(V)_t^i + 1/N sum_(j≠i)^N Y_t^j - bb(E)[overline(Y)_t^j]|. $
+
++ Un seul des processus saute, c'est-à-dire que $ min(phi.alt(V_t^i), phi.alt(overline(V)_t^i)) < U_(t+1)^i < max(phi.alt(V_t^i), phi.alt(overline(V)_t^i)). $
+    Dans ce cas, on obtient : $d_(t+1)^(i,"III") = |V_t^i| "ou" |overline(V)_t^i|$, que l'on peut majorer par $theta$ :
+    $ d_(t+1)^(i,"III") <= theta. $
+
+En utilisant les propriétés de l'espérance, nous pouvons écrire :
+$ d_(t+1)^i &= bb(E)[bold(1)_"I" 0] + bb(E)[bold(1)_"II" d_(t+1)^(i,"II")] + bb(E)[bold(1)_"III" d_(t+1)^(i,"III")]\
+d_(t+1)^i &<= bb(P)("II") bb(E)[d_(t+1)^(i,"II")] + bb(P)("III") theta "car les événements sont indépendants." $
+
+Or nous savons que :
+$ bb(P)("III") &= bb(P)(min(phi.alt(V_t^i), phi.alt(overline(V)_t^i)) < U_(t+1)^i < max(phi.alt(V_t^i), phi.alt(overline(V)_t^i))),\
+bb(P)("III") &= max(phi.alt(V_t^i), phi.alt(overline(V)_t^i)) - min(phi.alt(V_t^i), phi.alt(overline(V)_t^i)) "car" U_(t+1)^i ~ "Unif"(0, 1). $
+Nous pouvons bien sûr écrire :
+$ bb(P)("III") &= bb(E)[bb(P)("III" | V_t^i, overline(V)_t^i)],\ 
+"où" bb(P)("III" | V_t^i, overline(V)_t^i) &= |phi.alt(V_t^i) - phi.alt(overline(V)_t^i)| = beta |bold(1)[V_t^i = 0] - bold(1)[overline(V)_t^i = 0]|. $
+
+Montrons que $ |bold(1)_(V_t^i = 0) - bold(1)_(overline(V)_t^i = 0)| <= |V_t^i - overline(V)_t^i| $
+
+En effet, $|bold(1)_(V_t^i = 0) - bold(1)_(overline(V)_t^i = 0)|$ ne peut prendre que deux valeurs, 0 ou 1. Dans le premier cas, trivialement :
+$ |bold(1)_(V_t^i = 0) - bold(1)_(overline(V)_t^i = 0)| = 0 <= |V_t^i - overline(V)_t^i|. $
+
+Dans le second cas $|bold(1)_(V_t^i = 0) - bold(1)_(overline(V)_t^i = 0)| = 1$
+implique nécessairement que $V_t^i ≠ overline(V)_t^i$.\
+Or, comme $V_t^i$ et $overline(V)_t^i in {0, 1, ..., theta}$, par construction :
+$ V_t^i ≠ overline(V)_t^i => |V_t^i - overline(V)_t^i| >= 1, $
+ce qui conclut la preuve. 
+
+Nous avons donc :
+$ bb(P)("III" | V_t^i, overline(V)_t^i) <= beta |V_t^i - overline(V)_t^i|, $
+soit :
+$ bb(P)("III") <= beta d_t^i. $
+
+
+#set math.vec(delim: "(")
 
 = Modèle en temps continu et équation différentielle stochastique associée
 $ d X_t^i &= integral_bb(R)_+ bold(1)_(z<=beta) Delta_a (X^i_t) pi^i (d t, d z) + integral_bb(R)_+ bold(1)_(beta <= z <= beta + lambda)F_(t_-)^i vec(0, -1)pi^i (d t, d z)  \
@@ -137,3 +203,9 @@ Avec les sauts associés à un spike du neurone lui-même, dit *autonome* :
 $ Delta_a (x) = bold(1)_(u = theta)[vec(-u, 1)bold(1)_(f=0) + vec(-u, 0)f],space"pour tout " x = vec(u, f), $
 et les sauts déclenchés par un autre neurone *extérieur* : $ Delta_"ex" (x) = vec(u+1 and theta, f),space"pour tout " x = vec(u, f). $
 $pi^i$ mesures de Poisson.
+
+$ abs(Y_(t+1)^j - overline(Y)_(t+1)) &= abs(A_t^j  bold(1)_(U_(t+1)^j <= phi.alt(V_r^j)) - overline(A)_t^j  bold(1)_(U_(t+1)^j <= phi.alt(overline(V)_r^j)))\
+&= abs(bold(1)_(U_(t+1)^j <= phi.alt(V_r^j)) - bold(1)_(U_(t+1)^j <= phi.alt(overline(V)_r^j)))\
+&= bold(1)_(phi.alt(V_r^j) and phi.alt(overline(V)_r^j) <= U_(t+1)^j <= phi.alt(V_r^j) or phi.alt(overline(V)_r^j)).
+$
+

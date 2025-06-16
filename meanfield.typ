@@ -62,7 +62,7 @@ $ #distance_global() = #distance_potential() + #distance_activation(). $
     // $ lim_(N->oo) delta^i_(t+1) = 0. $ <conv_activation>
 ] <convergence_theorem>
 
-#proof[
+#proof()[
     L'idée de cette preuve est de montrer que la suite des distances #distance_global(t: $0$), #distance_global(t: $1$), $dots,$ #distance_global(), #distance_global(t: $t+1$) subit une contraction, soit
     $ forall c < 1, space #distance_global(t: $t+1$) <= c#distance_global(). $
     Nous pourrons ensuite utiliser l'hypothèse que tous les neurones commencent avec les même conditions initiales pour dire que $#distance_global(t: $0$) = 0$ et puis finalement utiliser un argument de récurrence pour conclure la preuve.
@@ -70,6 +70,7 @@ $ #distance_global() = #distance_potential() + #distance_activation(). $
     L'objectif est donc de trouver une majoration de #distance_global(t: $t+1$) par #distance_global()\
     Cela passe évidemment par trouver des majorations similaires pour #distance_potential(t: $t+1$) et #distance_activation(t: $t+1$).
 
+    === Majoration de #distance_activation(t: $t+1$)
     Commençons par majorer #distance_activation(t: $t+1$). De la définition, il vient :
     $ #distance_activation(t: $t+1$) &= bb(E)abs(#activation(t: $t+1$) - #activation_limit(t: $t+1$)) <= bb(E)abs(A_t^i - overline(A)_t^i) +\
     &bb(E)underbrace(abs((1 - #activation())#spiking_indicator() - (1 - #activation_limit())#spiking_indicator_limit() - (#activation()#deactivation_indicator - #activation_limit()#deactivation_indicator)), "= e pour simplifier l'écriture pour les lignes suivantes"). $
@@ -113,7 +114,9 @@ $ #distance_global() = #distance_potential() + #distance_activation(). $
         &= bb(P)(#auxiliary_uniform(t: $t+1$) > #spiking_probability) + bb(P)(#membrane_potential() < #max_potential "et" #membrane_potential_limit() < #max_potential) - bb(P)({#auxiliary_uniform(t: $t+1$) > #spiking_probability} inter {#membrane_potential() < #max_potential "et" #membrane_potential_limit() < #max_potential}),\
         &= 1 - #spiking_probability + #spiking_probability bb(P)(#membrane_potential() < #max_potential "et" #membrane_potential_limit() < #max_potential). $
         Par construction, nous avons nécessairement $bb(P)(#membrane_potential() < #max_potential "et" #membrane_potential_limit() < #max_potential) < 1$ car le neurone $i$ se trouve nécessairement, pour certains temps $t$, dans la couche #max_potential.\
-        Ainsi, $ bb(P)(#no_spike_event) = c < 1. $
+        Ainsi,
+        #numbered_equation($ bb(P)(#no_spike_event) = c < 1. $, <probabability_no_spike_event_upperbound>)
+        
 
     En reprenant @equation_majoration_distance_activation, nous aboutissons à :
     #numbered_equation($ #distance_activation(t: $t+1$) <= #distance_activation() + #spiking_probability#distance_activation() + #spiking_probability #probability_spike_alone_event + c bb(E)[e|#no_spike_event]. $, <equation_majoration_distance_activation_2>)
@@ -122,7 +125,7 @@ $ #distance_global() = #distance_potential() + #distance_activation(). $
 
     #proposition()[
         $ #probability_spike_alone_event <= #distance_potential(). $
-    ] <majoration_discrete>
+    ] <majoration_discrete_potential>
     #proof[
         Commençons par réécrire #probability_spike_alone_event :
         $ #probability_spike_alone_event = bb(E)[bold(1)_(#membrane_potential() < #max_potential "ou" #membrane_potential_limit() < #max_potential)]. $
@@ -133,7 +136,7 @@ $ #distance_global() = #distance_potential() + #distance_activation(). $
         "et donc" bb(E)[bold(1)_(#membrane_potential() < #max_potential "ou" #membrane_potential_limit() < #max_potential)] <= bb(E)abs(#membrane_potential() - #membrane_potential_limit()) = #distance_potential(). $
     ]
 
-    En utilisant la @majoration_discrete et @equation_majoration_distance_activation_2, nous arrivons à :
+    En utilisant la @majoration_discrete_potential et @equation_majoration_distance_activation_2, nous arrivons à :
     #numbered_equation(
         $ #distance_activation(t: $t+1$) <= (1 + #spiking_probability)#distance_activation() + #spiking_probability#distance_potential() + c bb(E)[e|#no_spike_event]. $, <equation_majoration_distance_activation_3>
     )
@@ -171,7 +174,6 @@ $ #distance_global() = #distance_potential() + #distance_activation(). $
         La probabilité $bb(P)(#alone_deactivation_event)$ peut s'écrire :
         $ bb(P)(#alone_deactivation_event) &= bb(P)(#alone_deactivation_event_definition)\
         & = #deactivation_probability #probability_one_activated. $
-        La probabilité #probability_one_activated sera majorée plus loin.\
 
     + Si #no_deactivation_event est vérifié, alors l'indicatrice de désactivation est nulle, soit $#deactivation_indicator = 0$.\
         Il reste donc dans $bb(E)[e|#no_spike_event, #no_deactivation_event]$ :
@@ -202,84 +204,82 @@ $ #distance_global() = #distance_potential() + #distance_activation(). $
 
     Ainsi, en utilisant @equation_majoration_distance_activation_3 et @equation_majoration_no_spike_event_final, nous avons :
     #numbered_equation(
-        $ #distance_activation(t: $t+1$) <= (1 + #spiking_probability)#distance_activation() + #spiking_probability#distance_potential() + c(#deactivation_probability + c_2) #distance_activation(). $,
+        $ #distance_activation(t: $t+1$) <= (1 + #spiking_probability + c(#deactivation_probability + c_2))#distance_activation() + #spiking_probability #distance_potential(). $,
         <equation_majoration_distance_activation_final>
     )
-]
 
-#proof("de la convergence du processus de potentiel de membrane")[
-    On rappelle les équations de la dynamique du potentiel de membrane, pour le processus classique et le processus limite sous les hypothèses de champ moyen :
-$ V_(t+1)^i = bold(1)_(U_(t+1)^i > phi.alt(V_t^i)) [V_t^i + 1/N sum_(j≠i)^N Y_t^j], $
-$ overline(V)_(t+1)^i = bold(1)_(U_(t+1)^i > phi.alt(overline(V)_t^i)) [overline(V)_t^i + bb(E)[overline(Y)_t^j]]. $
-Développons la distance entre ces deux processus :
-$ d^i_(t+1) &= bb(E)abs(V^i_(t+1) - overline(V)^i_(t+1)),\
-    &=bb(E)abs( bold(1)_(U_(t+1)^i > phi.alt(V_t^i)) (V_t^i + 1/N sum_(j≠i)^N Y_t^j) - bold(1)_(U_(t+1)^i > phi.alt(overline(V)_t^i)) (overline(V)_t^i + bb(E)[overline(Y)_t^j]) ). $
+    *Problème constante multiplicative > 1...*
 
-Nous pouvons distinguer de nouveau les trois même événements disjoints pour écrire que $ d_(t+1)^i = bb(E)[bold(1)_"I" 0] + bb(E)[bold(1)_"II" d_(t+1)^(i,"II")] + bb(E)[bold(1)_"III" d_(t+1)^(i,"III")], $
-et majorer la distance $d^i_(t+1)$ :
 
-+ Les deux processus sautent en même temps, c'est-à-dire que $U_(t+1)^i < phi.alt(V_t^i) $ et $ U_(t+1)^i < phi.alt(overline(V)_t^i)$. Dans ce cas, les indicatrices s'annulent et $d_(t+1)^(i, "I") = 0$.
+    === Majoration de #distance_potential(t: $t+1$)
+    À présent, nous allons nous attaquer à la majoration de #distance_potential(t: $t+1$). De la définition, il vient :
+    $ #distance_potential(t: $t+1$) &= bb(E)abs(#membrane_potential(t: $t+1$) - #membrane_potential_limit(t: $t+1$)),\
+    &= bb(E)underbrace(abs(#non_spiking_indicator (#membrane_potential() + 1/N sum_(j=1)^N #simplification_variable(i: $j$)) - #non_spiking_indicator_limit (#membrane_potential_limit() + bb(E)[#simplification_variable_limit()])), "= f pour simplifier l'écriture par la suite"). $
 
-+ Les deux processus ne sautent pas, c'est-à-dire que $U_(t+1)^i > phi.alt(V_t^i)$ et $U_(t+1)^i > phi.alt(overline(V)_t^i). $ Dans ce cas, on se retrouve avec :
-    $ d_(t+1)^(i,"II") = abs(V_t^i - overline(V)_t^i + 1/N sum_(j≠i)^N Y_t^j - bb(E)[overline(Y)_t^j]). $
+    Nous pouvons ici encore utiliser les trois événements disjoints #simultaneous_spikes_event, #alone_spike_event et #no_spike_event définis précédemment pour écrire :
+    #numbered_equation(
+        $ #distance_potential(t: $t+1$) <= bb(P)(#simultaneous_spikes_event)bb(E)[f|#simultaneous_spikes_event] + bb(P)(#alone_spike_event)bb(E)[f|#alone_spike_event] + bb(P)(#no_spike_event)bb(E)[f|#no_spike_event]. $,
+        <equation_majoration_distance_potential>
+    )
 
-+ Un seul des processus saute, c'est-à-dire que $ min(phi.alt(V_t^i), phi.alt(overline(V)_t^i)) < U_(t+1)^i < max(phi.alt(V_t^i), phi.alt(overline(V)_t^i)). $
-    Dans ce cas, on obtient : $d_(t+1)^(i,"III") = abs(V_t^i) "ou" abs(overline(V)_t^i)$, que l'on peut majorer par $theta$ :
-    $ d_(t+1)^(i,"III") <= theta. $
+    + Si l'événement #simultaneous_spikes_event est vérifié, alors les indicatrices d'absence de spike sont nulles ($#non_spiking_indicator = #non_spiking_indicator_limit = 0$), ce qui nous donne :
+        $ bb(E)[f|#simultaneous_spikes_event] = 0. $
 
-Finalement,
-$ d_(t+1)^i <= bb(P)("II") bb(E)[d_(t+1)^(i,"II")] + bb(P)("III") theta. $
+    + Si l'événement #alone_spike_event est vérifié, alors seule une des indicatrices d'absence de spike est nulle, soit $#non_spiking_indicator = 0$ ou $#non_spiking_indicator_limit = 0$. Il reste donc dans $bb(E)[f|#alone_spike_event]$ :
+        $ bb(E)[f|#alone_spike_event] = cases(bb(E)abs(#membrane_potential() + 1/N sum_(j=1)^N #simplification_variable(i: $j$)), bb(E)abs(#membrane_potential_limit() + bb(E)[#simplification_variable_limit()])) <= #max_potential "par construction". $
+        Ici aussi, la probabilité $bb(P)(#alone_spike_event)$ peut se majorer en utilisant la @majoration_discrete_potential :
+        $ bb(P)(#alone_spike_event) <= #spiking_probability #distance_potential(). $
+        
 
-\
-En reprenant la majoration de $d_(t+1)^i$ avec la @majoration_discrete, nous avons :
-$ d_(t+1)^i <= bb(P)("II")space bb(E)[d_(t+1)^(i,"II")] + beta abs(d_t^i) theta. $\
+    + Si l'événement #no_spike_event est vérifié, alors les indicatrices d'absence de spike valent toutes deux un ($#non_spiking_indicator = #non_spiking_indicator_limit = 1$), ce qui nous permet d'écrire :
+        $ bb(E)[f|#no_spike_event] = bb(E)abs(#membrane_potential() + 1/N sum_(j=1)^N #simplification_variable(i: $j$) - (#membrane_potential_limit() + bb(E)[#simplification_variable_limit()])). $
+        Cette quantité sera développée et majorée plus loin. Pour $bb(P)(#no_spike_event)$, nous avons toujours @probabability_no_spike_event_upperbound.
 
-Calculons maintenant $bb(E)[d_(t+1)^(i,"II")]$. On rappelle que :
+    En reprenant @equation_majoration_distance_potential, avec les résultats précédent, nous avons donc :
+    #numbered_equation(
+        $ #distance_potential(t: $t+1$) <= #spiking_probability #max_potential #distance_potential() + c bb(E)[f|#no_spike_event]. $,
+        <equation_majoration_distance_potential_2>
+    )
 
-$ d_(t+1)^(i,"II") = abs(V_t^i - overline(V)_t^i + 1/N sum_(j≠i)^N Y_t^j - bb(E)[overline(Y)_t^j]). $
+    Maintenant, nous allons développer $bb(E)[f|#no_spike_event]$. Ajoutons et retirons $1/N sum_(j=1)^N #simplification_variable_limit(i: $j$)$ :
+    $ bb(E)[f|#no_spike_event] &= bb(E)abs(#membrane_potential() + 1/N sum_(j=1)^N #simplification_variable(i: $j$) - (#membrane_potential_limit() + bb(E)[#simplification_variable_limit()]) + 1/N sum_(j=1)^N #simplification_variable_limit(i: $j$) - 1/N sum_(j=1)^N #simplification_variable_limit(i: $j$) ), $
 
-Si on ajoute et retire $1/N sum_(j≠i)^N Y_t^j $ à $ overline(V)_(t+1)^i$ :
+    #let martingale(i: $i$) = $overline(M)_(t)^#i$
+    Posons 
+    $ #martingale() = sum_(i=1)^N (#simplification_variable_limit(i: $j$) - bb(E)[#simplification_variable_limit(i: $j$)]). $
+    On a alors,
+    $ bb(E)[f|#no_spike_event] &= bb(E)abs(#membrane_potential() - #membrane_potential_limit() + 1/N sum_(j=1)^N #simplification_variable(i: $j$) - 1/N sum_(j=1)^N #simplification_variable_limit(i: $j$) + #martingale()),\
+    &<= bb(E)abs(#membrane_potential() - #membrane_potential_limit()) + 1/N sum_(j=0)^N bb(E)abs(#simplification_variable(i: $j$) - #simplification_variable_limit(i: $j$)) + bb(E)abs(#martingale()). $
 
-$ &overline(V)_(t+1)^i = V_t^i + 1/N sum_(j≠i)^N overline(Y)_(t+1)^j - 1/N [ sum_(j≠i)^N overline(Y)_(t+1)^j - bb(E)[overline(Y)_(t+1)^j] ],\
-&=> overline(V)_(t+1)^i = V_t^i + 1/N sum_(j≠i)^N overline(Y)_(t+1)^j - 1/N overline(M)_(t+1)^i, $
+    Pour majorer cette quantité, énonçons tout d'abord la proposition suivante :
 
-en posant $overline(M)_(t+1)^i = sum_(j≠i)^N (overline(Y)_(t+1)^j - bb(E)[overline(Y)_(t+1)^j]).$ Nous avons donc :
+    #proposition()[
+        $ bb(E)abs(#martingale()) <= sqrt(N/4). $
+    ] <majoration_martingale>
+    #proof()[
+        Nous pouvons écrire :
+        $ abs(#martingale()) &= sqrt(abs(#martingale())^2),\
+        => bb(E)abs(#martingale()) &= bb(E)[sqrt(abs(#martingale())^2)],\
+        => bb(E)abs(#martingale()) &<= sqrt(bb(E)[ abs(#martingale())^2]) "par Jensen concave." $
 
-$ d_(t+1)^(i,"II") &= abs(V_t^i - overline(V)_t^i + 1/N sum_(j≠i)^N Y_t^j - 1/N sum_(j≠i)^N overline(Y)_t^j + 1/N overline(M)_(t+1)^i)\
-d_(t+1)^(i,"II") &<= abs(V_t^i - overline(V)_t^i) + 1/N sum_(j≠i)^N abs(Y_t^j - overline(Y)_t^j) + 1/N abs(overline(M)_(t+1)^i). $
+        $  bb(E)[ abs(#martingale())^2] &= bb(E)[(sum_(j≠i)^N overline(Y)_(t+1)^j - bb(E)[overline(Y)_(t+1)^j])^2],\
+        &= bb(E)[sum_(j≠i)^N (overline(Y)_(t+1)^j - bb(E)[overline(Y)_(t+1)^j])^2 + 2 sum_(0<=k<j<=N) (overline(Y)_(t+1)^k - bb(E)[overline(Y)_(t+1)^k]) (overline(Y)_(t+1)^j - bb(E)[overline(Y)_(t+1)^j])],\
+        &= sum_(j≠i)^N bb(E)[(overline(Y)_(t+1)^j - bb(E)[overline(Y)_(t+1)^j])^2] + 2 sum_(0<=k<j<=N) bb(E)[(overline(Y)_(t+1)^k - bb(E)[overline(Y)_(t+1)^k]) (overline(Y)_(t+1)^j - bb(E)[overline(Y)_(t+1)^j])],\
+        &= sum_(j≠i)^N "Var"[overline(Y)_(t+1)^j] + 2 sum_(0<=k<j<=N) "Cov"(overline(Y)_(t+1)^k, overline(Y)_(t+1)^j). $
 
-Soit,  
-$ bb(E)[d_(t+1)^(i,"II")] <= abs(d_t^i) + 1/N sum_(j≠i)^N bb(E)abs(Y_t^j - overline(Y)_t^j) + 1/N bb(E)abs(overline(M)_(t+1)^i). $
+        Or, comme nous travaillons dans le cadre champ moyen, les neurones sont des copies indépendantes les uns des autres. Ainsi $"Cov"(overline(Y)_(t+1)^k, overline(Y)_(t+1)^j) = 0$ et
+        $ bb(E)[ abs(#martingale())^2] = sum_(j≠i)^N "Var"[overline(Y)_(t+1)^j] = N "Var"[overline(Y)_(t+1)^j]. $
 
-L'objectif est de trouver une majoration pertinente pour $bb(E)[d_(t+1)^(i,"II")]$. Cela commence par remarquer la proposition suivante :
-#proposition()[
-    $ bb(E)abs(overline(M)_(t+1)^i) <= sqrt(N/4). $
-] <majoration_martingale>
-#proof()[
-    Nous pouvons écrire :
-    $ abs(overline(M)_(t+1)^i) &= sqrt(abs(overline(M)_(t+1)^i)^2),\
-    => bb(E)abs(overline(M)_(t+1)^i) &= bb(E)[sqrt(abs(overline(M)_(t+1)^i)^2)],\
-    => bb(E)abs(overline(M)_(t+1)^i) &<= sqrt(bb(E)[ abs(overline(M)_(t+1)^i)^2]) "par Jensen concave." $
+        Comme $overline(Y)_(t+1)^j in {0, 1}$, alors $0 <= bb(E)[overline(Y)_(t+1)^j] <= 1$, ce qui implique que :
 
-    $  bb(E)[ abs(overline(M)_(t+1)^i)^2] &= bb(E)[(sum_(j≠i)^N overline(Y)_(t+1)^j - bb(E)[overline(Y)_(t+1)^j])^2],\
-    &= bb(E)[sum_(j≠i)^N (overline(Y)_(t+1)^j - bb(E)[overline(Y)_(t+1)^j])^2 + 2 sum_(0<=k<j<=N) (overline(Y)_(t+1)^k - bb(E)[overline(Y)_(t+1)^k]) (overline(Y)_(t+1)^j - bb(E)[overline(Y)_(t+1)^j])],\
-    &= sum_(j≠i)^N bb(E)[(overline(Y)_(t+1)^j - bb(E)[overline(Y)_(t+1)^j])^2] + 2 sum_(0<=k<j<=N) bb(E)[(overline(Y)_(t+1)^k - bb(E)[overline(Y)_(t+1)^k]) (overline(Y)_(t+1)^j - bb(E)[overline(Y)_(t+1)^j])],\
-    &= sum_(j≠i)^N "Var"[overline(Y)_(t+1)^j] + 2 sum_(0<=k<j<=N) "Cov"(overline(Y)_(t+1)^k, overline(Y)_(t+1)^j). $
+        $ &"Var"[overline(Y)_(t+1)^j] = bb(E)[overline(Y)_(t+1)^j](1 - bb(E)[overline(Y)_(t+1)^j]) <= 1/4,\
+        &=> bb(E)[ abs(#martingale())^2] <= N/4,\
+        &=> sqrt(bb(E)[ abs(#martingale())^2]) <= sqrt(N/4),\
+        &"d'où" bb(E)abs(#martingale()) <= sqrt(N/4). $
+    ]
 
-    Or, comme nous travaillons dans le cadre champ moyen, les neurones sont des copies indépendantes les uns des autres. Ainsi $"Cov"(overline(Y)_(t+1)^k, overline(Y)_(t+1)^j) = 0$ et
-    $ bb(E)[ abs(overline(M)_(t+1)^i)^2] = sum_(j≠i)^N "Var"[overline(Y)_(t+1)^j] = N "Var"[overline(Y)_(t+1)^j]. $
 
-    Comme $overline(Y)_(t+1)^j in {0, 1}$, alors $0 <= bb(E)[overline(Y)_(t+1)^j] <= 1$, ce qui implique que :
+    Il reste désormais à majorer le terme bb(E)abs(#simplification_variable(i: $j$) - #simplification_variable_limit(i: $j$)).
 
-    $ &"Var"[overline(Y)_(t+1)^j] = bb(E)[overline(Y)_(t+1)^j](1 - bb(E)[overline(Y)_(t+1)^j]) <= 1/4,\
-    &=> bb(E)[ abs(overline(M)_(t+1)^i)^2] <= N/4,\
-    &=> sqrt(bb(E)[ abs(overline(M)_(t+1)^i)^2]) <= sqrt(N/4),\
-    &"d'où" bb(E)abs(overline(M)_(t+1)^i) <= sqrt(N/4). $
-]
-
-En reprenant l'expression de $bb(E)[d_(t+1)^(i,"II")]$ et en utilisant la @majoration_martingale, nous obtenons :
-$ bb(E)[d_(t+1)^(i,"II")] <= d_t^i + 1/N sum_(j≠i)^N bb(E)abs(Y_t^j - overline(Y)_t^j) + 1/(4sqrt(N)). $
-
-Il reste désormais à majorer le terme $bb(E)abs(Y_t^j - overline(Y)_t^j)$. On rappelle que :
 
 ]

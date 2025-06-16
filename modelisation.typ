@@ -1,4 +1,5 @@
 #import "rules.typ" : *
+#import "global_variables.typ": *
 
 == Définition du système
 Nous définissons l'état du système de neurones par le processus stochastique suivant $ X_t = vec(X_t^1, dots.v, X_t^N) $ où $ X_t^i = #neuron(). $

@@ -1,142 +1,210 @@
-#import "@preview/ctheorems:1.1.3": *
-
 #import "rules.typ": *
+#import "global_variables.typ": *
 
-// Theorem box and proof box
+// Display settings for theorems and proofs
 #show: thmrules.with(qed-symbol: $square$)
-#let theorem = thmbox("theorem", "Théorème", base_level: 1, stroke: red+1.4pt)
-#let lemma = thmbox("theorem", "Lemme", base_level: 1, stroke: 1.4pt)
-#let proposition = thmbox("theorem", "Proposition", base_level: 1, stroke: blue+1.4pt)
-#let proof = thmproof("proof", "Preuve")
 
-L'hypothèse de champ moyen que nous allons faire dans cette partie consiste à considérer un grand nombre de neurones $N$ et à les considérer comme étant tous identiques. Cela permet plusieurs simplifications :
+// Variables for this section
+#let distance_activation(t: $t$) = $delta_#t^(i, N)$
+#let distance_potential(t: $t$) = $d_#t^(i, N)$
+#let distance_global(t: $t$) = $D_#t^(i, N)$
+#let simplification_variable(t: $t$, i: $i$) = $Y_#t^#i$
+#let simplification_variable_limit(t: $t$, i: $i$) = $overline(Y)_#t^#i$
+#let potential_limit_dynamics = $#membrane_potential_limit(t: $t+1$) = #non_spiking_indicator_limit (#membrane_potential_limit() + bb(E)[#simplification_variable()])$
+#let activation_limit_dynamics = $#activation_limit(t: $t+1$) = #activation_limit() + (1 - #activation_limit())#spiking_indicator_limit() - #activation_limit()#deactivation_indicator$
+
+L'hypothèse de champ moyen que nous allons faire dans cette partie consiste à considérer un grand nombre de neurones $N$ et à les considérer comme étant tous *identiques*, c'est-à-dire indiscernables et avec les même valeurs pour conditions initiales :
+$ forall (v, a) in {0, 1, dots, #max_potential} times {0, 1},\
+X_0^N = vec((v, a), (v, a), dots.v, (v, a)). $
+
 #set math.vec(delim: none)
-- Au lieu d'écrire $sum_vec(j = 0, j != i)^N$, nous écrirons $sum_(j = 1)^N$.
-- Nous allons poser $Y_t^i = A_t^i bold(1)_(U_(t+1)^j <= phi.alt(V_t^i)).$
+Comme les neurones sont indiscernables, nous pouvons les compter simplement et au lieu d'écrire $sum_vec(j = 0, j != i)^N$, écrire directement $sum_(j = 1)^N$.
 
-Nous allons supposer l'existence d'une "loi des grands nombres" permettant d'affirmer que $ 1/N sum_(i=0)^N V_i^t ~ bb(E)[V_i^t]. $
-et que $ 1/N sum_(i=0)^N Y_i^t ~ bb(E)[Y_i^t]. $
+Avec le modèle utilisé dans les parties précédentes, lorsque nous ferons tendre $N$ vers l'infini, la somme $sum_(j = 1)^N #activation()#spiking_indicator()$ explosera. Pour conserver l'intégrité du modèle, nous allons ajouter un facteur $1/N$ pour normaliser cette somme. Enfin, pour alléger l'écriture, nous noterons à partir de maintenant
+$ #simplification_variable() = #activation()#spiking_indicator(). $
 
-=== Processus limites
-Nous allons noter $overline(V)_t^i$ et $overline(A)_t^i$ les processus limites de potentiel de membrane et d'activation pour le neurone $i$. Leur dynamique obéit aux équations suivantes :
-$ overline(V)_(t+1)^i = bold(1)_(U_(t+1)^i > phi.alt(overline(V)_t^i))(overline(V)_t^i + sum_vec(j = 0, j != i)^N overline(Y)_t^j), $
-$ overline(A)_(t+1)^i = overline(A)_t^i + (1 - overline(A)_t^i)bold(1)_(U_(t+1)^i <= phi.alt(overline(V)_t^i)) - overline(A)_t^i bold(1)_(phi.alt(overline(V)_t^i) <= U_(t+1)^i <= lambda + phi.alt(overline(V)_t^i)). $
-
-=== Existence des processus limites
+Ainsi l'équation de la dynamique du potentiel de membrane,
+#potential_dynamics
+#let potential_dynamics = $#membrane_potential(t: $t+1$) = #non_spiking_indicator (#membrane_potential() + 1/N sum_(j=1)^N #simplification_variable(i: $j$))$
+s'écrit désormais
+$ #potential_dynamics. $
 
 
-=== Convergence vers les processus limites
-Commençons par définir la distance entre les processus limites et les processus classiques :
-$ D^i_(t+1) = abs(d^i_(t+1)) + abs(delta^i_(t+1)), $ avec $d^i_(t+1) = bb(E)abs(V^i_(t+1) - overline(V)^i_(t+1))$ et $delta^i_(t+1) = bb(E)abs(A_(t+1)^i - overline(A)^i_(t+1))$.
+== Processus limites
+Nous allons noter #membrane_potential_limit() et #activation_limit() les *processus limites* de potentiel de membrane et d'activation pour le neurone $i$. Pour suivre cette notation, posons également que $#simplification_variable_limit() = #activation_limit()#spiking_indicator_limit()$.
 
-#set math.equation(numbering: "(1)")
+Nous allons supposer l'existence d'une "loi des grands nombres" permettant d'affirmer que
+$ 1/N sum_(i=0)^N #simplification_variable_limit() ->_(N -> oo) bb(E)[#simplification_variable_limit()]. $
+
+À la lueur de ces hypothèses et de ces définitions, écrivons désormais les équations régissant les dynamiques de ces deux processus limites en spécifiant que les processus classiques et limites *partagent la même variable auxiliaire uniforme* #auxiliary_uniform().\
+Pour le processus limite du potentiel de membrane nous avons
+$ #potential_limit_dynamics, $
+et pour le processus limite de la variable d'activation
+$ #activation_limit_dynamics. $
+
+
+== Existence des processus limites
+
+
+== Convergence vers les processus limites
+Nous allons démontrer que les processus classiques convergent vers les processus limites. Les processus de voltage et d'activation doivent tous deux converger vers leurs processus limites respectifs.\
+Ainsi, si nous définissons la *distance entre les processus de potentiel de membrane* 
+$ #distance_potential() = bb(E)abs(#membrane_potential() - #membrane_potential_limit()), $ ainsi que *distance entre les processus d'activation* 
+$ #distance_activation() = bb(E)abs(#activation() - #activation_limit()), $ nous pouvons écrire la *distance globale* entre le processus de neurone et sa limite comme 
+$ #distance_global() = #distance_potential() + #distance_activation(). $
+
+// #set math.equation(numbering: "(1)")
 #theorem("Convergence vers les processus limites")[
     Pour tout $i in {1, dots, N}$, nous avons :
-    $ lim_(N->oo) D^i_(t+1) = 0. $ c'est-à-dire que :
-    $ lim_(N->oo) abs(d^i_(t+1)) = 0 $ <conv_potentiel> et
-    $ lim_(N->oo) abs(delta^i_(t+1)) = 0. $ <conv_activation>
-] <convergence>
+    $ lim_(N->oo) #distance_global() = 0. $
+    // c'est-à-dire que :
+    // $ lim_(N->oo) d^i_(t+1) = 0 $ <conv_potentiel> et
+    // $ lim_(N->oo) delta^i_(t+1) = 0. $ <conv_activation>
+] <convergence_theorem>
 
-#proof("de la convergence du processus d'activation")[
-    Rappellons les équations de la dynamique de l'activation, pour le processus classique et le processus limite sous les hypothèses de champ moyen :
-    $ A_(t+1)^i = A_t^i + (1 - A_t^i)bold(1)_(U_(t+1)^i <= phi.alt(V_t^i)) - A_t^i bold(1)_(phi.alt(V_t^i) <= U_(t+1)^i <= lambda + phi.alt(V_t^i)),\
-    overline(A)_(t+1)^i = overline(A)_t^i + (1 - overline(A)_t^i)bold(1)_(U_(t+1)^i <= phi.alt(overline(V)_t^i)) - overline(A)_t^i bold(1)_(phi.alt(overline(V)_t^i) <= U_(t+1)^i <= lambda + phi.alt(overline(V)_t^i)). $
-    Ainsi, $ delta_(t+1)^i = bb(E)abs(A_(t+1)^i - overline(A)_(t+1)^i) <= bb(E)abs(A_t^i - overline(A)_t^i) +\
-    bb(E)abs((1 - A_t^i)bold(1)_(U_(t+1)^i <= phi.alt(V_t^i)) - (1 - overline(A)_t^i)bold(1)_(U_(t+1)^i <= phi.alt(overline(V)_t^i)) - (A_t^i bold(1)_(phi.alt(V_t^i) <= U_(t+1)^i <= lambda + phi.alt(V_t^i)) - overline(A)_t^i bold(1)_(phi.alt(overline(V)_t^i) <= U_(t+1)^i <= lambda + phi.alt(overline(V)_t^i)))) $
+#proof[
+    L'idée de cette preuve est de montrer que la suite des distances #distance_global(t: $0$), #distance_global(t: $1$), $dots,$ #distance_global(), #distance_global(t: $t+1$) subit une contraction, soit
+    $ forall c < 1, space #distance_global(t: $t+1$) <= c#distance_global(). $
+    Nous pourrons ensuite utiliser l'hypothèse que tous les neurones commencent avec les même conditions initiales pour dire que $#distance_global(t: $0$) = 0$ et puis finalement utiliser un argument de récurrence pour conclure la preuve.
     
-    Nous pouvons, en distinguant trois événements disjoints, écrire que :
+    L'objectif est donc de trouver une majoration de #distance_global(t: $t+1$) par #distance_global()\
+    Cela passe évidemment par trouver des majorations similaires pour #distance_potential(t: $t+1$) et #distance_activation(t: $t+1$).
 
-    $ delta_(t+1)^i <= delta_t^i + bb(P)("I") delta_(t+1)^(i,"I") + bb(P)("II") delta_(t+1)^(i,"II") + bb(P)("III") delta_(t+1)^(i,"III") $
-
-    Les trois événements sont :
-    #set enum(numbering: "I.")
-    + Les 2 processus spikent en t+1, c'est-à-dire que $U_(t+1)^i > phi.alt(V_t^i)$ et $U_(t+1)^i > phi.alt(overline(V)_t^i).$ Dans ce cas :
-        $ bold(1)_(phi.alt(V_t^i) <= U_(t+1)^i <= phi.alt(overline(V)_t^i) + lambda) = bold(1)_(phi.alt(overline(V)_t^i) <= U_(t+1)^i <= phi.alt(overline(V)_t^i) + lambda) = 0 $
-        et
-        $ bold(1)_(U_(t+1)^i <= phi.alt(V_t^i)) = bold(1)_(U_(t+1)^i <= phi.alt(overline(V)_t^i)) = 1. $
-        Nous avons alors : $ delta_(t+1)^(i,"I") = bb(E)abs((1 - overline(A)_t^i) - (1 - overline(A)_t^i)) = abs(delta_t^i). $
+    Commençons par majorer #distance_activation(t: $t+1$). De la définition, il vient :
+    $ #distance_activation(t: $t+1$) &= bb(E)abs(#activation(t: $t+1$) - #activation_limit(t: $t+1$)) <= bb(E)abs(A_t^i - overline(A)_t^i) +\
+    &bb(E)underbrace(abs((1 - #activation())#spiking_indicator() - (1 - #activation_limit())#spiking_indicator_limit() - (#activation()#deactivation_indicator - #activation_limit()#deactivation_indicator)), "= e pour simplifier l'écriture pour les lignes suivantes"). $
     
-    + Le 2 processus ne spikent pas, c'est-à-dire que $U_(t+1)^i > phi.alt(V_t^i)$ et $U_(t+1)^i > phi.alt(overline(V)_t^i)$. Nous obtenons : 
-        $ delta_(t+1)^(i,"II") = bb(E)abs(A_t^i bold(1)_(phi.alt(V_t^i) <= U_(t+1)^i <= phi.alt(V_t^i) + lambda) - overline(A)_t^i bold(1)_(phi.alt(overline(V)_t^i) <= U_(t+1)^i <= phi.alt(overline(V)_t^i) + lambda)). $
+    #let simultaneous_spikes_event = $bold(2)$
+    #let alone_spike_event = $bold(1)$
+    #let no_spike_event = $bold(0)$
+    Remarquons que les trois événements suivants sont disjoints :
+    + L'événement $#simultaneous_spikes_event = {"le processus classique et limite spikent simultanément au temps" t+1} = {0 < #auxiliary_uniform(t: $t+1$) < #spiking_probability} inter {#membrane_potential() = #membrane_potential_limit() = #max_potential}.$
 
-    + Un seul spike, soit 
-        $ min(phi.alt(V_t^i), phi.alt(overline(V)_t^i)) < U_(t+1)^i < max(phi.alt(V_t^i), phi.alt(overline(V)_t^i)). $
-        Dans ce cas :
-        $ delta_(t+1)^(i,"III") <= 1. $
+    + L'évévement $#alone_spike_event = {"un des deux processus spikes au temps" t+1} = {0 < #auxiliary_uniform(t: $t+1$) < #spiking_probability} inter {#membrane_potential() < #max_potential "ou" #membrane_potential_limit() < #max_potential}.$
 
-    Nous pouvons donc majorer la distance $delta_(t+1)^i$ avec :
-    $ delta_(t+1)^i <= delta_t^i + bb(P)("I") abs(delta_t^i) + bb(P)("II") bb(E)abs(A_t^i bold(1)_(phi.alt(V_t^i) <= U_(t+1)^i <= phi.alt(V_t^i) + lambda) - overline(A)_t^i bold(1)_(phi.alt(overline(V)_t^i) <= U_(t+1)^i <= phi.alt(overline(V)_t^i) + lambda)) + bb(P)("III"), $ où $bb(P)(min[phi.alt(V_t^i), phi.alt(overline(V)_t^i)] < U_(t+1)^i < max[phi.alt(V_t^i), phi.alt(overline(V)_t^i)])$
+    + L'événement $#no_spike_event = {"aucun processus ne spike au temps" t+1} = {#auxiliary_uniform(t: $t+1$) > #spiking_probability} union {#membrane_potential() < #max_potential "et" #membrane_potential_limit() < #max_potential}.$
+    
+    Nous pouvons donc écrire
+    #numbered_equation(
+        $ #distance_activation(t: $t+1$) <= #distance_activation() + bb(P)(#simultaneous_spikes_event)bb(E)[e|#simultaneous_spikes_event] + bb(P)(#alone_spike_event)bb(E)[e|#alone_spike_event] + bb(P)(#no_spike_event)bb(E)[e|#no_spike_event]. $, <equation_majoration_distance_activation>
+    )
 
-    L'expression précédente peut se simplifier encore, en remarquant la proposition qui suit, provenant de la structure discrète de notre processus. 
+    + Si #simultaneous_spikes_event est vérifié, alors les indicatrices de la désactivation sont nulles ($#deactivation_indicator = 0$) et les indicatrices des spikes valent un (#spiking_indicator() = #spiking_indicator_limit() = 1).\
+        Ainsi il reste dans $bb(E)[e|#simultaneous_spikes_event]$ :
+        $ bb(E)[e|#simultaneous_spikes_event] = bb(E)abs((1 - #activation()) - (1 - #activation_limit())) = #distance_activation(). $
+        Pour $bb(P)(#simultaneous_spikes_event)$, nous avons :
+        $ bb(P)(#simultaneous_spikes_event) = bb(P)({0 < #auxiliary_uniform(t: $t+1$) < #spiking_probability} inter {#membrane_potential() = #membrane_potential_limit() = #max_potential}) = #spiking_probability bb(P)(#membrane_potential() = #membrane_potential_limit() = #max_potential) <= #spiking_probability. $
+
+    #let probability_spike_alone_event = $bb(P)(#membrane_potential() < #max_potential "ou" #membrane_potential_limit() < #max_potential))$
+
+    + Si #alone_spike_event est vérifié, alors $0 < #auxiliary_uniform(t: $t+1$) < #spiking_probability$, ce qui implique ici aussi que $#deactivation_indicator = 0$, et une seule des fonctions de saut est non nulle ($#spiking_function() = 0 "ou" #spiking_function(v: membrane_potential_limit()) = 0$).\
+        Il reste ainsi dans $bb(E)[e|#alone_spike_event]$,
+        $ bb(E)[e|#alone_spike_event] = bb(E)abs((1 - #activation())) "ou" bb(E)abs((1 - #activation_limit())) <= 1 "de toute façon". $
+        La probabilité $bb(P)(#alone_spike_event)$ peut s'écrire :
+        $ bb(P)(#alone_spike_event) = bb(P)({0 < #auxiliary_uniform(t: $t+1$) < #spiking_probability} inter {#membrane_potential() < #max_potential "ou" #membrane_potential_limit() < #max_potential}) = #spiking_probability #probability_spike_alone_event. $
+        La probabilité #probability_spike_alone_event sera majorée plus loin.
+
+    + Si #no_spike_event est vérifié, alors seulent restent les indicatrices de la désactivation dans $bb(E)[e|#no_spike_event]$ (#spiking_indicator() = #spiking_indicator_limit() = 0).\
+        Ainsi,
+        $ bb(E)[e|#no_spike_event] = bb(E)abs(#activation()#deactivation_indicator - #activation_limit()#deactivation_indicator), $
+        qui sera développée et majorée plus loin.\
+        Concernant $bb(P)(#no_spike_event)$, nous pouvons écrire :
+        $ bb(P)(#no_spike_event) &= bb(P)({#auxiliary_uniform(t: $t+1$) > #spiking_probability} union {#membrane_potential() < #max_potential "et" #membrane_potential_limit() < #max_potential}),\
+        &= bb(P)(#auxiliary_uniform(t: $t+1$) > #spiking_probability) + bb(P)(#membrane_potential() < #max_potential "et" #membrane_potential_limit() < #max_potential) - bb(P)({#auxiliary_uniform(t: $t+1$) > #spiking_probability} inter {#membrane_potential() < #max_potential "et" #membrane_potential_limit() < #max_potential}),\
+        &= 1 - #spiking_probability + #spiking_probability bb(P)(#membrane_potential() < #max_potential "et" #membrane_potential_limit() < #max_potential). $
+        Par construction, nous avons nécessairement $bb(P)(#membrane_potential() < #max_potential "et" #membrane_potential_limit() < #max_potential) < 1$ car le neurone $i$ se trouve nécessairement, pour certains temps $t$, dans la couche #max_potential.\
+        Ainsi, $ bb(P)(#no_spike_event) = c < 1. $
+
+    En reprenant @equation_majoration_distance_activation, nous aboutissons à :
+    #numbered_equation($ #distance_activation(t: $t+1$) <= #distance_activation() + #spiking_probability#distance_activation() + #spiking_probability #probability_spike_alone_event + c bb(E)[e|#no_spike_event]. $, <equation_majoration_distance_activation_2>)
+
+    L'expression précédente peut se simplifier encore, en remarquant la proposition qui suit, provenant de la structure discrète de notre processus.
+
     #proposition()[
-        $ bb(P)(min[phi.alt(V_t^i), phi.alt(overline(V)_t^i)] < U_(t+1)^i < max[phi.alt(V_t^i), phi.alt(overline(V)_t^i)]) <= beta abs(d_t^i). $
+        $ #probability_spike_alone_event <= #distance_potential(). $
     ] <majoration_discrete>
-    #proof("de la majoration ")[
-        Notons, pour simplifier, par $e$ l'événement suivant $ e = {min[phi.alt(V_t^i), phi.alt(overline(V)_t^i)] < U_(t+1)^i < max[phi.alt(V_t^i), phi.alt(overline(V)_t^i)]}. $
-
-        Écrivons, en utilisant la formule de l'espérance totale :
-        $ bb(P)(e) = bb(E)[bold(1)_e] = bb(E)[bb(E)(bold(1)_e | V_t^i, overline(V)_t^i)] = bb(E)[bb(P)(e | V_t^i, overline(V)_t^i)]. $
-        
-        Or,
-        $ bb(P)(e| V_t^i, overline(V)_t^i) = max(phi.alt(V_t^i), phi.alt(overline(V)_t^i)) - min(phi.alt(V_t^i), phi.alt(overline(V)_t^i)) "car" U_(t+1)^i ~ "Unif"(0, 1),\
-        => bb(P)(e | V_t^i, overline(V)_t^i)  = abs(phi.alt(V_t^i) - phi.alt(overline(V)_t^i)) = beta abs(bold(1)_(V_t^i = theta) - bold(1)_(overline(V)_t^i = theta)). $
-
-        Ensuite, remarquons que $abs(bold(1)_(V_t^i = theta) - bold(1)_(overline(V)_t^i = theta))$ ne peut prendre que deux valeurs, 0 ou 1. Dans le premier cas, trivialement :
-        $ abs(bold(1)_(V_t^i = theta) - bold(1)_(overline(V)_t^i = theta)) = 0 <= abs(V_t^i - overline(V)_t^i). $
-
-        Dans le second cas $abs(bold(1)_(V_t^i = theta) - bold(1)_(overline(V)_t^i = theta)) = 1$
-        implique nécessairement que $V_t^i ≠ overline(V)_t^i$.\
-        Or, comme $V_t^i$ et $overline(V)_t^i in {0, 1, ..., theta}$, par construction :
-        $ V_t^i ≠ overline(V)_t^i => abs(V_t^i - overline(V)_t^i) >= 1,\
-        => abs(bold(1)_(V_t^i = theta) - bold(1)_(overline(V)_t^i = theta)) <= 1 <= abs(V_t^i - overline(V)_t^i). $
-        Nous avons donc $ abs(bold(1)_(V_t^i = theta) - bold(1)_(overline(V)_t^i = theta)) <= abs(V_t^i - overline(V)_t^i), $
-        que nous pouvons utiliser pour majorer $bb(P)(e | V_t^i, overline(V)_t^i)$ :
-        $ bb(P)(e | V_t^i, overline(V)_t^i) <= beta abs(V_t^i - overline(V)_t^i), $
-        $ => bb(P)(e) <= beta bb(E)abs(V_t^i - overline(V)_t^i) = beta abs(d_t^i). $
+    #proof[
+        Commençons par réécrire #probability_spike_alone_event :
+        $ #probability_spike_alone_event = bb(E)[bold(1)_(#membrane_potential() < #max_potential "ou" #membrane_potential_limit() < #max_potential)]. $
+        Remarquons ensuite que l'événement ${#membrane_potential() < #max_potential "ou" #membrane_potential_limit() < #max_potential}$ implique que les potentiels de membrane des processus classique et limite sont différents, c'est-à-dire que $#membrane_potential() ≠ #membrane_potential_limit()$.\
+        Par construction, #membrane_potential() et #membrane_potential_limit() ne peuvent prendre que des valeurs discrètes comprises entre zéro et #max_potential. Il en découle que la distance entre les deux potentiels de membrane est nécessairement supérieure ou égale à 1, soit $abs(#membrane_potential() - #membrane_potential_limit()) >= 1$.\
+        Ainsi, nous avons :
+        $ abs(#membrane_potential() - #membrane_potential_limit()) >= bold(1)_(#membrane_potential() < #max_potential "ou" #membrane_potential_limit() < #max_potential),\
+        "et donc" bb(E)[bold(1)_(#membrane_potential() < #max_potential "ou" #membrane_potential_limit() < #max_potential)] <= bb(E)abs(#membrane_potential() - #membrane_potential_limit()) = #distance_potential(). $
     ]
 
-    En utilisant la @majoration_discrete, nous arrivons à la majoration suivante pour $delta_(t+1)^i$ :
-    $ => delta_(t+1)^i <= 2 abs(delta_t^i) + beta abs(d_t^i) + delta_(t+1)^(i, "II") + lambda)). $
+    En utilisant la @majoration_discrete et @equation_majoration_distance_activation_2, nous arrivons à :
+    #numbered_equation(
+        $ #distance_activation(t: $t+1$) <= (1 + #spiking_probability)#distance_activation() + #spiking_probability#distance_potential() + c bb(E)[e|#no_spike_event]. $, <equation_majoration_distance_activation_3>
+    )
+    
+    #let both_deactivation_event = $bb(2)$
+    #let alone_deactivation_event = $bb(1)$
+    #let no_deactivation_event = $bb(0)$
+    Maintenant, nous allons majorer $bb(E)[e|#no_spike_event]$. Remarquons une nouvelle fois que trois nouveaux événements sont disjoints :
 
-    Trouvons une majoration pour $delta_(t+1)^(i,"II")$. De nouveau, nous pouvons séparer l'espérance en utilisant trois événements distincts : 
+    #let both_deactivation_event_definition = ${#spiking_probability <= #auxiliary_uniform(t: $t+1$) <= #spiking_probability + #deactivation_probability} inter {#activation() = #activation_limit() = 1}$
+    + L'événement $#both_deactivation_event = {"les deux synapses se désactivent au temps" $t+1$} = #both_deactivation_event_definition.$
 
-    $ delta_(t+1)^(i,"II") = bb(P)("IV") delta_(t+1)^(i,"IV") + bb(P)("V") delta_(t+1)^(i,"V") + bb(P)("VI") delta_(t+1)^(i,"VI"). $
+    #let alone_deactivation_event_definition = ${#spiking_probability <= #auxiliary_uniform(t: $t+1$) <= #spiking_probability + #deactivation_probability} inter {#activation() = 1 "ou" #activation_limit() = 1}$
+    + L'événement $#alone_deactivation_event = {"une seule synapse se désactive au temps" $t+1$} = #alone_deactivation_event_definition.$
 
-    + Les deux synapses se désactivent à t+1, soit $phi.alt(V_t^i) <= U_(t+1)^i <= phi.alt(V_t^i)+ lambda$ et $phi.alt(overline(V)_t^i) <= U_(t+1)^i <= phi.alt(overline(V)_t^i)+ lambda$.  
-        Nous aurons donc :  
-        $ delta_(t+1)^(i,"IV") = delta_t^i. $
+    #let no_deactivation_event_definition = ${#auxiliary_uniform(t: $t+1$) < beta "ou" #auxiliary_uniform(t: $t+1$) > #spiking_probability + #deactivation_probability} union {#activation() = #activation_limit() = 0}$
+    + L'événement $#no_deactivation_event = {"aucune synapse ne se désactive au temps" $t+1$} = #no_deactivation_event_definition.$
 
-    + Aucune ne se désactive, c'est-à-dire que $U_(t+1)^i > phi.alt(V_t^i)+ lambda$ et $U_(t+1)^i > phi.alt(overline(V)_t^i)+ lambda$.  
-        Nous obtenons :
-        $ delta_(t+1)^(i,"V") = 0 $
+    Écrivons donc :
+    #numbered_equation(
+        $ bb(E)[e|#no_spike_event] = bb(P)(#both_deactivation_event)bb(E)[e|#no_spike_event, #both_deactivation_event] + bb(P)(#alone_deactivation_event)bb(E)[e|#no_spike_event, #alone_deactivation_event] + bb(P)(#no_deactivation_event)bb(E)[e|#no_spike_event, #no_deactivation_event]. $, <equation_majoration_no_spike_event>
+    )
 
-    + Une seule synapse est désactivée :  
-        $ min(phi.alt(V_t^i), phi.alt(overline(V)_t^i))+ lambda <= U_(t+1)^i <= max(phi.alt(V_t^i), phi.alt(overline(V)_t^i))+ lambda. $  
-        Alors  
-        $ delta_(t+1)^(i,"VI") <= 1. $
+    + Si #both_deactivation_event est vérifié, alors l'indicatrice de désactivation est égale à 1, soit $#deactivation_indicator = 1$.\
+        Il reste donc dans $bb(E)[e|#no_spike_event, #both_deactivation_event]$ :
+        $ bb(E)[e|#no_spike_event, #both_deactivation_event] = bb(E)abs(#activation() - #activation_limit()) = #distance_activation(). $
+        Pour $bb(P)(#both_deactivation_event)$, nous avons :
+        $ bb(P)(#both_deactivation_event) = bb(P)(#both_deactivation_event_definition) = #deactivation_probability bb(P)(#activation() = #activation_limit() = 1) <= #deactivation_probability. $\
 
-    Nous aboutissons à :  
-    $ delta_(t+1)^(i,"II") <= delta_t^i + bb(P)("VI"). $
+    #let probability_one_activated = $bb(P)(#activation() = 1 "ou" #activation_limit() = 1)$
+    + Si #alone_deactivation_event est vérifié, alors l'indicatrice de désactivation est aussi égale à 1 et une des variables d'activation est nulle.\
+        Nous restons avec :
+        $ bb(E)[e|#no_spike_event, #alone_deactivation_event] = cases(bb(E)[#activation()], bb(E)[#activation_limit()]) < 1 "de toute façon". $
+        En effet, comme $#activation() in {0, 1}$ et qu'il existe presque-sûrement des temps $t$ où #activation() alors $bb(E)[#activation()] < 1$ et $bb(E)[#activation_limit()] < 1$. On écrit $bb(E)[e|#no_spike_event, #alone_deactivation_event] = c_2 < 1$.\
+        La probabilité $bb(P)(#alone_deactivation_event)$ peut s'écrire :
+        $ bb(P)(#alone_deactivation_event) &= bb(P)(#alone_deactivation_event_definition)\
+        & = #deactivation_probability #probability_one_activated. $
+        La probabilité #probability_one_activated sera majorée plus loin.\
 
-    Or, nous pouvons remarquer que :
-    $ &bb(P)("VI") = bb(P)(min[phi.alt(V_t^i), phi.alt(overline(V)_t^i)]+ lambda <= U_(t+1)^i <= max[phi.alt(V_t^i), phi.alt(overline(V)_t^i)]+ lambda) \
-    &=> bb(P)("VI") = max[phi.alt(V_t^i), phi.alt(overline(V)_t^i)] - min[phi.alt(V_t^i), phi.alt(overline(V)_t^i)] + lambda - lambda \
-    &=> bb(P)("VI") = bb(P)(min[phi.alt(V_t^i), phi.alt(overline(V)_t^i)] < U_(t+1)^i < max[phi.alt(V_t^i), phi.alt(overline(V)_t^i)]). $
+    + Si #no_deactivation_event est vérifié, alors l'indicatrice de désactivation est nulle, soit $#deactivation_indicator = 0$.\
+        Il reste donc dans $bb(E)[e|#no_spike_event, #no_deactivation_event]$ :
+        $ bb(E)[e|#no_spike_event, #no_deactivation_event] = bb(E)abs(#activation()#deactivation_indicator - #activation_limit()#deactivation_indicator) = 0. $\
 
-    D'où nous pouvons utiliser la @majoration_discrete pour écrire :
-    $ bb(P)("VI") <= beta d_t^i. $
-    Enfin,
-    $ delta_(t+1)^(i,"II") <= delta_t^i + beta d_t^i, \
-    => delta_(t+1)^i <= 3 delta_t^i + 2 beta d_t^i. $
+    Reprenons maintenant @equation_majoration_no_spike_event pour écrire :
+    #numbered_equation(
+        $ bb(E)[e|#no_spike_event] <= #deactivation_probability #distance_activation() + c_2 #probability_one_activated. $,
+        <equation_majoration_no_spike_event_2>
+    )
 
-    À t=0, nous avons $d_0^i = delta_0^i = 0$ car nous avons supposé $A_0^i = overline(A)_0^i$ et $V_0^i = overline(V)_0^i$.  
-    Ainsi,
-    $ &delta_1^i <= 0,\
-    &delta_2^i <= 2beta d_1^i,\
-    &delta_3^i <= 6beta d_1^i + 2beta d_2^i,\
-    dots.v\
-    &delta_(t+1)^i <= 2beta sum_(n=1)^t 3^(n-1) d_(t-n)^i. $
-    Nous voyons ainsi que nous avons besoin de majorer la distance $d_t^i$ pour conclure la preuve.
+    #proposition()[
+        $ #probability_one_activated = #distance_activation(). $
+    ] <majoration_probability_one_activated>
+    #proof[
+        Commençons par réécrire #probability_one_activated :
+        $ #probability_one_activated = bb(E)[bold(1)_(#activation() = 1 "ou" #activation_limit() = 1)]. $
+        Or $bold(1)_(#activation() = 1 "ou" #activation_limit() = 1)$ vaut 1 si et seulement si $#activation() ≠ #activation_limit()$, et zéro sinon. Cela signifie que $bold(1)_(#activation() = 1 "ou" #activation_limit() = 1)$ se comporte exactement comme $abs(#activation() - #activation_limit())$ puisque #activation() et #activation_limit() ne peuvent que prendre les valeurs zéro ou un.\
+        Ainsi, 
+        $ bb(E)[bold(1)_(#activation() = 1 "ou" #activation_limit() = 1)] = bb(E)[abs(#activation() - #activation_limit())] = #distance_activation(). $
+    ]
+
+    Grâce à la @majoration_probability_one_activated, nous pouvons réécrire @equation_majoration_no_spike_event_2 :
+    #numbered_equation(
+        $ bb(E)[e|#no_spike_event] <= (#deactivation_probability + c_2) #distance_activation(). $,
+        <equation_majoration_no_spike_event_final>
+    )
+
+    Ainsi, en utilisant @equation_majoration_distance_activation_3 et @equation_majoration_no_spike_event_final, nous avons :
+    #numbered_equation(
+        $ #distance_activation(t: $t+1$) <= (1 + #spiking_probability)#distance_activation() + #spiking_probability#distance_potential() + c(#deactivation_probability + c_2) #distance_activation(). $,
+        <equation_majoration_distance_activation_final>
+    )
 ]
 
 #proof("de la convergence du processus de potentiel de membrane")[

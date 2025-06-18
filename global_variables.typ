@@ -16,11 +16,8 @@
 #let non_spiking_indicator = $bold(1)_(#auxiliary_uniform(t: $t+1$) > #spiking_function(v: membrane_potential()))$
 #let non_spiking_indicator_limit = $bold(1)_(#auxiliary_uniform(t: $t+1$) > #spiking_function(v: membrane_potential_limit()))$
 #let deactivation_indicator = $bold(1)_(#spiking_probability <= #auxiliary_uniform(t: $t+1$) <= #spiking_probability + #deactivation_probability)$
+#let non_deactivation_indicator = $bold(1)_(#auxiliary_uniform(t: $t+1$) > #spiking_probability + #deactivation_probability)$
 
 #let potential_dynamics = [#set math.vec(delim: none)
-  $ #membrane_potential(t: $t+1$) = #non_spiking_indicator (#membrane_potential() + sum_vec(j=0, j!=i)^N #activation(i: $j$)#spiking_indicator(i: $j$)) $
+  $ #membrane_potential(t: $t+1$) = #non_spiking_indicator (#membrane_potential() + sum_vec(j=0, j!=i)^N #activation(i: $j$)#spiking_indicator(i: $j$)). $
 ]
-#let potential_limit_dynamics = [#set math.vec(delim: none)
-  $ #membrane_potential_limit(t: $t+1$) = #non_spiking_indicator_limit (#membrane_potential_limit() + sum_vec(j=0, j!=i)^N #activation_limit(i: $j$)#spiking_indicator_limit(i: $j$)) $
-]
-#let activation_dynamics = $ #activation(t: $t+1$) = #activation() + (1 - #activation())#spiking_indicator() - #activation()#deactivation_indicator $

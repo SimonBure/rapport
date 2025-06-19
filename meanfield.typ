@@ -60,7 +60,7 @@ $ #distance_activation() = bb(E)abs(#activation() - #activation_limit()), $ nous
     $ lim #distance_globale() ->_(N -> oo) 0. $
 ] <theoreme_convergence_processus>
 
-*Condition sur t ?*
+*TO-DO Condition sur t ?*
 
 /*#theorem("La suite des distances globales est une contraction")[
     Pour tout $i in {1, dots, N}$, et $forall kappa < 1$, la suite des distances #distance_globale(t: $0$), #distance_globale(t: $1$), $dots,$ #distance_globale(), #distance_globale(t: $t+1$) est une *contraction* :
@@ -68,16 +68,21 @@ $ #distance_activation() = bb(E)abs(#activation() - #activation_limit()), $ nous
 ] <theoreme_convergence_distance_globale>*/
 
 #proof()[
-    La preuve du @theoreme_convergence_processus consiste à trouver une majoration de #distance_globale(t: $t+1$) par une fonction de $N$ qui puisse disparaître lorsque $N -> oo$.\
-    
-    *Clarifier l'introduction de la preuve et utiliser l'argument de contraction ?*
+    Pour prouver le @theoreme_convergence_processus, nous allons  consiste à trouver une majoration de #distance_globale(t: $t+1$) par une fonction de $N$ qui puisse disparaître lorsque $N -> oo$.\
 
+    La trame de la preuve est la suivante :
+    + Trouver des majorations de #distance_activation(t: $t+1$) et #distance_potential(t: $t+1$) qui utilisent #distance_globale().
+    + Utiliser ces majorations pour trouver une majoration de #distance_globale(t: $t+1$) en fonction de #distance_globale() et d'une fonction de $N$ qui pourra disparaître lorsque $N$ deviendra grand.
+    + Montrer par récurrence que #distance_globale(t: $t+1$) est bornée par une fonction de $N$ qui tend vers zéro lorsque $N$ tend vers l'infini.
+    
+    *TO-DO Pas besoin de l'argument de contraction ?*
+    /*
     L'idée de cette preuve est de montrer que la suite des distances #distance_globale(t: $0$), #distance_globale(t: $1$), $dots,$ #distance_globale(), #distance_globale(t: $t+1$) subit une contraction, soit
     $ forall kappa < 1, space #distance_globale(t: $t+1$) <= kappa #distance_globale(). $
     Nous pourrons ensuite utiliser l'hypothèse que tous les neurones commencent avec les même conditions initiales pour dire que $#distance_globale(t: $0$) = 0$ et puis finalement utiliser un argument de récurrence pour conclure la preuve.
     
     L'objectif est donc de trouver une majoration de #distance_globale(t: $t+1$) par #distance_globale()\
-    Cela passe évidemment par trouver des 
+    Cela passe évidemment par trouver des */
 
     === Majoration de #distance_activation(t: $t+1$)
     Commençons par majorer #distance_activation(t: $t+1$). De la définition, il vient :
@@ -165,7 +170,7 @@ $ #distance_activation() = bb(E)abs(#activation() - #activation_limit()), $ nous
     Ainsi,
     #numbered_equation($ bb(P)(#no_spike_event) = c < 1. $, <majoration_probability_no_spike_event>)
 
-    *Est-ce que cet argument est vrai ? Est-ce que l'on peut être plus rigoureux dans son utilisation ?*
+    *TO-DO Est-ce que cet argument est vrai ? Est-ce que l'on peut être plus rigoureux dans son utilisation ?*
     
 
     Reprenant @majoration_distance_activation_3 et @majoration_probability_no_spike_event, nous arrivons enfin à :
@@ -270,7 +275,7 @@ $ #distance_activation() = bb(E)abs(#activation() - #activation_limit()), $ nous
         Il reste donc dans $bb(E)[f|#alone_spike_event]$ :
         $ bb(E)[f|#alone_spike_event] = cases(bb(E)abs(#membrane_potential() + 1/N sum_(j=1)^N #simplification_variable(i: $j$)) "si le processus limite spike", bb(E)abs(#membrane_potential_limit() + bb(E)[#simplification_variable_limit()]) "si le processus classique spike"). $
         Dans tous les cas, nous pouvons majorer par #max_potential car #membrane_potential() est borné par #max_potential.\
-        *Véridique ?*
+        *TO-DO Véridique ?*
         $ bb(E)[f|#alone_spike_event] <= #max_potential "par construction". $        
 
     - Si l'événement #no_spike_event est vérifié, alors les indicatrices d'absence de spike valent toutes deux un, c'est-à-dire $#non_spiking_indicator = #non_spiking_indicator_limit = 1$. Cela nous permet d'écrire :
@@ -412,10 +417,21 @@ $ #distance_activation() = bb(E)abs(#activation() - #activation_limit()), $ nous
     Si nous combinons la première pièce @majoration_distance_globale_1 avec la seconde pièce du puzzle @majoration_distance_globale_2, nous obtenons enfin,
 
     $ #distance_globale(t: $t+1$) &<= c''#distance_globale() + c'#distance_globale() + c/(2 sqrt(N)),\
-    &<= C #distance_globale() + c/(2 sqrt(N)). $
-    Ici $C$ est posé comme la constante suivante : $C = max(c'', c') < 1$.\
+    &<= C #distance_globale() + c/(2 sqrt(N)), $
+    avec $C$ la constante suivante : $C = max(c'', c') < 1$.
 
-    Nous avons donc prouvé  une contraction 
+    Rappellons-nous que les processus sont initialisés de la même façon, ce qui signifique que $#distance_globale(t: $0$) = 0$.\
+    Ainsi, en $t=1$ : 
+    $ #distance_globale(t: $1$) <= c/(2 sqrt(N)). $
+    Poursuivant l'itération, nous avons :
+    $ #distance_globale(t: $2$) &<= C #distance_globale(t: $1$) + c/(2 sqrt(N)) = (C +1) c/(2 sqrt(N)) "puis",\
+    #distance_globale(t: $3$) &<= C #distance_globale(t: $2$) + c/(2 sqrt(N)) <= C (C +1) c/(2 sqrt(N)) + c/(2 sqrt(N)) = (C^2 + C + 1) c/(2 sqrt(N)).\ $
 
-    Ce qui parachève la preuve du @theoreme_convergence_processus !
+    Ce qui nous fait aboutir à :
+    $ #distance_globale() <= (sum_(k=0)^(t-1)C^k) c/(2 sqrt(N)). $
+    Or puisque $C < 1$ et que $t$ est un élément quelconque et fini de $bb(N)$, alors un polynôme en $C$ est nécessairement fini.\
+    D'où $sum_(k=0)^(t-1)C^k < oo$, impliquant finalement,
+    $ #distance_globale() ->_(N -> oo) 0. $
+
+    Ce qui parachève la preuve du @theoreme_convergence_processus ! #place(right, $square.stroked$)
 ]

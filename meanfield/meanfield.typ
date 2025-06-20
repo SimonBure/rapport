@@ -1,5 +1,5 @@
-#import "rules.typ": *
-#import "global_variables.typ": *
+#import "../rules.typ": *
+#import "../global_variables.typ": *
 
 // Display settings for theorems and proofs
 #show: thmrules.with(qed-symbol: $square$)
@@ -33,14 +33,37 @@ $ #potential_dynamics_meanfield. $
 == Processus limites
 Nous allons noter #membrane_potential_limit() et #activation_limit() les valeurs des *processus limites* de potentiel de membrane et d'activation pour le neurone $i$ au temps $t$. Pour suivre cette notation, posons également que $#simplification_variable_limit() = #activation_limit()#spiking_indicator_limit()$.
 
-Nous allons supposer l'existence d'une "loi des grands nombres" permettant d'affirmer que
+La dynamique du processus limite de l'activation de la synapse du neurone $i$ reste défini de façon similaire que la dynamique du processus classique :
+$ #activation_limit(t: $t+1$) = #spiking_indicator_limit() + #non_spiking_indicator_limit #activation_limit() (1 - #deactivation_indicator). $ 
+
+Cependant, la variable aléatoire #membrane_potential_limit() se voit modifiée plus profondément par l'hypothèse de champ moyen. En effet, le champ moyen suppose l'existence d'une certaine "loi des grands nombres" stipulant que
 $ 1/N sum_(i=0)^N #simplification_variable_limit() ->_(N -> oo) bb(E)[#simplification_variable_limit()]. $
 
+Ainsi la dynamique du processus limite du potentiel de membrane s'écrit :
+$ #potential_limit_dynamics. $
+
+#let max_potential_limit = $Gamma$
+#let definition_max_potential_limit = $K gamma$
+#let space_value_potential_limit = ${0, gamma, 2 gamma, dots, #max_potential_limit}$
+La variable aléatoire #membrane_potential() avait été définie comme à valeurs dans $#space_value_potential subset bb(N)$. Or nous voyons désormais que #membrane_potential_limit() ne respecte plus cette définition, notamment car $bb(E)[#simplification_variable_limit()]$ est un *nombre réel*.\
+Supposons que $gamma = bb(E)[#simplification_variable_limit()]$. Intuitivement, cela signifie qu'à chaque pas de temps, le potentiel de membrane limite #membrane_potential_limit() augmente d'une quantité fixée $gamma$.\ Comme #membrane_potential(), le potentiel limite #membrane_potential_limit() sera en capacité d'émettre un potentiel d'action après avoir dépassé le potentiel seuil $#max_potential$.\
+Notons #max_potential_limit, la valeur maximale que peut prendre le potentiel de membrane limite, définie comme suit :
+$ #max_potential_limit = #definition_max_potential_limit, $
+où $K$ correspond au nombre minimal de pas nécessaires pour dépasser #max_potential. $K$ est donc un *entier positif*, défini de la façon suivante : 
+$ K = ceil(#max_potential / gamma). $
+
+
+Si nous posons que , alors il vient que #membrane_potential_limit() est un processus aléatoire à valeurs dans 
+
+En effet,
+$ bb(E)[#simplification_variable_limit()] &= bb(E)[#activation_limit() #spiking_indicator_limit()],\
+&= bb(E)[bb(E)[#activation_limit() #spiking_indicator_limit()|#membrane_potential_limit()]],\
+&= bb(E)[bb(E)[#activation_limit()] bb(P)(#auxiliary_uniform(t: $t+1$) < #spiking_function(v: membrane_potential_limit())|#membrane_potential_limit())],\
+&= bb(E)[#activation_limit() #spiking_function_limit], $ 
+
 À la lueur de ces hypothèses et de ces définitions, écrivons désormais les équations régissant les dynamiques de ces deux processus limites en spécifiant que les processus classiques et limites *partagent la même variable auxiliaire uniforme* #auxiliary_uniform().\
-Pour le processus limite du potentiel de membrane nous avons
-$ #potential_limit_dynamics, $
-et pour le processus limite de la variable d'activation
-$ #activation_limit(t: $t+1$) = #spiking_indicator_limit() + #non_spiking_indicator_limit #activation_limit() (1 - #deactivation_indicator). $
+
+
 
 
 == Existence des processus limites
@@ -435,3 +458,6 @@ $ #distance_activation() = bb(E)abs(#activation() - #activation_limit()), $ nous
 
     Ce qui parachève la preuve du @theoreme_convergence_processus ! #place(right, $square.stroked$)
 ]
+
+== Mesure invariante
+#include "invariant.typ"

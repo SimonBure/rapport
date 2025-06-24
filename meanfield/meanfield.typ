@@ -97,15 +97,6 @@ $ #distance_activation() = bb(E)abs(#activation() - #activation_limit()), $ nous
     + Trouver des majorations de #distance_activation(t: $t+1$) et #distance_potential(t: $t+1$) qui utilisent #distance_globale().
     + Utiliser ces majorations pour trouver une majoration de #distance_globale(t: $t+1$) en fonction de #distance_globale() et d'une fonction de $N$ qui pourra disparaître lorsque $N$ deviendra grand.
     + Montrer par récurrence que #distance_globale(t: $t+1$) est bornée par une fonction de $N$ qui tend vers zéro lorsque $N$ tend vers l'infini.
-    
-    *TO-DO Pas besoin de l'argument de contraction ?*
-    /*
-    L'idée de cette preuve est de montrer que la suite des distances #distance_globale(t: $0$), #distance_globale(t: $1$), $dots,$ #distance_globale(), #distance_globale(t: $t+1$) subit une contraction, soit
-    $ forall kappa < 1, space #distance_globale(t: $t+1$) <= kappa #distance_globale(). $
-    Nous pourrons ensuite utiliser l'hypothèse que tous les neurones commencent avec les même conditions initiales pour dire que $#distance_globale(t: $0$) = 0$ et puis finalement utiliser un argument de récurrence pour conclure la preuve.
-    
-    L'objectif est donc de trouver une majoration de #distance_globale(t: $t+1$) par #distance_globale()\
-    Cela passe évidemment par trouver des */
 
     === Majoration de #distance_activation(t: $t+1$)
     Commençons par majorer #distance_activation(t: $t+1$). De la définition, il vient :
@@ -185,99 +176,17 @@ $ #distance_activation() = bb(E)abs(#activation() - #activation_limit()), $ nous
         $ #distance_activation(t: $t+1$) <= #spiking_probability #distance_potential() + bb(P)(#no_spike_event)(1 + #deactivation_probability)#distance_activation(). $, <majoration_distance_activation_3>
     )
 
-    Concernant $bb(P)(#no_spike_event)$, nous pouvons écrire :
-    $ bb(P)(#no_spike_event) &= bb(P)({#auxiliary_uniform(t: $t+1$) > #spiking_probability} union {#membrane_potential() < #max_potential "et" #membrane_potential_limit() < #max_potential}),\
-    &= bb(P)(#auxiliary_uniform(t: $t+1$) > #spiking_probability) + bb(P)(#membrane_potential() < #max_potential "et" #membrane_potential_limit() < #max_potential) - bb(P)({#auxiliary_uniform(t: $t+1$) > #spiking_probability} inter {#membrane_potential() < #max_potential "et" #membrane_potential_limit() < #max_potential}),\
-    &= 1 - #spiking_probability + #spiking_probability bb(P)(#membrane_potential() < #max_potential "et" #membrane_potential_limit() < #max_potential). $
-    Par construction, nous avons nécessairement $bb(P)(#membrane_potential() < #max_potential "et" #membrane_potential_limit() < #max_potential) < 1$ car le neurone $i$ se trouve nécessairement, pour certains temps $t$, dans la couche #max_potential.\
-    Ainsi,
-    #numbered_equation($ bb(P)(#no_spike_event) = c < 1. $, <majoration_probability_no_spike_event>)
-
-    *TO-DO Est-ce que cet argument est vrai ? Est-ce que l'on peut être plus rigoureux dans son utilisation ?*
+    Concernant $bb(P)(#no_spike_event)$, nous pouvons tout simplement la majorer par $1$. Nous obtenons finalement :
+    $ #distance_activation(t: $t+1$) <= #spiking_probability #distance_potential() + (1 + #deactivation_probability)#distance_activation(). $
     
-
-    Reprenant @majoration_distance_activation_3 et @majoration_probability_no_spike_event, nous arrivons enfin à :
-    $ #distance_activation(t: $t+1$) <= #spiking_probability #distance_potential() + c (1 + #deactivation_probability)#distance_activation(). $
-
-    Si nous faisons l'hypothèse que $c (1 + #deactivation_probability) < 1$, alors nous pouvons dire que 
-    $ #distance_activation(t: $t+1$) &<= max(#spiking_probability, c (1 + #deactivation_probability)) (#distance_potential() + #distance_activation()),\
-    &<= c' #distance_globale(), "où" c' = max(#spiking_probability, c (1 + #deactivation_probability)) < 1. $
+    Soit, en posant $c = max(#spiking_probability, (1 + #deactivation_probability)) $ :
+    $ #distance_activation(t: $t+1$) &<= max(#spiking_probability, 1 + #deactivation_probability) (#distance_potential() + #distance_activation()),\
+    &<= c #distance_globale(). $
 
     Grâce à cette dernière ligne, nous avons désormais la première pièce du puzzle. Si nous réécrivons @distance_globale, nous pouvons dire que :
     #numbered_equation(
-        $ #distance_globale(t: $t+1$) <= #distance_potential(t: $t+1$) + c'#distance_globale(). $, <majoration_distance_globale_1>
+        $ #distance_globale(t: $t+1$) <= #distance_potential(t: $t+1$) + c#distance_globale(). $, <majoration_distance_globale_1>
     )
-
-    /*
-    #let both_deactivation_event = $bb(2)$
-    #let alone_deactivation_event = $bb(1)$
-    #let no_deactivation_event = $bb(0)$
-    Maintenant, nous allons majorer $bb(E)[e|#no_spike_event]$. Remarquons une nouvelle fois que trois nouveaux événements sont disjoints :
-
-    #let both_deactivation_event_definition = ${#spiking_probability <= #auxiliary_uniform(t: $t+1$) <= #spiking_probability + #deactivation_probability} inter {#activation() = #activation_limit() = 1}$
-    - L'événement $#both_deactivation_event = {"les deux synapses se désactivent au temps" $t+1$} = #both_deactivation_event_definition.$
-
-    #let alone_deactivation_event_definition = ${#spiking_probability <= #auxiliary_uniform(t: $t+1$) <= #spiking_probability + #deactivation_probability} inter {#activation() = 1 "ou" #activation_limit() = 1}$
-    - L'événement $#alone_deactivation_event = {"une seule synapse se désactive au temps" $t+1$} = #alone_deactivation_event_definition.$
-
-    #let no_deactivation_event_definition = ${#auxiliary_uniform(t: $t+1$) < beta "ou" #auxiliary_uniform(t: $t+1$) > #spiking_probability + #deactivation_probability} union {#activation() = #activation_limit() = 0}$
-    - L'événement $#no_deactivation_event = {"aucune synapse ne se désactive au temps" $t+1$} = #no_deactivation_event_definition.$
-
-    Écrivons donc :
-    #numbered_equation(
-        $ bb(E)[e|#no_spike_event] = bb(P)(#both_deactivation_event)bb(E)[e|#no_spike_event, #both_deactivation_event] + bb(P)(#alone_deactivation_event)bb(E)[e|#no_spike_event, #alone_deactivation_event] + bb(P)(#no_deactivation_event)bb(E)[e|#no_spike_event, #no_deactivation_event]. $, <equation_majoration_no_spike_event>
-    )
-
-    - Si #both_deactivation_event est vérifié, alors l'indicatrice de désactivation est égale à 1, soit $#deactivation_indicator = 1$.\
-        Il reste donc dans $bb(E)[e|#no_spike_event, #both_deactivation_event]$ :
-        $ bb(E)[e|#no_spike_event, #both_deactivation_event] = bb(E)abs(#activation() - #activation_limit()) = #distance_activation(). $
-        Pour $bb(P)(#both_deactivation_event)$, nous avons :
-        $ bb(P)(#both_deactivation_event) = bb(P)(#both_deactivation_event_definition) = #deactivation_probability bb(P)(#activation() = #activation_limit() = 1) <= #deactivation_probability. $\
-
-    #let probability_one_activated = $bb(P)(#activation() = 1 "ou" #activation_limit() = 1)$
-    - Si #alone_deactivation_event est vérifié, alors l'indicatrice de désactivation est aussi égale à 1 et une des variables d'activation est nulle.\
-        Nous restons avec :
-        $ bb(E)[e|#no_spike_event, #alone_deactivation_event] = cases(bb(E)[#activation()], bb(E)[#activation_limit()]) < 1 "de toute façon". $
-        En effet, comme $#activation() in {0, 1}$ et qu'il existe presque-sûrement des temps $t$ où $#activation() = 0$ alors $bb(E)[#activation()] < 1$ et $bb(E)[#activation_limit()] < 1$. On écrit $bb(E)[e|#no_spike_event, #alone_deactivation_event] = c_2 < 1$.\
-        La probabilité $bb(P)(#alone_deactivation_event)$ peut s'écrire :
-        $ bb(P)(#alone_deactivation_event) &= bb(P)(#alone_deactivation_event_definition)\
-        & = #deactivation_probability #probability_one_activated. $
-
-    - Si #no_deactivation_event est vérifié, alors l'indicatrice de désactivation est nulle, soit $#deactivation_indicator = 0$.\
-        Il reste donc dans $bb(E)[e|#no_spike_event, #no_deactivation_event]$ :
-        $ bb(E)[e|#no_spike_event, #no_deactivation_event] = bb(E)abs(#activation()#deactivation_indicator - #activation_limit()#deactivation_indicator) = 0. $\
-
-    Reprenons maintenant @equation_majoration_no_spike_event pour écrire :
-    #numbered_equation(
-        $ bb(E)[e|#no_spike_event] <= #deactivation_probability #distance_activation() + c_2 #probability_one_activated. $,
-        <equation_majoration_no_spike_event_2>
-    )
-
-    #proposition()[
-        $ #probability_one_activated = #distance_activation(). $
-    ] <majoration_probability_one_activated>
-    #proof[
-        Commençons par réécrire #probability_one_activated :
-        $ #probability_one_activated = bb(E)[bold(1)_(#activation() = 1 "ou" #activation_limit() = 1)]. $
-        Or $bold(1)_(#activation() = 1 "ou" #activation_limit() = 1)$ vaut 1 si et seulement si $#activation() ≠ #activation_limit()$, et zéro sinon. Cela signifie que $bold(1)_(#activation() = 1 "ou" #activation_limit() = 1)$ se comporte exactement comme $abs(#activation() - #activation_limit())$ puisque #activation() et #activation_limit() ne peuvent que prendre les valeurs zéro ou un.\
-        Ainsi, 
-        $ bb(E)[bold(1)_(#activation() = 1 "ou" #activation_limit() = 1)] = bb(E)[abs(#activation() - #activation_limit())] = #distance_activation(). $
-    ]
-
-    Grâce à la @majoration_probability_one_activated, nous pouvons réécrire @equation_majoration_no_spike_event_2 :
-    #numbered_equation(
-        $ bb(E)[e|#no_spike_event] <= (#deactivation_probability + c_2) #distance_activation(). $,
-        <equation_majoration_no_spike_event_final>
-    )
-
-    Ainsi, en utilisant @majoration_distance_activation_3 et @equation_majoration_no_spike_event_final, nous avons :
-    #numbered_equation(
-        $ #distance_activation(t: $t+1$) <= (1 + #spiking_probability + c(#deactivation_probability + c_2))#distance_activation() + #spiking_probability #distance_potential(). $,
-        <majoration_distance_activation_final>
-    )
-
-    *Problème constante multiplicative > 1...*
-    */
 
     === Majoration de #distance_potential(t: $t+1$)
     À présent, nous allons nous attaquer à la majoration de #distance_potential(t: $t+1$). De la définition, il vient :
@@ -305,9 +214,9 @@ $ #distance_activation() = bb(E)abs(#activation() - #activation_limit()), $ nous
         $ bb(E)[f|#no_spike_event] = bb(E)abs(#membrane_potential() + 1/N sum_(j=1)^N #simplification_variable(i: $j$) - (#membrane_potential_limit() + bb(E)[#simplification_variable_limit()])). $
         Cette quantité sera majorée plus loin, car son développement est un peu plus long.
 
-    En reprenant @majoration_distance_potential_1, et en utilisant @majoration_probability_alone_spike_event_final avec @majoration_probability_no_spike_event pour majorer $bb(P)(#alone_spike_event) "et" bb(P)(#no_spike_event)$, nous obtenons :
+    En reprenant @majoration_distance_potential_1, et en utilisant @majoration_probability_alone_spike_event_final et $bb(P)(#no_spike_event) <= 1$, nous obtenons :
     #numbered_equation(
-        $ #distance_potential(t: $t+1$) <= #spiking_probability #max_potential #distance_potential() + c bb(E)[f|#no_spike_event]. $,
+        $ #distance_potential(t: $t+1$) <= #spiking_probability #max_potential #distance_potential() + bb(E)[f|#no_spike_event]. $,
         <majoration_distance_potential_2>
     )
 
@@ -423,37 +332,34 @@ $ #distance_activation() = bb(E)abs(#activation() - #activation_limit()), $ nous
     )
 
     Ultimement, pour écrire la majoration définitive de #distance_potential(t: $t+1$), nous pouvons repartir de @majoration_distance_potential_2 et utiliser @majoration_distance_potential_knowing_no_spike_event_final pour écrire :
-    $ #distance_potential(t: $t+1$) &<= #spiking_probability#max_potential#distance_potential() + c(#distance_potential() + #spiking_probability (#distance_activation() + #distance_potential()) + 1 /(2 sqrt(N))), $
+    $ #distance_potential(t: $t+1$) &<= #spiking_probability#max_potential#distance_potential() + (#distance_potential() + #spiking_probability (#distance_activation() + #distance_potential()) + 1 /(2 sqrt(N))), $
     #numbered_equation(
-        $ #distance_potential(t: $t+1$) <= (#spiking_probability #max_potential + c(1 + #spiking_probability))#distance_potential() + c #spiking_probability #distance_activation() + c/(2 sqrt(N)). $,
+        $ #distance_potential(t: $t+1$) <= (#spiking_probability #max_potential + (1 + #spiking_probability))#distance_potential() + #spiking_probability #distance_activation() + 1/(2 sqrt(N)). $,
         <majoration_distance_potential_finale>
     )
 
-    *Supposer $#spiking_probability #max_potential + c(1 + #spiking_probability) > 1$ ?*
-
-    Si nous acceptons l'hypothèse
-    $ #spiking_probability #max_potential + c(1 + #spiking_probability) > 1, $
-    alors nous pouvons écrire que
-    #numbered_equation($ #distance_potential(t: $t+1$) <= c''#distance_globale() + c/(2 sqrt(N)), $, <majoration_distance_globale_2>)
-    où $c'' = max(#spiking_probability #max_potential + c(1 + #spiking_probability), c #spiking_probability) < 1$.
+    Nous pouvons écrire que
+    #numbered_equation($ #distance_potential(t: $t+1$) <= c'#distance_globale() + 1/(2 sqrt(N)), $, <majoration_distance_globale_2>)
+    où $c' = #spiking_probability #max_potential + 1 + #spiking_probability$.
 
     Si nous combinons la première pièce @majoration_distance_globale_1 avec la seconde pièce du puzzle @majoration_distance_globale_2, nous obtenons enfin,
 
-    $ #distance_globale(t: $t+1$) &<= c''#distance_globale() + c'#distance_globale() + c/(2 sqrt(N)),\
-    &<= C #distance_globale() + c/(2 sqrt(N)), $
-    avec $C$ la constante suivante : $C = max(c'', c') < 1$.
+    $ #distance_globale(t: $t+1$) &<= c'#distance_globale() + c#distance_globale() + 1/(2 sqrt(N)),\
+    &<= C #distance_globale() + 1/(2 sqrt(N)), $
+    avec $C$ la constante suivante : $C = max(c', c)$.
 
     Rappellons-nous que les processus sont initialisés de la même façon, ce qui signifique que $#distance_globale(t: $0$) = 0$.\
     Ainsi, en $t=1$ : 
-    $ #distance_globale(t: $1$) <= c/(2 sqrt(N)). $
+    $ #distance_globale(t: $1$) <= 1/(2 sqrt(N)). $
     Poursuivant l'itération, nous avons :
-    $ #distance_globale(t: $2$) &<= C #distance_globale(t: $1$) + c/(2 sqrt(N)) = (C +1) c/(2 sqrt(N)) "puis",\
-    #distance_globale(t: $3$) &<= C #distance_globale(t: $2$) + c/(2 sqrt(N)) <= C (C +1) c/(2 sqrt(N)) + c/(2 sqrt(N)) = (C^2 + C + 1) c/(2 sqrt(N)).\ $
+    $ #distance_globale(t: $2$) &<= C #distance_globale(t: $1$) + 1/(2 sqrt(N)) = (C +1) 1/(2 sqrt(N)) "puis",\
+    #distance_globale(t: $3$) &<= C #distance_globale(t: $2$) + 1/(2 sqrt(N)) <= C (C +1) 1/(2 sqrt(N)) + 1/(2 sqrt(N)) = (C^2 + C + 1) 1/(2 sqrt(N)).\ $
 
     Ce qui nous fait aboutir à :
-    $ #distance_globale() <= (sum_(k=0)^(t-1)C^k) c/(2 sqrt(N)). $
-    Or puisque $C < 1$ et que $t$ est un élément quelconque et fini de $bb(N)$, alors un polynôme en $C$ est nécessairement fini.\
-    D'où $sum_(k=0)^(t-1)C^k < oo$, impliquant finalement,
+    $ #distance_globale() <= (sum_(k=0)^(t-1)C^k) 1/(2 sqrt(N)). $
+
+    Or puisque $C$ est une combinaison finie d'opérations sur des paramètres finis de notre modèle, et que nous nous sommes placés sur une fenêtre temporelle finie, soit $t in [0, T]$, pour tout $T in bb(N) "avec" T > 0$.\
+    Ainsi un polynôme en $C$ de degré $t-1$ est nécessairement fini, c'est-à-dire $sum_(k=0)^(t-1)C^k < oo$, impliquant finalement que,
     $ #distance_globale() ->_(N -> oo) 0. $
 
     Ce qui parachève la preuve du @theoreme_convergence_processus ! #place(right, $square.stroked$)

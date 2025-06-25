@@ -2,12 +2,16 @@
 #let spiking_probability = $beta$
 #let deactivation_probability = $lambda$
 
+#let indexes_interval = ${0, 1, dots, N}$
+#let time_interval = ${0, 1, dots, T}$
+
 #let chain(t: $t$) = $X_#t$
 #let chain_limit(t: $t$) = $overline(X)_#t$
 
 #let membrane_potential(t: $t$, i: $i$) = $V_#t^#i$
 #let membrane_potential_limit(t: $t$, i: $i$) = $overline(V)_#t^#i$
 #let space_value_potential = ${0, 1, dots, #max_potential}$
+#let space_value_activation = ${0, 1}$
 
 #let activation(t: $t$, i: $i$) = $A_#t^#i$
 #let activation_limit(t: $t$, i: $i$) = $overline(A)_#t^#i$

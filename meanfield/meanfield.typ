@@ -42,31 +42,41 @@ $ 1/N sum_(i=0)^N #simplification_variable_limit() ->_(N -> oo) bb(E)[#simplific
 Ainsi la dynamique du processus limite du potentiel de membrane s'écrit :
 $ #potential_limit_dynamics. $
 
-#let max_potential_limit = $Gamma$
-#let definition_max_potential_limit = $K gamma$
+Faisons la remarque que les processus #membrane_potential() et #membrane_potential_limit() partagent tous les deux la même variable #auxiliary_uniform().
+
+#let max_potential_limit = $K gamma$
 #let space_value_potential_limit = ${0, gamma, 2 gamma, dots, #max_potential_limit}$
-La variable aléatoire #membrane_potential() avait été définie comme à valeurs dans $#space_value_potential subset bb(N)$. Or nous voyons désormais que #membrane_potential_limit() ne respecte plus cette définition, notamment car $bb(E)[#simplification_variable_limit()]$ est un *nombre réel*.\
-Supposons que $gamma = bb(E)[#simplification_variable_limit()]$. Intuitivement, cela signifie qu'à chaque pas de temps, le potentiel de membrane limite #membrane_potential_limit() augmente d'une quantité fixée $gamma$.\ Comme #membrane_potential(), le potentiel limite #membrane_potential_limit() sera en capacité d'émettre un potentiel d'action après avoir dépassé le potentiel seuil $#max_potential$.\
-Notons #max_potential_limit, la valeur maximale que peut prendre le potentiel de membrane limite, définie comme suit :
-$ #max_potential_limit = #definition_max_potential_limit, $
-où $K$ correspond au nombre minimal de pas nécessaires pour dépasser #max_potential. $K$ est donc un *entier positif*, défini de la façon suivante : 
+La variable aléatoire #membrane_potential() avait été définie comme à valeurs dans $#space_value_potential subset bb(N)$. Or nous voyons désormais que #membrane_potential_limit() ne respecte plus cette définition, notamment car $bb(E)[#simplification_variable_limit()]$ est un *nombre réel* et dépendant du temps $t$.\
+Supposons que $gamma_t = bb(E)[#simplification_variable_limit()]$. Intuitivement, cela signifie qu'à chaque pas de temps, le potentiel de membrane limite #membrane_potential_limit() augmente d'une quantité fixée $gamma_t$, dépendante du temps.\
+Nous pouvons même calculer la valeur de $gamma_t$ :
+$ gamma_t &= bb(E)[#activation_limit()#spiking_indicator_limit()],\
+&= bb(P)(#auxiliary_uniform(t: $t+1$) > #spiking_function(v: membrane_potential_limit())) bb(E)[#activation_limit()|#auxiliary_uniform(t: $t+1$) > #spiking_function(v: membrane_potential_limit())],\
+&= #spiking_function(v: membrane_potential_limit()) bb(E)[#activation_limit()]. $
+
+Ce qui nous permet d'écrire la majoration suivante :
+#numbered_equation($ gamma_t <= #spiking_probability. $, <majoration_gamma_t>)
+
+Comme nous sommes placés sur une fenêtre temporelle de taille $T$, nous sommes donc en capactié de minorer la valeur de $gamma_t$.\
+Soit $t^*$ le temps critique où $gamma_t = 0$, c'est à dire le temps où la chaîne #chain() est absorbée. En effet, $gamma_t = 0$ implique que tous les neurones du processus limite soient désactivés ou qu'ils soient tous dans une couche inférieure à $K gamma$.\
+Ainsi, 
+$ t^* = inf{t > 0 : gamma_t = 0}. $
+
+Comme nous travaillons en temps discret, cela nous permet de maintenir la valeur de $gamma_t$ supérieure à un certain seuil $epsilon > 0$ pour tout $t < t^*$.\
+D'après @majoration_gamma_t, nous avons donc pour toute valeur de $t < t^*$,
+#numbered_equation($ epsilon <= gamma_t <= #spiking_probability. $, <encadrement_gamma_t>)
+
+Ainsi *TODO: Écrire l'espace des valeurs possibles de #membrane_potential_limit().*
+
+
+Comme #membrane_potential(), le potentiel limite #membrane_potential_limit() sera en capacité d'émettre un potentiel d'action après avoir dépassé le potentiel seuil $#max_potential$.\
+Notons #max_potential_limit, la valeur maximale que peut prendre le potentiel de membrane limite, où $K$ correspond au nombre minimal de pas nécessaires pour dépasser #max_potential. $K$ est donc un *entier positif*, défini de la façon suivante : 
 $ K = ceil(#max_potential / gamma). $
 
 
-Si nous posons que , alors il vient que #membrane_potential_limit() est un processus aléatoire à valeurs dans 
-
-En effet,
-$ bb(E)[#simplification_variable_limit()] &= bb(E)[#activation_limit() #spiking_indicator_limit()],\
-&= bb(E)[bb(E)[#activation_limit() #spiking_indicator_limit()|#membrane_potential_limit()]],\
-&= bb(E)[bb(E)[#activation_limit()] bb(P)(#auxiliary_uniform(t: $t+1$) < #spiking_function(v: membrane_potential_limit())|#membrane_potential_limit())],\
-&= bb(E)[#activation_limit() #spiking_function_limit], $ 
-
-À la lueur de ces hypothèses et de ces définitions, écrivons désormais les équations régissant les dynamiques de ces deux processus limites en spécifiant que les processus classiques et limites *partagent la même variable auxiliaire uniforme* #auxiliary_uniform().\
-
-
-
-
 == Existence des processus limites
+Concernant le processus #membrane_potential_limit(), 
+
+À propos du processus #activation_limit(), aucun problème ne se pose, tout est correctement défini et ne peut pas 
 
 
 == Convergence vers les processus limites
@@ -77,18 +87,11 @@ $ #distance_activation() = bb(E)abs(#activation() - #activation_limit()), $ nous
 #numbered_equation($ #distance_globale() = #distance_potential() + #distance_activation(). $, <distance_globale>)
 
 #theorem("Convergence des processus classiques vers les processsus limites")[
-    Pour tout $i in {1, dots, N}$, et pour un $t in bb(N)$,
+    Pour tout $i in #indexes_interval$, et pour un $t in #time_interval$, avec $T$ nombre entier positif,
     $ (#membrane_potential(), #activation()) ->_(N -> oo) (#membrane_potential_limit(), #activation_limit()), $
     ce qui revient à dire que :
     $ lim #distance_globale() ->_(N -> oo) 0. $
 ] <theoreme_convergence_processus>
-
-*TO-DO Condition sur t ?*
-
-/*#theorem("La suite des distances globales est une contraction")[
-    Pour tout $i in {1, dots, N}$, et $forall kappa < 1$, la suite des distances #distance_globale(t: $0$), #distance_globale(t: $1$), $dots,$ #distance_globale(), #distance_globale(t: $t+1$) est une *contraction* :
-    $ #distance_globale(t: $t+1$) <= kappa . $
-] <theoreme_convergence_distance_globale>*/
 
 #proof()[
     Pour prouver le @theoreme_convergence_processus, nous allons  consiste à trouver une majoration de #distance_globale(t: $t+1$) par une fonction de $N$ qui puisse disparaître lorsque $N -> oo$.\

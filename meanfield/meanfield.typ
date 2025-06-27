@@ -74,9 +74,7 @@ $ K = ceil(#max_potential / gamma). $
 
 
 == Existence des processus limites
-Concernant le processus #membrane_potential_limit(), 
-
-À propos du processus #activation_limit(), aucun problème ne se pose, tout est correctement défini et ne peut pas 
+Comme les deux processus limites #neuron_limit() prennent leurs valeurs dans des espaces discrets et finis, ils sont tous les deux bien définis. L'existence des processus ne pose ainsi aucun problème.
 
 
 == Convergence vers les processus limites

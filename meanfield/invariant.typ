@@ -41,7 +41,7 @@ Ainsi, pour $v < K gamma$,
 #numbered_equation($ #mean_time_spent_in_state() = #probability_no_deactivation_before_v. $, <valeur_temps_moyen_passe_etat_v_1>)
 
 #let probability_deactivation_before_v = $1 - #probability_no_deactivation_before_v$
-De façon similaire, pour $a = 0$, #time_spent_in_state() vaut un si le neurone subit une désactivation avant la couche $v$, ce qui arrive avec probabilité #probability_deactivation_before_v. Sinon, le temps passé dans l'état $(v, 0)$ est nul. D'où,
+De façon similaire, pour $a = 0$, #time_spent_in_state(state: $(v, 0)$) vaut un si le neurone subit une désactivation avant la couche $v$, ce qui arrive avec probabilité #probability_deactivation_before_v. Sinon, le temps passé dans l'état $(v, 0)$ est nul. D'où,
 #numbered_equation($ #mean_time_spent_in_state(state: $(v, 0)$) = #probability_deactivation_before_v. $, <valeur_temps_moyen_passe_etat_v_0>)
 
 Finalelement, nous avons

@@ -10,3 +10,9 @@
 #let numbered_equation(content, label) = [#set math.equation(numbering: "(1)")
 #content #label
 ]
+
+// Unreference to avoid reference error for sub-chapter
+#let no-ref(it) = {
+  show ref: _ => [[?]]
+  it
+}

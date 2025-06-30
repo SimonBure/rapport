@@ -11,6 +11,9 @@
 #content #label
 ]
 
+// Define a TO-DO
+#let todo(text) = [*TO-DO : #text*]
+
 // Unreference to avoid reference error for sub-chapter
 #let no-ref(it) = {
   show ref: _ => [[?]]

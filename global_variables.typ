@@ -1,12 +1,18 @@
+#let integers = $bb(N)$
+#let integers_without_zero = $attach(#integers, tr: *)$
+#let reals = $bb(R)$
+
 #let max_potential = $theta$
 #let spiking_probability = $beta$
 #let deactivation_probability = $lambda$
 
 #let indexes_interval = ${0, 1, dots, N}$
 #let time_interval = ${0, 1, dots, T}$
+#let time_window = $[|0, T|]$
 
 #let chain(t: $t$) = $X_#t$
 #let chain_limit(t: $t$) = $overline(X)_#t$
+#let chain_space = $cal(X)$
 
 #let membrane_potential(t: $t$, i: $i$) = $V_#t^#i$
 #let membrane_potential_limit(t: $t$, i: $i$) = $overline(V)_#t^#i$
@@ -24,7 +30,7 @@
 // Indicators
 #let spiking_function(v: membrane_potential()) = $phi.alt(#v)$
 #let spiking_function_limit = $phi.alt(#membrane_potential_limit())$
-#let spiking_function_definition = $phi.alt(v) = #spiking_probability bold(1)_(v = #max_potential)$
+#let spiking_function_definition = $phi.alt(v) = #spiking_probability bold(1)_(v >= #max_potential)$
 #let spiking_indicator(i: $i$) = $bold(1)_(#auxiliary_uniform(t: $t+1$, i: i) <= #spiking_function(v: membrane_potential(i: i)))$
 #let spiking_indicator_limit(i: $i$) = $bold(1)_(#auxiliary_uniform(t: $t+1$, i: i) <= #spiking_function(v: membrane_potential_limit(i: i)))$
 #let non_spiking_indicator = $bold(1)_(#auxiliary_uniform(t: $t+1$) > #spiking_function(v: membrane_potential()))$

@@ -1,6 +1,9 @@
 #let integers = $bb(N)$
 #let integers_without_zero = $attach(#integers, tr: *)$
 #let reals = $bb(R)$
+#let expectation(u) = $bb(E)[#u]$
+#let expectation_absolute(u) = $bb(E)abs(#u)$
+#let indicator(e) = $bold(1)_({#e})$
 
 #let max_potential = $theta$
 #let spiking_probability = $beta$
@@ -31,11 +34,11 @@
 #let spiking_function(v: membrane_potential()) = $phi.alt(#v)$
 #let spiking_function_limit = $phi.alt(#membrane_potential_limit())$
 #let spiking_function_definition = $phi.alt(v) = #spiking_probability bold(1)_(v >= #max_potential)$
-#let spiking_indicator(i: $i$) = $bold(1)_(#auxiliary_uniform(t: $t+1$, i: i) <= #spiking_function(v: membrane_potential(i: i)))$
-#let spiking_indicator_limit(i: $i$) = $bold(1)_(#auxiliary_uniform(t: $t+1$, i: i) <= #spiking_function(v: membrane_potential_limit(i: i)))$
-#let non_spiking_indicator = $bold(1)_(#auxiliary_uniform(t: $t+1$) > #spiking_function(v: membrane_potential()))$
-#let non_spiking_indicator_limit = $bold(1)_(#auxiliary_uniform(t: $t+1$) > #spiking_function(v: membrane_potential_limit()))$
-#let deactivation_indicator = $bold(1)_(#spiking_probability < #auxiliary_uniform(t: $t+1$) < #spiking_probability + #deactivation_probability)$
+#let spiking_indicator(i: $i$) = $#indicator($#auxiliary_uniform(t: $t+1$, i: i) <= #spiking_function(v: membrane_potential(i: i))$)$
+#let spiking_indicator_limit(i: $i$) = $#indicator($#auxiliary_uniform(t: $t+1$, i: i) <= #spiking_function(v: membrane_potential_limit(i: i))$)$
+#let non_spiking_indicator = $#indicator($#auxiliary_uniform(t: $t+1$) > #spiking_function(v: membrane_potential())$)$
+#let non_spiking_indicator_limit = $#indicator($#auxiliary_uniform(t: $t+1$) > #spiking_function(v: membrane_potential_limit())$)$
+#let deactivation_indicator = $#indicator($#spiking_probability < #auxiliary_uniform(t: $t+1$) < #spiking_probability + #deactivation_probability$)$
 
 // Definitions
 #let definition_membrane_potential_limit(t: $t$, i: $i$) = $#non_spiking_indicator_limit (#membrane_potential_limit(t: t, i: i) + bb(E)[#activation_limit(i: $j$) #spiking_indicator_limit(i: $j$)])$

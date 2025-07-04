@@ -39,8 +39,9 @@ Un état absorbant $cal(a)$ se définit donc de la façon suivante :
 $ cal(a) = vec((v_1, 0), (v_2, 0), dots.v, (v_N, 0)), space forall v_i < theta. $
 
 === États presque-absorbants
-Autour de ces états absorbants existent aussi des états qui mènent presque-sûrement vers ces états absorbants en temps fini. Nous les appellerons les états _presque-absorbants_. C'est le cas par exemple des états où aucun neurone n'est en capacité de spiker. En temps fini, les neurones vont se désactiver un à un jusqu'à atteindre l'état absorbant.\
-C'est aussi le cas pour un état moins trivial, qui est celui (...)
+Autour de ces états absorbants existent aussi des états qui mènent nécessairement vers un état absorbant après quelques pas de temps. Nous les appellerons les états _presque-absorbants_.\
+C'est le cas par exemple des systèmes où aucun neurone n'est en capacité de spiker où tous les potentiels de membrane sont inférieurs à #max_potential. En temps fini, les neurones vont se désactiver un à un jusqu'à atteindre l'état absorbant.\
+Un autre exemple est celui du système ayant deux neurones actifs dans la couche #max_potential, mais dont le reste des neurones se trouvent éparpillés dans les couches inférieures à $#max_potential - 2$. Après les deux spikes, le système se retrouve dans l'état précédent, où aucun neurone ne peut émettre de spike.
 
 === Définition de l'espace absorbant
 #let absorbing_space = $cal(A)$

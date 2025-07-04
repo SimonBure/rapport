@@ -12,18 +12,23 @@ Par exemple, pour un système contenant $N=10$ neurones dans les bonnes configur
 
 
 == Mesure empirique
-Pour représenter le système autrement, nous introduisons sa mesure empirique, $ mu_t^N = 1/N sum_(i=1)^N delta_((V_t^i, A_t^i)). $
+// Variables
+#let mesure_empirique(state: $x$, v: $v$, a: $a$) = $#state^N_((#v, #a))$
+#let mesure_couche(state: $x$, v: $v$) = mesure_empirique(state: state, v: v, a: $dot$)
 
-Si le système se trouve dans l'état $x$, nous définissons la mesure de comptage du nombre de neurones dans l'état $(v, a)$ par :
-$ forall u in {0, dots, theta} "et " f in {0, 1},\ mu_x (v, f) = sum_(i=1)^N bold(1)_(v_i = v)bold(1)_(a_i = a). $ // écrire avec des mesures ponctuelles ?
-Écrit avec des mesures de Dirac : $ mu_x (v, a) = 1/N sum_(i=1)^N delta_((V_t^i, A_t^i)) (v, a). $
-$ mu_x (v, dot) = sum_(i=1)^N delta_((V_t^i, A_t^i)) (v, 0) + delta_((V_t^i, A_t^i)) (v, 1). $
+La mesure empirique associée à une chaîne de Markov permet de représenter d'une nouvelle façon notre système de neurones. Cette représentation se focalise sur les _couches_ de potentiel de membrane plutôt que sur les neurones individuels (total de $#max_potential + 1$ couches).\
+En language classique, notre mesure empirique permet de compter le nombre de neurones présent à une couche $v$ et dans un état d'activation $a$ quelconques.\
+Dans le cas présent, la mesure empirique est elle-même une chaîne de Markov définie en plus sur un espace d'états plus petit. L'explication sera donnée un peu plus tard.
 
-// À réécrire
-Cette représentation permet de réduire la taille de l'espace $cal(X)$ des états possibles en considérant tous les neurones comme identiques et en prenant en compte que le nombre total de neurones est fixé à $N$. En utilisant un peu de combinatoire, nous obtenons désormais $ abs(cal(X)) = vec(N - 2theta + 1, 2theta + 1). $ (nombre de représentation possible de n étoiles avec m barres)
+Soit $x$ un état arbitraire de notre système à $N$ neurones.En notant #mesure_empirique(), la mesure empirique associée à notre système de neurones stochastiques en interaction, nous écrivons la définition suivante, pour tout $v in #space_value_potential$ et tout $a in #space_value_activation$ :
+#numbered_equation($ #mesure_empirique() = sum_(i=1)^N #dirac($(#membrane_potential(), #activation())$) (v, a). $, <def_mesure_empirique>)
 
-Pour simplifier la notation, nous noterons $x_(v, f) = mu_x (v, f)$ et $x_(v, dot) = mu_x(v, dot)$. 
-Pour parler plus simplement, nous utiliserons le terme de _couche_ $v$ pour désigner les neurones ayant un potentiel de membrane $V_t^i = v$, càd $mu_x (v, dot) "ou" x_(v, dot)$.
+Introduisons également la notation suivante #mesure_couche(), qui nous sera utile pour compter le nombre de neurones possédant un potentiel de membrane $v$, toute variable d'activation confondue. Elle se définit par
+#numbered_equation($ #mesure_couche() = sum_(i = 1)^N #dirac($(#membrane_potential(), #activation())$) (v, 0) + #dirac($(#membrane_potential(), #activation())$) (v, 1). $, <def_mesure_couche>)
+ 
+Pour compter le nombre d'états possibles, il suffit de se référer au problème canonique de combinatoire : le nombre de façon de séparer un nombre $n$ de $star$ par un nombre $m$ de $|$. Cela donne
+$ abs(cal(X)) = vec(N - 2theta + 1, 2theta + 1). $
+#todo("Donner exemple avec 5 étoiles et 2 barres ?")
 
 == Espace absorbant
 === États absorbants

@@ -43,13 +43,30 @@ Autour de ces états absorbants existent aussi des états qui mènent presque-s�
 C'est aussi le cas pour un état moins trivial, qui est celui (...)
 
 === Définition de l'espace absorbant
-Nous notons $cal(A)$, l'*espace rassemblant les états absorbants et presque-absorbants* :
-$ cal(A) = union.big_(k=0)^theta A_k, $ avec $ cal(A)_k = {X in cal(X) : space sum_(l = k)^theta mu (l, 1) <= theta - k } space forall k in {1, dots}, $
-et le cas particulier suivant :
-$ cal(A)_0 = {X in cal(X) : mu(theta, 0) + sum_(l=0)^theta mu(l, 1) < theta}. $
+#let absorbing_space = $cal(A)$
+Nous notons #absorbing_space, l'*espace rassemblant les états absorbants et presque-absorbants*.\
+#absorbing_space désigne les états à partir desquels le système est déjà absorbé ou finira nécessairement par l'être en un temps fini. Autrement dit, ce sont des configurations où l'activité neuronale est insuffisante pour maintenir une dynamique soutenue : la chaîne de Markov évolue alors inévitablement vers un état stable et inactif.\
 
+#let absorbing_subspace(k: $k$) = $attach(#absorbing_space, br: #k)$
+Pour chaque couche $k$ du système de neurones, nous allons définir un sous-ensemble #absorbing_subspace() et définir #absorbing_space de la façon suivante :
+$ #absorbing_space = union.big_(k=0)^theta #absorbing_subspace(). $
 
-Étudions maintenant l'irréductibilité de la chaîne de Markov sur cet espace $cal(A)^complement$.
+Chaque sous-ensemble #absorbing_subspace() impose une contrainte sur le nombre de neurones actifs dans les couches $l <= k$, de façon à ce que le système ne puisse pas se maintenir dans le temps et finisse nécessairement par tomber dans un état réellement absorbant.\
+Définissons à présent les #absorbing_subspace(). $forall k <= #max_potential$ :
+$ #absorbing_subspace() = {X in #chain_space : space sum_(l = k)^theta mu (l, 1) <= theta - k }. $
+Pour $k = 0$, nous avons le cas particulier suivant :
+$ #absorbing_subspace(k: $0$) = {X in #chain_space : mu(theta, 0) + sum_(l=0)^theta mu(l, 1) < theta}. $
+ 
+#let complement_absorbing_space = $attach(#absorbing_space, tr: complement)$
+Ce que nous voulons pour représenter un groupe de neurones impliqué dans une tâche de mémorisation à court terme, c'est qu'ils puissent conjointement soutenir une activité neuronale sur un temps arbitrairement long. L'interruption de cette activité, traduirait une perturbation de cette mémorisation, et donc un oubli de l'information d'intérêt.\
+Nous allons petit à petit définir ce que "soutenir une activité neuronale sur un temps arbitrairement long" signifie en termes mathématiques.\
+Tout d'abord, cela signifie que la chaîne de Markov représentant notre système de neurones, ne doit pas être absorbée sur la fenêtre temporelle #time_window sur laquelle nous l'étudions. Ensuite, cela veut dire que sur #time_window, #chain() doit être capable d'émettre en continu des potentiels d'action :
+
+Pour modéliser la fonction de mémoire court-terme, nous étudierons notre chaîne de Markov neuronale sur l'espace complémentaire #complement_absorbing_space. , où elle pourra effectivement connaître une activité de spikes indéfiniment. Mais cela n'est pas suffisant
+
+#todo("TERMINER L'INTERPRÉTATION MÉMORIELLE & PLACER AU BON ENDROIT")
+
+Étudions maintenant l'irréductibilité de la chaîne de Markov sur cet espace .
 
 == Irréductibilité
 === États transitoires et espace transitoire

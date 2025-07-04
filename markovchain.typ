@@ -1,3 +1,8 @@
+#import "rules.typ": *
+#import "global_variables.typ": *
+// Rule to avoid references error in sub-chapters when compiling local file
+#show: no-ref
+
 == Espace des états dans lequel évolue la chaîne
 Chaque neurone peut prendre des valeurs dans l'espace ${0,1,...,theta}times{0,1}$. Le nombre d'état possible est ainsi $2(theta + 1)$. Pour un système à N neurones évoluant dans l'espace $cal(X) = ({0,1,...,theta}times{0,1})^N$, le nombre d'états est donc $abs(cal(X)) = 2(theta + 1)N$.
 
@@ -5,10 +10,14 @@ Chaque neurone peut prendre des valeurs dans l'espace ${0,1,...,theta}times{0,1}
 Soit $x in cal(X)$ un état possible du système de neurones. Nous notons $ x = vec(x_1, dots.v, x_N) "avec" x_i = (v_i, a_i). $ Nous avons bien sûr $x_i in {0, 1, dots, theta}times{0, 1}, space forall i in {1, dots, N}$.\
 Depuis cet état $x$, nous définissons trois transitions élémentaires possibles, vers un état $y in cal(X)$ :
 - *Spike inefficace menant à l'activation d'un neurone* : notons $i$ l'indice du neurone effectuant le spike. La transition suivante survient avec probabilité $beta$ : $ vec((v_1, a_1), (v_2, a_2), dots.v, (v_i, a_i) = (theta, 0), dots.v, (v_N, a_N)) --> vec((v_1, a_1), (v_2, a_2), dots.v, (v_i, a_i) = (0, 1), dots.v, (v_N, a_N)). $
-- *Désactivation d'un neurone* : ici aussi, $i$ est l'indice $i$ du neurone se désactivant. Le système subit la transition suivante avec probabilité $lambda$, $ vec((v_1, a_1), dots.v, (v_i, a_i), dots.v, (v_N, a_N)) --> vec((v_1, a_1), dots.v, (v_i, a_i), dots.v, (u_N, f_N)). $
-- *Spike efficace* : ici encore, nous notons $i$ l'indice du neurone effectuant le spike. On écrit la transition la façon suivante, $ vec((v_1, a_1), dots.v, (theta, 1), dots.v, (v_N, a_N)) --> vec(([v_1 + 1] and theta, a_1), dots.v, (0, 1), dots.v, ([v_N +1] and theta, a_N)) "avec probabilité "beta. $
+
+- *Désactivation d'un neurone* : ici aussi, $i$ est l'indice $i$ du neurone se désactivant. Le système subit la transition suivante avec probabilité $lambda$, $ vec((v_1, a_1), dots.v, (v_i, a_i) = (v_i, 1), dots.v, (v_N, a_N)) --> vec((v_1, a_1), dots.v, (v_i, a_i) = (v_i, 0), dots.v, (u_N, f_N)). $
+
+- *Spike efficace* : ici encore, nous notons $i$ l'indice du neurone effectuant le spike. La transition survient avec probabilité #spiking_probability, et s'écrit comme suit :
+$ vec((v_1, a_1), dots.v, (theta, 1), dots.v, (v_N, a_N)) --> vec(([v_1 + 1] and theta, a_1), dots.v, (0, 1), dots.v, ([v_N +1] and theta, a_N)). $
+
 Ces trois transitions élémentaires sont *mutuellement exclusives*, c'est-à-dire que, dans un même intervalle de temps (entre $t$ et $t+1$), un neurone d'indice $i$ ne peut pas se désactiver puis faire une spike inefficace (ou bien effectuer un spike efficace puis se désactiver). Par contre, les $N$ neurones du système dans son ensemble peuvent tout à fait tous, ou en partie, subir une transition de façon indépendante. 
-Par exemple, pour un système contenant $N=10$ neurones dans les bonnes configuration, nous pourrions tout à fait avoir $3$ spikes efficaces, $0$ spike inefficace, et $5$ désactivations.
+Par exemple, pour un système contenant $N=10$ neurones dans les bonnes configuration, nous pourrions tout à fait avoir $3$ spikes efficaces, $0$ spike inefficace, et $5$ désactivations pendant le même intervalle temporel.
 
 
 == Mesure empirique
@@ -72,6 +81,7 @@ Pour modéliser la fonction de mémoire court-terme, nous étudierons notre cha�
 == Irréductibilité
 === États transitoires et espace transitoire
 Certains états du système de neurones ne font pas partie de $cal(A)^complement$ mais ne sont pourtant pas atteignables à partir d'autres états non-absorbants. Nous appellerons les états de ce types les états _transitoires_. Le seul moyen pour notre système de se trouver dans un état transitoire, c'est de commencer dans cet état via les conditions initiales.\
+
 Pour illustrer notre propos, prenons l'état ne contenant aucun neurone dans la couche $0$ et tous les neurones activés dans la couche $theta$, c'est-à-dire $x$ tel que $x_(0, dot) = 0$ et $x_(theta, 1) = N$. Comme il possède tous ses neurones capables de spiker, c'est bien un état qui n'est pas absorbant. Il est pourtant transitoire car après son premier spike, et pour toujours après, il y aura toujours un neurone dans la couche $0$, par définition des spikes. Autre exemple : l'état tel que $x_(theta, 1) = N - 1$ et $x_(0, 1) = 1$ est aussi transitoire. En fait, tout état qui possède plus de $N- theta$ neurones dans une de ses couches est transitoire. Cela est dû au fait qu'il n'est possible de rassembler au maximum que $N - theta$ neurones dans la couche $theta$. À cause des $theta + 1$ couches, il faut un nombre de spikes égal à $theta$ pour amener tous les neurones dans la couche $theta$. Cependant, les $theta$ spikes qui viennt d'être effectués entraînent la dispersion de $theta$ neurones  dans les couches inférieures (de $0$ à $theta - 1$).\
 Nous définissons donc l'*ensemble des états transitoires* comme suit :
 $ cal(T) = {x in cal(X) : x_(0, dot) = 0} union {x in cal(X) : x_(v, dot) > N - theta, forall v = 0, dots, theta}. $\

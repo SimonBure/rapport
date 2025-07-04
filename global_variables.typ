@@ -2,8 +2,9 @@
 #let integers_without_zero = $attach(#integers, tr: *)$
 #let reals = $bb(R)$
 #let expectation(u) = $bb(E)[#u]$
-#let expectation_absolute(u) = $bb(E)abs(#u)$
-#let indicator(e) = $bold(1)_({#e})$
+#let expectation_absolute(variable) = $bb(E)abs(#variable)$
+#let indicator(event) = $bold(1)_({#event})$
+#let dirac(state) = $delta_#state$
 
 #let max_potential = $theta$
 #let spiking_probability = $beta$

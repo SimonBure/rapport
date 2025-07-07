@@ -16,8 +16,6 @@
 
 #let network_contributions(t: $t$, i: $i$) = $#activation(t: t, i: i)#spiking_indicator(i: i)$
 #let network_contributions_limit(t: $t$, i: $i$) = $#activation_limit(t: t, i: i)#spiking_indicator_limit(i: i)$
-
-#let potential_limit_dynamics = $#membrane_potential_limit(t: $t+1$) = #non_spiking_indicator_limit (#membrane_potential_limit() + #expectation(network_contributions()))$
 #let non_spiking_indicator_limit = $#indicator($#auxiliary_uniform(t: $t+1$) > #spiking_function(v: membrane_potential_limit())$)$
 
 
@@ -29,7 +27,9 @@ X_0^N = vec((v, a), (v, a), dots.v, (v, a)). $
 
 Comme les neurones sont indiscernables, nous pouvons les compter simplement et au lieu d'écrire $sum_vec(j = 0, j != i)^N$, écrire directement $sum_(j = 1)^N$.
 
-Avec le modèle utilisé dans les parties précédentes, lorsque nous ferons tendre $N$ vers l'infini, la somme $sum_(j = 1)^N #activation()#spiking_indicator()$ explosera. Pour conserver l'intégrité du modèle, nous allons ajouter un facteur $1/N$ pour normaliser cette somme.
+#let space_potentiel_mf = $attach(#space_potentiel, tr: N)$
+Avec le modèle utilisé dans les parties précédentes, lorsque nous ferons tendre $N$ vers l'infini, la somme $sum_(j = 1)^N #activation()#spiking_indicator()$ explosera. Pour conserver l'intégrité du modèle, nous allons ajouter un facteur $1/N$ pour normaliser cette somme.\
+Conséquemment à l'ajout de ce terme, l'espace de #membrane_potential() se voit altéré. De $#space_potentiel = #space_value_potential$, discret et incrémenté de 1, il deviendra incrémenté de $1/N$, soit $#space_potentiel_mf = {0, 1/N, 2/N, dots, 1, dots, theta}$. $N$ allant à l'infini, l'espace #space_potentiel_mf deviendra *continu*.
 
 Ainsi l'équation de la dynamique du potentiel de membrane,
 #potential_dynamics
@@ -38,7 +38,7 @@ $ #membrane_potential(t: $t+1$) = #non_spiking_indicator (#membrane_potential() 
 
 
 == Processus limites
-Nous allons noter #membrane_potential_limit() et #activation_limit() les valeurs des *processus limites* de potentiel de membrane et d'activation pour le neurone $i$ au temps $t$. Pour suivre cette notation, posons également que $#network_contributions_limit() = #activation_limit()#spiking_indicator_limit()$.
+Nous allons noter #membrane_potential_limit() et #activation_limit() les valeurs des *processus limites* de potentiel de membrane et d'activation pour le neurone $i$ au temps $t$. Remarquons de suite que les processus #membrane_potential() et #membrane_potential_limit() partagent tous les deux la même variable #auxiliary_uniform().
 
 La dynamique du processus limite de l'activation de la synapse du neurone $i$ reste définie de façon similaire que la dynamique du processus fini :
 $ #activation_limit(t: $t+1$) = #spiking_indicator_limit() + #non_spiking_indicator_limit #activation_limit() (1 - #deactivation_indicator). $ 
@@ -47,15 +47,16 @@ Cependant, la variable aléatoire #membrane_potential_limit() se voit modifiée 
 $ 1/N sum_(i=0)^N #network_contributions_limit() ->_(N -> oo) bb(E)[#network_contributions_limit()]. $
 
 Ainsi la dynamique du processus limite du potentiel de membrane s'écrit :
-$ #potential_limit_dynamics. $
-
-Faisons la remarque que les processus #membrane_potential() et #membrane_potential_limit() partagent tous les deux la même variable #auxiliary_uniform().
+$ #membrane_potential_limit(t: $t+1$) = #non_spiking_indicator_limit (#membrane_potential_limit() + expectation(#network_contributions_limit())). $
 
 #let unknown_expectation(t: $t$) = $gamma_#t$
-#let max_potential_limit = $K gamma$
+#let max_potential_limit = $K^gamma$
 #let space_value_potential_limit = ${0, gamma, 2 gamma, dots, #max_potential_limit}$
 La variable aléatoire #membrane_potential() avait été définie comme à valeurs dans $#space_value_potential subset bb(N)$. Or nous voyons désormais que #membrane_potential_limit() ne respecte plus cette définition, notamment car #expectation(network_contributions_limit()) est un *nombre réel* et dépendant du temps $t$.\
-Supposons que $#unknown_expectation() = #expectation(network_contributions_limit())$. Intuitivement, cela signifie qu'à chaque pas de temps, le potentiel de membrane limite #membrane_potential_limit() augmente d'une quantité fixée #unknown_expectation(), dépendante du temps.\
+Supposons que $#unknown_expectation() = #expectation(network_contributions_limit())$. Intuitivement, cela signifie qu'à chaque pas de temps, le potentiel de membrane limite #membrane_potential_limit() augmente d'une quantité fixée #unknown_expectation(), inconnue et dépendante du temps.\
+Cependant, comme nous travaillons sur une fenêtre temporelle fixée #time_window, les valeurs de #unknown_expectation() sont fixées, et au nombre de $T+1$. Notons d'ailleurs #space_potentiel_limite(), l'espace des valeurs prises par #membrane_potential_limit() sur la fenêtre temporelle #time_window.\
+
+/*
 Nous pouvons même calculer la valeur de #unknown_expectation() :
 $ #unknown_expectation() &= bb(E)[#activation_limit()#spiking_indicator_limit()],\
 &= bb(P)(#auxiliary_uniform(t: $t+1$) > #spiking_function(v: membrane_potential_limit())) bb(E)[#activation_limit()|#auxiliary_uniform(t: $t+1$) > #spiking_function(v: membrane_potential_limit())],\
@@ -64,7 +65,6 @@ $ #unknown_expectation() &= bb(E)[#activation_limit()#spiking_indicator_limit()]
 Ce qui nous permet d'écrire la majoration suivante :
 #numbered_equation($ #unknown_expectation() <= #spiking_probability. $, <majoration_gamma_t>)
 
-/*
 Comme nous sommes placés sur une fenêtre temporelle de taille $T$, nous sommes donc en capactié de minorer la valeur de #unknown_expectation().\
 Soit $t^*$ le temps critique où $#unknown_expectation() = 0$, c'est à dire le temps où la chaîne #chain() est absorbée. En effet, $#unknown_expectation() = 0$ implique que tous les neurones du processus limite soient désactivés ou qu'ils soient tous dans une couche inférieure à $K #unknown_expectation()$.\
 Ainsi, 
@@ -81,35 +81,44 @@ Notons #max_potential_limit, la valeur maximale que peut prendre le potentiel de
 $ #max_potential_limit = ceil(#max_potential / gamma_t). $
 */
 
-#let space_max_potential_limit(T: $T$) = $overline(cal(V))_#T$
-Pour terminer, appelons #space_max_potential_limit() l'espace des valeurs possibles pour #max_potential_limit sur un temps donné $T$.
-
 == Existence des processus limites
 Comme les deux processus limites #neuron_limit() prennent leurs valeurs dans des espaces discrets et finis, ils sont tous les deux bien définis. L'existence des processus ne pose ainsi aucun problème, et nous pouvons écrire le théorème suivant :
 
 #theorem("Existence des processus limites")[
-    Pour tout $t in #time_window$, il existe un unique processus #neuron_limit(), associée à #unknown_expectation().
-] <theorem_existence_processus_limite>
+    Pour tout $t in #time_window$, il existe un unique processus #neuron_limit() avec un #unknown_expectation() associé.
+]<theorem_existence_processus_limite>
 
-#theorem("Propagation du chaos")[
-    Étant donné l'existence du processus limite donné dans le @theorem_existence_processus_limite et son #unknown_expectation() associé,
-    $ #expectation_absolute($#membrane_potential() - #membrane_potential_limit()$) + #expectation_absolute($#activation() - #activation_limit()$) <= C_T(epsilon) / sqrt(N). $  
-]
+#theorem([Propagation du chaos avec $phi$ modifiée])[
+    Étant donné l'existence du processus limite donné dans le @theorem_existence_processus_limite et son #unknown_expectation() associé, et une nouvelle fonction $phi^*$, prise lipschitz, et approchant $phi$, nous avons
+    $ #expectation_absolute($#membrane_potential() - #membrane_potential_limit()$) + #expectation_absolute($#activation() - #activation_limit()$) <= C_T (epsilon) / sqrt(N). $
+    $C_T$ est ici une constante qui fait intervenir les #unknown_expectation() et donc qui dépend de la fenêtre temporelle #time_window.
+]<theorem_propagation_chaos>
+
+#corrolary("Convergence des processus finis vers les processus limites")[
+    $ lim_(N -> oo) #expectation_absolute($#membrane_potential() - #membrane_potential_limit()$) + #expectation_absolute($#activation() - #activation_limit()$) = 0, $
+    ce qui revient à dire que, pour tout $i in #indexes_interval$, et pour un $t in #time_interval$, avec $T$ nombre entier positif :
+    $ (#membrane_potential(), #activation()) ->_(N -> oo) (#membrane_potential_limit(), #activation_limit()). $
+]<theoreme_convergence_processus>
+
+#todo("À développer et à terminer")
 
 
 == Convergence vers les processus limites
-Nous allons démontrer que les processus classiques convergent vers les processus limites. Les processus de voltage et d'activation doivent tous deux converger vers leurs processus limites respectifs.\
+#todo("À mettre à jour puisque la preuve s'est effondrée")
+Nous allons démontrer que les processus finis convergent vers les processus limites. Les processus de voltage et d'activation doivent tous deux converger vers leurs processus limites respectifs.\
 Ainsi, si nous définissons la *distance entre les processus de potentiel de membrane* 
 $ #distance_potential() = bb(E)abs(#membrane_potential() - #membrane_potential_limit()), $ ainsi que *distance entre les processus d'activation* 
 $ #distance_activation() = bb(E)abs(#activation() - #activation_limit()), $ nous pouvons écrire la *distance globale* entre le processus de neurone et sa limite comme 
 #numbered_equation($ #distance_globale() = #distance_potential() + #distance_activation(). $, <distance_globale>)
 
-#theorem("Convergence des processus classiques vers les processsus limites")[
+Étant donné @theorem_propagation_chaos, 
+
+#theorem("Convergence des processus finis vers les processsus limites")[
     Pour tout $i in #indexes_interval$, et pour un $t in #time_interval$, avec $T$ nombre entier positif,
     $ (#membrane_potential(), #activation()) ->_(N -> oo) (#membrane_potential_limit(), #activation_limit()), $
     ce qui revient à dire que :
     $ lim #distance_globale() ->_(N -> oo) 0. $
-] <theoreme_convergence_processus>
+]
 
 #proof()[
     Pour prouver le @theoreme_convergence_processus, nous allons  consiste à trouver une majoration de #distance_globale(t: $t+1$) par une fonction de $N$ qui puisse disparaître lorsque $N -> oo$.\
@@ -120,19 +129,22 @@ $ #distance_activation() = bb(E)abs(#activation() - #activation_limit()), $ nous
     + Montrer par récurrence que #distance_globale(t: $t+1$) est bornée par une fonction de $N$ qui tend vers zéro lorsque $N$ tend vers l'infini.
 
     === Majoration de #distance_activation(t: $t+1$)
+    #todo("Afficher correctement l'équation")
     Commençons par majorer #distance_activation(t: $t+1$). De la définition, il vient :
-    $ #distance_activation(t: $t+1$) &= bb(E)abs(#activation(t: $t+1$) - #activation_limit(t: $t+1$))\
-    &= bb(E)underbrace(abs(#spiking_indicator() - #spiking_indicator_limit() + #activation()#non_spiking_indicator (1 - #deactivation_indicator) - #activation_limit()#non_spiking_indicator_limit (1 - #deactivation_indicator)),"= e pour simplifier l'écriture pour les lignes suivantes"). $
+    $ #distance_activation(t: $t+1$) &= bb(E)abs(#activation(t: $t+1$) - #activation_limit(t: $t+1$)),\
+    &= bb(E)abs(#spiking_indicator() - #spiking_indicator_limit()\
+    &+ #activation()#non_spiking_indicator (1 - #deactivation_indicator) - #activation_limit()#non_spiking_indicator_limit (1 - #deactivation_indicator)),\
+    &= expectation(e) "pour simplifier l'écriture pour la suite." $
     
     #let simultaneous_spikes_event = $bold(2)$
     #let alone_spike_event = $bold(1)$
     #let alone_spike_event_def = ${#membrane_potential() < #max_potential xor #membrane_potential_limit() < #max_potential}$
     #let no_spike_event = $bold(0)$
     Remarquons que les trois événements suivants sont disjoints :
-    - L'événement $#simultaneous_spikes_event = {"processus classique et limite spikent simultanément en" t+1}$ peut s'écrire formellement :
+    - L'événement $#simultaneous_spikes_event = {"processus fini et limite spikent simultanément en" t+1}$ peut s'écrire formellement :
         #numbered_equation($ #simultaneous_spikes_event = {0 < #auxiliary_uniform(t: $t+1$) < #spiking_probability} inter {#membrane_potential() = #membrane_potential_limit() = #max_potential}. $, <definition_simultaneous_spikes_event>)
 
-    - L'évévement $#alone_spike_event = {"processus classique ou (exclusif) limite spike en" t+1} = {0 < #auxiliary_uniform(t: $t+1$) < #spiking_probability} inter #alone_spike_event_def.$
+    - L'évévement $#alone_spike_event = {"processus fini ou (exclusif) limite spike en" t+1} = {0 < #auxiliary_uniform(t: $t+1$) < #spiking_probability} inter #alone_spike_event_def.$
 
     - L'événement $#no_spike_event = {"aucun processus ne spike au temps" t+1} = {#auxiliary_uniform(t: $t+1$) > #spiking_probability} union {#membrane_potential() < #max_potential "et" #membrane_potential_limit() < #max_potential}.$
     <evenements_spike>
@@ -168,6 +180,8 @@ $ #distance_activation() = bb(E)abs(#activation() - #activation_limit()), $ nous
         $ #distance_activation(t : $t+1$) <= bb(P)(#alone_spike_event) + bb(P)(#no_spike_event)(1 + #deactivation_probability)#distance_activation(). $, <majoration_distance_activation_2>
     )
 
+    #todo("Adapter la preuve en supposant phi lipschitz")
+
     La probabilité $bb(P)(#alone_spike_event)$ peut s'écrire :
     #numbered_equation($ bb(P)(#alone_spike_event) = bb(P)({0 < #auxiliary_uniform(t: $t+1$) < #spiking_probability} inter #alone_spike_event_def) = #spiking_probability #probability_spike_alone_event. $,
     <majoration_probability_alone_spike_event>
@@ -177,12 +191,13 @@ $ #distance_activation() = bb(E)abs(#activation() - #activation_limit()), $ nous
 
     #let min_distance_processes = $$
     #proposition()[
-        $ #probability_spike_alone_event <= 1/Delta #distance_potential(). $
+        $ #probability_spike_alone_event <= C^N #distance_potential(). $
+        où $C^N = 1 / (min(1/N, abs(#max_potential - sum_(t=L)^(L + K + 1/#spiking_probability) gamma_t)))$
     ] <proposition_majoration_probability_different_voltage>
     #proof[
         Commençons par réécrire #probability_spike_alone_event :
         $ #probability_spike_alone_event = bb(E)[bold(1)_(#alone_spike_event_def)]. $
-        Remarquons ensuite que l'événement $#alone_spike_event_def$ implique que les potentiels de membrane des processus classique et limite sont différents, c'est-à-dire que $#membrane_potential() ≠ #membrane_potential_limit()$.\
+        Remarquons ensuite que l'événement $#alone_spike_event_def$ implique que les potentiels de membrane des processus fini et limite sont différents, c'est-à-dire que $#membrane_potential() ≠ #membrane_potential_limit()$.\
         Par construction, #membrane_potential() et #membrane_potential_limit() ne peuvent prendre que des valeurs discrètes comprises entre zéro et #max_potential. Il en découle que la distance entre les deux potentiels de membrane est nécessairement supérieure ou égale à 1, soit $abs(#membrane_potential() - #membrane_potential_limit()) >= 1$.\
         Ainsi, nous avons :
         $ abs(#membrane_potential() - #membrane_potential_limit()) >= bold(1)_(#alone_spike_event_def),\
@@ -227,7 +242,7 @@ $ #distance_activation() = bb(E)abs(#activation() - #activation_limit()), $ nous
 
     - Si l'événement #alone_spike_event est vérifié, alors seule une des indicatrices d'absence de spike est nulle, soit $#non_spiking_indicator = 0$ ou $#non_spiking_indicator_limit = 0$.\
         Il reste donc dans $bb(E)[f|#alone_spike_event]$ :
-        $ bb(E)[f|#alone_spike_event] = cases(bb(E)abs(#membrane_potential() + 1/N sum_(j=1)^N #network_contributions(i: $j$)) "si le processus limite spike", bb(E)abs(#membrane_potential_limit() + bb(E)[#network_contributions_limit()]) "si le processus classique spike"). $
+        $ bb(E)[f|#alone_spike_event] = cases(bb(E)abs(#membrane_potential() + 1/N sum_(j=1)^N #network_contributions(i: $j$)) "si le processus limite spike", bb(E)abs(#membrane_potential_limit() + bb(E)[#network_contributions_limit()]) "si le processus fini spike"). $
         Dans tous les cas, nous pouvons majorer par #max_potential car #membrane_potential() est borné par #max_potential.\
         *TO-DO Véridique ?*
         $ bb(E)[f|#alone_spike_event] <= #max_potential "par construction". $        

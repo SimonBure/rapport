@@ -3,6 +3,8 @@
 #let reals = $bb(R)$
 #let expectation(u) = $bb(E)[#u]$
 #let expectation_absolute(variable) = $bb(E)abs(#variable)$
+#let expectation_conditional(variable, condition) = expectation($#variable|#condition$)
+#let proba(variable) = $bb(P)(#variable)$
 #let indicator(event) = $bold(1)_({#event})$
 #let dirac(state) = $delta_#state$
 
@@ -20,6 +22,10 @@
 
 #let membrane_potential(t: $t$, i: $i$) = $V_#t^#i$
 #let membrane_potential_limit(t: $t$, i: $i$) = $overline(V)_#t^#i$
+
+// Espaces
+#let space_potentiel = $cal(V)$
+#let space_potentiel_limite(T: $T$) = $overline(cal(V))_#T$
 #let space_value_potential = ${0, 1, dots, #max_potential}$
 #let space_value_activation = ${0, 1}$
 
@@ -32,10 +38,11 @@
 #let neuron_limit(t: $t$, i: $i$) = $(#membrane_potential_limit(t: t, i: i), #activation_limit(t: t, i: i))$
 
 // Indicators
-#let spiking_function(v: membrane_potential()) = $phi.alt(#v)$
-#let spiking_function_limit = $phi.alt(#membrane_potential_limit())$
-#let spiking_function_definition = $phi.alt(v) = #spiking_probability bold(1)_(v >= #max_potential)$
-#let spiking_indicator(i: $i$) = $#indicator($#auxiliary_uniform(t: $t+1$, i: i) <= #spiking_function(v: membrane_potential(i: i))$)$
+#let spiking_function_raw = $phi.alt$
+#let spiking_function(v: membrane_potential()) = $#spiking_function_raw (#v)$
+#let spiking_function_limit = $#spiking_function_raw (#membrane_potential_limit())$
+#let spiking_function_definition = $#spiking_function_raw (v) = #spiking_probability bold(1)_(v >= #max_potential)$
+#let spiking_indicator(t: $t$, i: $i$) = $#indicator($#auxiliary_uniform(t: $#t+1$, i: i) <= #spiking_function(v: membrane_potential(t: t, i: i))$)$
 #let spiking_indicator_limit(i: $i$) = $#indicator($#auxiliary_uniform(t: $t+1$, i: i) <= #spiking_function(v: membrane_potential_limit(i: i))$)$
 #let non_spiking_indicator = $#indicator($#auxiliary_uniform(t: $t+1$) > #spiking_function(v: membrane_potential())$)$
 #let non_spiking_indicator_limit = $#indicator($#auxiliary_uniform(t: $t+1$) > #spiking_function(v: membrane_potential_limit())$)$

@@ -75,25 +75,6 @@ Le potentiel limite #membrane_potential_limit() se comporte de la même façon q
 Notons #max_potential_limit, la valeur maximale, qui dépendra des #unknown_expectation(), que peut prendre le potentiel de membrane limite. #max_potential_limit correspond au nombre minimal de pas nécessaires à #membrane_potential_limit() pour dépasser #max_potential. #max_potential_limit est donc un *entier positif*, défini de la façon suivante : 
 $ #max_potential_limit = #max_potential_limit_val. $
 
-/*
-Nous pouvons même calculer la valeur de #unknown_expectation() :
-$ #unknown_expectation() &= bb(E)[#activation_limit()#spiking_indicator_limit()],\
-&= bb(P)(#auxiliary_uniform(t: $t+1$) > #spiking_function(v: membrane_potential_limit())) bb(E)[#activation_limit()|#auxiliary_uniform(t: $t+1$) > #spiking_function(v: membrane_potential_limit())],\
-&= #spiking_function(v: membrane_potential_limit()) bb(E)[#activation_limit()]. $
-
-Ce qui nous permet d'écrire la majoration suivante :
-#numbered_equation($ #unknown_expectation() <= #spiking_probability. $, <majoration_gamma_t>)
-
-Comme nous sommes placés sur une fenêtre temporelle de taille $T$, nous sommes donc en capactié de minorer la valeur de #unknown_expectation().\
-Soit $t^*$ le temps critique où $#unknown_expectation() = 0$, c'est à dire le temps où la chaîne #chain() est absorbée. En effet, $#unknown_expectation() = 0$ implique que tous les neurones du processus limite soient désactivés ou qu'ils soient tous dans une couche inférieure à $K #unknown_expectation()$.\
-Ainsi, 
-$ t^* = inf{t > 0 : #unknown_expectation() = 0}. $
-
-Comme nous travaillons en temps discret, cela nous permet de maintenir la valeur de $gamma_t$ supérieure à un certain seuil $epsilon > 0$ pour tout $t < t^*$.\
-D'après @majoration_gamma_t, nous avons donc pour toute valeur de $t < t^*$,
-#numbered_equation($ epsilon <= gamma_t <= #spiking_probability. $, <encadrement_gamma_t>)
-*/
-
 
 == Existence des processus limites
 Comme les deux processus limites #neuron_limit() prennent leurs valeurs dans des espaces discrets et finis, ils sont tous les deux bien définis. L'existence des processus ne pose ainsi aucun problème, et nous pouvons écrire le théorème suivant :
@@ -102,45 +83,39 @@ Comme les deux processus limites #neuron_limit() prennent leurs valeurs dans des
     Pour tout $t in #time_window$, il existe un unique processus #neuron_limit() avec un #unknown_expectation() associé.
 ]<theorem_existence_processus_limite>
 
-#theorem([Propagation du chaos avec $phi$ modifiée])[
-    Étant donné l'existence du processus limite donné dans le @theorem_existence_processus_limite et son #unknown_expectation() associé, et une nouvelle fonction $phi^*$, prise lipschitz, et approchant $phi$, nous avons
-    $ #expectation_absolute($#membrane_potential() - #membrane_potential_limit()$) + #expectation_absolute($#activation() - #activation_limit()$) <= C_T (epsilon) / sqrt(N). $
+#todo("À valider + développer si besoin preuve existence")
+
+
+== Convergence vers les processus limites
+#todo("À mettre à jour puisque la preuve s'est effondrée")
+
+#let spiking_function_lip_raw = $phi.alt^*$
+#theorem([Propagation du chaos avec une fonction de spiking modifiée])[
+    Étant donné l'existence du processus limite donné dans le @theorem_existence_processus_limite et son #unknown_expectation() associé, et une nouvelle fonction #spiking_function_lip_raw, prise lipschitz, et approchant #spiking_function_raw, nous avons
+    $ #expectation_absolute($#membrane_potential() - #membrane_potential_limit()$) + #expectation_absolute($#activation() - #activation_limit()$) <= C_T / sqrt(N). $
     $C_T$ est ici une constante qui fait intervenir les #unknown_expectation() et donc qui dépend de la fenêtre temporelle #time_window.
 ]<theorem_propagation_chaos>
 
+Le @theorem_propagation_chaos possède un corollaire direct (@theoreme_convergence_processus), formalisant la convergence des processus finis vers leur version limite.
 #corrolary("Convergence des processus finis vers les processus limites")[
     $ lim_(N -> oo) #expectation_absolute($#membrane_potential() - #membrane_potential_limit()$) + #expectation_absolute($#activation() - #activation_limit()$) = 0, $
     ce qui revient à dire que, pour tout $i in #indexes_interval$, et pour un $t in #time_interval$, avec $T$ nombre entier positif :
     $ (#membrane_potential(), #activation()) ->_(N -> oo) (#membrane_potential_limit(), #activation_limit()). $
 ]<theoreme_convergence_processus>
 
-#todo("À développer et à terminer")
+#proof([du @theorem_propagation_chaos])[
+    Commençons par introduire quelques notations. Appelons *distance entre les processus de potentiel de membrane*, la quantité
+    $ #distance_potential() = bb(E)abs(#membrane_potential() - #membrane_potential_limit()), $ ainsi que *distance entre les processus d'activation*, le nombre
+    $ #distance_activation() = bb(E)abs(#activation() - #activation_limit()). $
+    Enfin nous pouvons écrire la *distance globale* entre le processus de neurone et sa limite comme 
+    #numbered_equation($ #distance_globale() = #distance_potential() + #distance_activation(). $, <distance_globale>)
 
+    #todo("Définir le nouveau phi")
 
-== Convergence vers les processus limites
-#todo("À mettre à jour puisque la preuve s'est effondrée")
-Nous allons démontrer que les processus finis convergent vers les processus limites. Les processus de voltage et d'activation doivent tous deux converger vers leurs processus limites respectifs.\
-Ainsi, si nous définissons la *distance entre les processus de potentiel de membrane* 
-$ #distance_potential() = bb(E)abs(#membrane_potential() - #membrane_potential_limit()), $ ainsi que *distance entre les processus d'activation* 
-$ #distance_activation() = bb(E)abs(#activation() - #activation_limit()), $ nous pouvons écrire la *distance globale* entre le processus de neurone et sa limite comme 
-#numbered_equation($ #distance_globale() = #distance_potential() + #distance_activation(). $, <distance_globale>)
-
-Étant donné @theorem_propagation_chaos, 
-
-#theorem("Convergence des processus finis vers les processsus limites")[
-    Pour tout $i in #indexes_interval$, et pour un $t in #time_interval$, avec $T$ nombre entier positif,
-    $ (#membrane_potential(), #activation()) ->_(N -> oo) (#membrane_potential_limit(), #activation_limit()), $
-    ce qui revient à dire que :
-    $ lim #distance_globale() ->_(N -> oo) 0. $
-]
-
-#proof()[
-    Pour prouver le @theoreme_convergence_processus, nous allons  consiste à trouver une majoration de #distance_globale(t: $t+1$) par une fonction de $N$ qui puisse disparaître lorsque $N -> oo$.\
-
-    La trame de la preuve est la suivante :
-    + Trouver des majorations de #distance_activation(t: $t+1$) et #distance_potential(t: $t+1$) qui utilisent #distance_globale().
-    + Utiliser ces majorations pour trouver une majoration de #distance_globale(t: $t+1$) en fonction de #distance_globale() et d'une fonction de $N$ qui pourra disparaître lorsque $N$ deviendra grand.
-    + Montrer par récurrence que #distance_globale(t: $t+1$) est bornée par une fonction de $N$ qui tend vers zéro lorsque $N$ tend vers l'infini.
+    // La trame de la preuve est la suivante :
+    // + Trouver des majorations de #distance_activation(t: $t+1$) et #distance_potential(t: $t+1$) qui utilisent #distance_globale().
+    // + Utiliser ces majorations pour trouver une majoration de #distance_globale(t: $t+1$) en fonction de #distance_globale() et d'une fonction de $N$ qui pourra disparaître lorsque $N$ deviendra grand.
+    // + Montrer par récurrence que #distance_globale(t: $t+1$) est bornée par une fonction de $N$ qui tend vers zéro lorsque $N$ tend vers l'infini.
 
     === Majoration de #distance_activation(t: $t+1$)
     #todo("Afficher correctement l'équation")
@@ -152,21 +127,23 @@ $ #distance_activation() = bb(E)abs(#activation() - #activation_limit()), $ nous
     
     #let simultaneous_spikes_event = $bold(2)$
     #let alone_spike_event = $bold(1)$
-    #let alone_spike_event_def = ${#membrane_potential() < #max_potential xor #membrane_potential_limit() < #max_potential}$
+    #let alone_spike_event_def = ${min(#spiking_function(v: membrane_potential()), #spiking_function(v: membrane_potential_limit())) < #auxiliary_uniform(t: $t+1$) < max(#spiking_function(v: membrane_potential()), #spiking_function(v: membrane_potential_limit()))}$
     #let no_spike_event = $bold(0)$
     Remarquons que les trois événements suivants sont disjoints :
-    - L'événement $#simultaneous_spikes_event = {"processus fini et limite spikent simultanément en" t+1}$ peut s'écrire formellement :
-        #numbered_equation($ #simultaneous_spikes_event = {0 < #auxiliary_uniform(t: $t+1$) < #spiking_probability} inter {#membrane_potential() = #membrane_potential_limit() = #max_potential}. $, <definition_simultaneous_spikes_event>)
+    - L'événement $#simultaneous_spikes_event = {"processus finis et limites spikent simultanément en" t+1}$ peut s'écrire formellement :
+        #numbered_equation($ #simultaneous_spikes_event = {#auxiliary_uniform(t: $t+1$) < min(#spiking_function(v: membrane_potential()), #spiking_function(v: membrane_potential_limit()))}. $, <definition_simultaneous_spikes_event>)
 
-    - L'évévement $#alone_spike_event = {"processus fini ou (exclusif) limite spike en" t+1} = {0 < #auxiliary_uniform(t: $t+1$) < #spiking_probability} inter #alone_spike_event_def.$
+    - L'évévement $#alone_spike_event = {"processus fini ou (exclusif) limite spike en" t+1}$ qui s'écrit formellement :
+    $ #alone_spike_event_def. $
 
-    - L'événement $#no_spike_event = {"aucun processus ne spike au temps" t+1} = {#auxiliary_uniform(t: $t+1$) > #spiking_probability} union {#membrane_potential() < #max_potential "et" #membrane_potential_limit() < #max_potential}.$
-    <evenements_spike>
+    - L'événement $#no_spike_event = {"aucun processus ne spike au temps" t+1}$, soit :
+    $ {#auxiliary_uniform(t: $t+1$) > max(#spiking_function(v: membrane_potential()), #spiking_function(v: membrane_potential_limit()))}. $
 
     Nous pouvons donc écrire
     #numbered_equation(
-        $ #distance_activation(t: $t+1$) =bb(P)(#simultaneous_spikes_event)bb(E)[e|#simultaneous_spikes_event] + bb(P)(#alone_spike_event)bb(E)[e|#alone_spike_event] + bb(P)(#no_spike_event)bb(E)[e|#no_spike_event]. $, <majoration_distance_activation>
+        $ #distance_activation(t: $t+1$) =bb(P)(#simultaneous_spikes_event)bb(E)[e|#simultaneous_spikes_event] + #proba(alone_spike_event)bb(E)[e|#alone_spike_event] + #proba(no_spike_event)bb(E)[e|#no_spike_event]. $, <majoration_distance_activation>
     )
+    Observons à présent les implications de chaque événement.
 
     - Si #simultaneous_spikes_event est vérifié, alors seules les indicatrices de spike valent un, et les autres sont nulles, soit $#spiking_indicator() = #spiking_indicator_limit() = 1$ et donc forcément $#non_spiking_indicator = #non_spiking_indicator_limit = 0$.\
         Dans ce cas, très simplement, 
@@ -188,68 +165,41 @@ $ #distance_activation() = bb(E)abs(#activation() - #activation_limit()), $ nous
         &<= #distance_activation() + #distance_activation() bb(P)(#spiking_probability < #auxiliary_uniform(t: $t+1$) < #spiking_probability + #deactivation_probability),\
         &<= (1+ #deactivation_probability) #distance_activation(). $        
 
-    #let probability_spike_alone_event = $bb(P)(#alone_spike_event_def)$
     En reprenant @majoration_distance_activation, nous aboutissons à :
     #numbered_equation(
-        $ #distance_activation(t : $t+1$) <= bb(P)(#alone_spike_event) + bb(P)(#no_spike_event)(1 + #deactivation_probability)#distance_activation(). $, <majoration_distance_activation_2>
+        $ #distance_activation(t : $t+1$) <= #proba(alone_spike_event) + #proba(no_spike_event) (1 + #deactivation_probability)#distance_activation(). $, <majoration_distance_activation_2>
     )
-
     #todo("Adapter la preuve en supposant phi lipschitz")
+    #let probability_spike_alone_event = proba(alone_spike_event_def)
+    #let distance_spiking_functions = $abs(#spiking_function(v: membrane_potential()) - #spiking_function(v: membrane_potential_limit()))$
+    Nous pouvons aller plus loin en écrivant #probability_spike_alone_event comme :
+    $ #proba(alone_spike_event_def) &= max(#spiking_function(v: membrane_potential()), #spiking_function(v: membrane_potential_limit())),\
+    &= #distance_spiking_functions. $
+    Ainsi, en utilisant la lipschitzianité de #spiking_function_raw :
+    #numbered_equation($ #proba(alone_spike_event) <= L #distance_activation(). $,<majoration_probability_alone_spike_event>)
 
-    La probabilité $bb(P)(#alone_spike_event)$ peut s'écrire :
-    #numbered_equation($ bb(P)(#alone_spike_event) = bb(P)({0 < #auxiliary_uniform(t: $t+1$) < #spiking_probability} inter #alone_spike_event_def) = #spiking_probability #probability_spike_alone_event. $,
-    <majoration_probability_alone_spike_event>
-    )
+    #todo("Utiliser la bonne constante de lipschitz")
 
-    Remarquons la proposition suivante, qui nous permet d'introduire #distance_potential() dans la majoration de $bb(P)(#alone_spike_event)$.
-
-    #let min_distance_processes = $$
-    #proposition()[
-        $ #probability_spike_alone_event <= C^N #distance_potential(). $
-        où $C^N = 1 / (min(1/N, abs(#max_potential - sum_(t=L)^(L + K + 1/#spiking_probability) gamma_t)))$
-    ] <proposition_majoration_probability_different_voltage>
-    #proof[
-        Commençons par réécrire #probability_spike_alone_event :
-        $ #probability_spike_alone_event = bb(E)[bold(1)_(#alone_spike_event_def)]. $
-        Remarquons ensuite que l'événement $#alone_spike_event_def$ implique que les potentiels de membrane des processus fini et limite sont différents, c'est-à-dire que $#membrane_potential() ≠ #membrane_potential_limit()$.\
-        Par construction, #membrane_potential() et #membrane_potential_limit() ne peuvent prendre que des valeurs discrètes comprises entre zéro et #max_potential. Il en découle que la distance entre les deux potentiels de membrane est nécessairement supérieure ou égale à 1, soit $abs(#membrane_potential() - #membrane_potential_limit()) >= 1$.\
-        Ainsi, nous avons :
-        $ abs(#membrane_potential() - #membrane_potential_limit()) >= bold(1)_(#alone_spike_event_def),\
-        "et donc" bb(E)[bold(1)_(#alone_spike_event_def)] <= bb(E)abs(#membrane_potential() - #membrane_potential_limit()) = #distance_potential(). $
-    ]
-
-    Si nous appliquons la @proposition_majoration_probability_different_voltage à @majoration_probability_alone_spike_event, nous obtenons :
-    #numbered_equation(
-        $ bb(P)(#alone_spike_event) <= #spiking_probability #distance_potential(). $, <majoration_probability_alone_spike_event_final>
-    )
-    Introduisons dans @majoration_distance_activation_2 et il vient :
-    #numbered_equation(
-        $ #distance_activation(t: $t+1$) <= #spiking_probability #distance_potential() + bb(P)(#no_spike_event)(1 + #deactivation_probability)#distance_activation(). $, <majoration_distance_activation_3>
-    )
-
-    Concernant $bb(P)(#no_spike_event)$, nous pouvons tout simplement la majorer par $1$. Nous obtenons finalement :
-    $ #distance_activation(t: $t+1$) <= #spiking_probability #distance_potential() + (1 + #deactivation_probability)#distance_activation(). $
-    
-    Soit, en posant $c = max(#spiking_probability, (1 + #deactivation_probability)) $ :
-    $ #distance_activation(t: $t+1$) &<= max(#spiking_probability, 1 + #deactivation_probability) (#distance_potential() + #distance_activation()),\
-    &<= c #distance_globale(). $
+    Si nous reprenons @majoration_distance_activation_2 avec @majoration_probability_alone_spike_event et en majorant #proba(no_spike_event) par $1$, nous obtenons :
+    #numbered_equation($ #distance_activation(t : $t+1$) <=  (1 + L + #deactivation_probability)#distance_activation(). $, <majoration_distance_activation_finale>)
 
     Grâce à cette dernière ligne, nous avons désormais la première pièce du puzzle. Si nous réécrivons @distance_globale, nous pouvons dire que :
     #numbered_equation(
-        $ #distance_globale(t: $t+1$) <= #distance_potential(t: $t+1$) + c#distance_globale(). $, <majoration_distance_globale_1>
+        $ #distance_globale(t: $t+1$) <= #distance_potential(t: $t+1$) + (1 + L + #deactivation_probability)#distance_activation(). $, <majoration_distance_globale_1>
     )
+    Passons à présent à la majoration de #distance_potential(t: $t+1$)
 
     === Majoration de #distance_potential(t: $t+1$)
-    À présent, nous allons nous attaquer à la majoration de #distance_potential(t: $t+1$). De la définition, il vient :
-    $ #distance_potential(t: $t+1$) &= bb(E)abs(#membrane_potential(t: $t+1$) - #membrane_potential_limit(t: $t+1$)),\
+    De la définition, il vient :
+    $ #distance_potential(t: $t+1$) = bb(E)abs(#membrane_potential(t: $t+1$) - #membrane_potential_limit(t: $t+1$)),\
     &= bb(E)underbrace(abs(#non_spiking_indicator (#membrane_potential() + 1/N sum_(j=1)^N #network_contributions(i: $j$)) - #non_spiking_indicator_limit (#membrane_potential_limit() + bb(E)[#network_contributions_limit()])), "= f pour simplifier l'écriture par la suite"). $
 
     Nous pouvons ici aussi utiliser les trois événements disjoints #simultaneous_spikes_event, #alone_spike_event et #no_spike_event définis précédemment pour écrire :
     #numbered_equation(
-        $ #distance_potential(t: $t+1$) = bb(P)(#simultaneous_spikes_event)bb(E)[f|#simultaneous_spikes_event] + bb(P)(#alone_spike_event)bb(E)[f|#alone_spike_event] + bb(P)(#no_spike_event)bb(E)[f|#no_spike_event]. $,
+        $ #distance_potential(t: $t+1$) = bb(P)(#simultaneous_spikes_event)bb(E)[f|#simultaneous_spikes_event] + #proba(alone_spike_event)bb(E)[f|#alone_spike_event] + #proba(no_spike_event)bb(E)[f|#no_spike_event]. $,
         <majoration_distance_potential_1>
     )
-
+    Regardons également les effets de ces événements sur #expectation_absolute($#membrane_potential(t: $t+1$) - #membrane_potential_limit(t: $t+1$)$) :
 
     - Si l'événement #simultaneous_spikes_event est vérifié, alors les indicatrices d'absence de spike sont nulles, c'est-à-dire $#non_spiking_indicator = #non_spiking_indicator_limit = 0$), ce qui nous donne :
         $ bb(E)[f|#simultaneous_spikes_event] = 0. $
@@ -257,61 +207,91 @@ $ #distance_activation() = bb(E)abs(#activation() - #activation_limit()), $ nous
     - Si l'événement #alone_spike_event est vérifié, alors seule une des indicatrices d'absence de spike est nulle, soit $#non_spiking_indicator = 0$ ou $#non_spiking_indicator_limit = 0$.\
         Il reste donc dans $bb(E)[f|#alone_spike_event]$ :
         $ bb(E)[f|#alone_spike_event] = cases(bb(E)abs(#membrane_potential() + 1/N sum_(j=1)^N #network_contributions(i: $j$)) "si le processus limite spike", bb(E)abs(#membrane_potential_limit() + bb(E)[#network_contributions_limit()]) "si le processus fini spike"). $
-        Dans tous les cas, nous pouvons majorer par #max_potential car #membrane_potential() est borné par #max_potential.\
-        *TO-DO Véridique ?*
-        $ bb(E)[f|#alone_spike_event] <= #max_potential "par construction". $        
+        Dans tous les cas, nous pouvons majorer par $#max_potential + 1$ car #membrane_potential() est borné par #max_potential et que $sum_(j=1)^N #network_contributions(i: $j$))$ peut valoir au plus $N$. Donc
+        $ bb(E)[f|#alone_spike_event] <= #max_potential + 1. $  
 
     - Si l'événement #no_spike_event est vérifié, alors les indicatrices d'absence de spike valent toutes deux un, c'est-à-dire $#non_spiking_indicator = #non_spiking_indicator_limit = 1$. Cela nous permet d'écrire :
         $ bb(E)[f|#no_spike_event] = bb(E)abs(#membrane_potential() + 1/N sum_(j=1)^N #network_contributions(i: $j$) - (#membrane_potential_limit() + bb(E)[#network_contributions_limit()])). $
         Cette quantité sera majorée plus loin, car son développement est un peu plus long.
 
-    En reprenant @majoration_distance_potential_1, et en utilisant @majoration_probability_alone_spike_event_final et $bb(P)(#no_spike_event) <= 1$, nous obtenons :
+    En reprenant @majoration_distance_potential_1 avec ces résultats ainsi que @majoration_probability_alone_spike_event et $#proba(no_spike_event) <= 1$, nous obtenons :
     #numbered_equation(
-        $ #distance_potential(t: $t+1$) <= #spiking_probability #max_potential #distance_potential() + bb(E)[f|#no_spike_event]. $,
+        $ #distance_potential(t: $t+1$) <= L (#max_potential + 1) #distance_activation() + bb(E)[f|#no_spike_event]. $,
         <majoration_distance_potential_2>
     )
 
     Maintenant, nous allons développer $bb(E)[f|#no_spike_event]$. Ajoutons et retirons $1/N sum_(j=1)^N #network_contributions_limit(i: $j$)$ :
-    $ bb(E)[f|#no_spike_event] &= bb(E)abs(#membrane_potential() + 1/N sum_(j=1)^N #network_contributions(i: $j$) - (#membrane_potential_limit() + bb(E)[#network_contributions_limit()]) + 1/N sum_(j=1)^N #network_contributions_limit(i: $j$) - 1/N sum_(j=1)^N #network_contributions_limit(i: $j$) ), $
+    $ bb(E)[f|#no_spike_event] = bb(E)abs(#membrane_potential() + 1/N sum_(j=1)^N #network_contributions(i: $j$) - (#membrane_potential_limit() + bb(E)[#network_contributions_limit()])\
+    + 1/N sum_(j=1)^N #network_contributions_limit(i: $j$) - 1/N sum_(j=1)^N #network_contributions_limit(i: $j$) ), $
 
     #let martingale(i: $i$) = $overline(M)_(t)^#i$
+    #let martingale_def = $sum_(j=1)^N (#network_contributions_limit(i: $j$) - bb(E)[#network_contributions_limit(i: $j$)])$
     Posons 
-    $ #martingale() = sum_(i=1)^N (#network_contributions_limit(i: $j$) - bb(E)[#network_contributions_limit(i: $j$)]), $
+    #numbered_equation(
+        $ #martingale() = #martingale_def, $,
+        <definition_martingale>
+    )
     nous avons alors,
+    $ bb(E)[f|#no_spike_event] = bb(E)abs(#membrane_potential() - #membrane_potential_limit() + 1/N sum_(j=1)^N #network_contributions(i: $j$) - 1/N sum_(j=1)^N #network_contributions_limit(i: $j$) + 1/N #martingale()), $
 
     #let distance_simplification_variables = $abs(#network_contributions(i: $j$) - #network_contributions_limit(i: $j$))$
     #let esperance_distance_simplification_variables = $bb(E)#distance_simplification_variables$
+    ce qui aboutit à :
     #numbered_equation(
-        $ bb(E)[f|#no_spike_event] &= bb(E)abs(#membrane_potential() - #membrane_potential_limit() + 1/N sum_(j=1)^N #network_contributions(i: $j$) - 1/N sum_(j=1)^N #network_contributions_limit(i: $j$) + 1/N #martingale()),\
-    &<= bb(E)abs(#membrane_potential() - #membrane_potential_limit()) + 1/N sum_(j=1)^N #esperance_distance_simplification_variables + 1/N bb(E)abs(#martingale()). $,
-    <majoration_distance_potential_3>
+        $ bb(E)[f|#no_spike_event] <= bb(E)abs(#membrane_potential() -       #membrane_potential_limit()) + 1/N sum_(j=1)^N #esperance_distance_simplification_variables + 1/N bb(E)abs(#martingale()). $, <majoration_distance_potential_3>
     )
 
-    Pour majorer cette quantité, énonçons tout d'abord la proposition suivante :
-
+    Pour majorer cette quantité, nous aurons besoin de la @proposition_majoration_martingale :
     #proposition()[
         $ bb(E)abs(#martingale()) <= sqrt(N)/2. $
     ] <proposition_majoration_martingale>
     #proof()[
+
+        #let square_martingale = $abs(#martingale())^2$
+        #let square_root_martingale_squared = $sqrt(#square_martingale)$
+        #let expectation_martingale = expectation_absolute(martingale())
+        #let expectation_network_contrib(i: $i$) = expectation(network_contributions_limit(i: i))
         Nous pouvons écrire :
         $ abs(#martingale()) &= sqrt(abs(#martingale())^2),\
-        => bb(E)abs(#martingale()) &= bb(E)[sqrt(abs(#martingale())^2)],\
-        => bb(E)abs(#martingale()) &<= sqrt(bb(E)[ abs(#martingale())^2]) "par Jensen concave." $
+        => #expectation_martingale &= bb(E)[sqrt(abs(#martingale())^2)]. $
+        En utilisant l'inégalité de Jensen pour majorer la fonction concave racine carrée :
+        #numbered_equation(
+            $ #expectation_martingale <= sqrt(#expectation(square_martingale)). $,
+            <majoration_martingale_jensen_concave>
+        )
+        
+        Reprenons la définition de #martingale() (@definition_martingale) :
+        #let sum_network_contrib = $sum_(j=1)^N #network_contributions_limit(i: $j$)$
+        $ #expectation(square_martingale) = #expectation($abs(#martingale_def)^2$). $
 
-        $  bb(E)[ abs(#martingale())^2] &= bb(E)[(sum_(j=1)^N #network_contributions_limit(i: $j$) - bb(E)[#network_contributions_limit(i: $j$)])^2],\
-        &= bb(E)[sum_(j=1)^N (#network_contributions_limit(i: $j$) - bb(E)[#network_contributions_limit(i: $j$)])^2 + 2 sum_(0<=k<j<=N) (#network_contributions_limit(i: $k$) - bb(E)[#network_contributions_limit(i: $k$)]) (#network_contributions_limit(i: $j$) - bb(E)[#network_contributions_limit(i: $j$)])],\
-        &= sum_(j=1)^N bb(E)[(#network_contributions_limit(i: $j$) - bb(E)[#network_contributions_limit(i: $j$)])^2] + 2 sum_(0<=k<j<=N) bb(E)[(#network_contributions_limit(i: $k$) - bb(E)[#network_contributions_limit(i: $k$)]) (#network_contributions_limit(i: $j$) - bb(E)[#network_contributions_limit(i: $j$)])],\
-        &= sum_(j=1)^N "Var"[#network_contributions_limit(i: $j$)] + 2 sum_(0<=k<j<=N) "Cov"(#network_contributions_limit(i: $k$), #network_contributions_limit(i: $j$)). $
+        #let difference_in_sum(i: $i$) = $Y^#i$
+        #let difference_in_sum_def(i: $i$) = $#network_contributions_limit(i: i) - #expectation(network_contributions_limit(i: i))$
+        Pour clarifier les calculs, notons également
+        $ #difference_in_sum() = #difference_in_sum_def(). $
 
-        Or, comme nous travaillons dans le cadre champ moyen, les neurones sont des copies indépendantes les uns des autres. Ainsi $"Cov"(#network_contributions_limit(i: $k$), #network_contributions_limit(i: $j$)) = 0$ et
-        $ bb(E)[ abs(#martingale())^2] = sum_(j=1)^N "Var"[#network_contributions_limit(i: $j$)] = N "Var"[#network_contributions_limit(i: $j$)]. $
+        En utilisant le carré de la somme, il vient :
+        $ #expectation(square_martingale) = #expectation($abs(sum_(j=1)^N #difference_in_sum(i: $j$))^2$) = #expectation($sum_(j=1)^N sum_(k=1)^N (#difference_in_sum(i: $j$))(#difference_in_sum(i: $k$))$). $
 
-        Comme $#network_contributions_limit(i: $j$) in {0, 1}$, alors $0 <= bb(E)[#network_contributions_limit(i: $j$)] <= 1$, ce qui implique que :
+        En séparant les termes carrés des termes rectangles, nous obtenons :
+        $ #expectation(square_martingale) = #expectation($sum_(j=1)^N (#difference_in_sum(i: $j$))^2$) +
+        #expectation($2 sum_(1<=k<j<=N) (#difference_in_sum(i: $j$))(#difference_in_sum(i: $k$))$). $
+        Écrit autrement :
+        $ #expectation(square_martingale) = sum_(j = 1)^N #variance($#difference_in_sum(i: $j$)$) +
+        2 sum_(1<=k<j<=N) #covariance(difference_in_sum(i: $j$), difference_in_sum(i: $k$)). $
 
-        $ &"Var"[#network_contributions_limit(i: $j$)] = bb(E)[#network_contributions_limit(i: $j$)](1 - bb(E)[#network_contributions_limit(i: $j$)]) <= 1/4,\
-        &=> bb(E)[ abs(#martingale())^2] <= N/4,\
-        &=> sqrt(bb(E)[ abs(#martingale())^2]) <= sqrt(N/4),\
-        &"d'où" bb(E)abs(#martingale()) <= sqrt(N)/2. $
+        Or, comme nous travaillons dans le cadre champ moyen, les neurones sont des copies indépendantes les uns des autres. Ainsi $#covariance(difference_in_sum(i: $j$), difference_in_sum(i: $k$)) = 0$. Nous obtenons donc :
+        $ #expectation(square_martingale) = N #variance(difference_in_sum()) = N #variance(difference_in_sum_def()). $
+
+        Comme $#network_contributions_limit() in {0, 1}$, alors $0 <= bb(E)[#network_contributions_limit()] <= 1$ et donc
+        $ 0 <= #difference_in_sum_def() <= 1. $
+        Cela nous permet d'écrire la majoration suivante :
+        $ #variance(difference_in_sum_def()) <= 1/4, $
+        puis d'écrire
+        $ #expectation(square_martingale) <= N / 4. $
+        Pour finir, nous pouvons dire que
+        $ sqrt(#expectation(square_martingale)) <= sqrt(N / 4) $
+        et enfin conclure la preuve en réutilisant @majoration_martingale_jensen_concave :
+        $ #expectation_martingale <= sqrt(N) / 2. $
     ]
     On reprend @majoration_distance_potential_3, avec la @proposition_majoration_martingale, pour écrire :
     #numbered_equation(
@@ -344,7 +324,7 @@ $ #distance_activation() = bb(E)abs(#activation() - #activation_limit()), $ nous
 
         Reprenons à présent @decomposition_esperance_distance_simplification_variables :
         #numbered_equation(
-            $ #esperance_distance_simplification_variables = bb(P)(#simultaneous_spikes_event)#distance_activation(i : $j$) + bb(P)(#alone_spike_event). $,
+            $ #esperance_distance_simplification_variables = bb(P)(#simultaneous_spikes_event)#distance_activation(i : $j$) + #proba(alone_spike_event). $,
             <decomposition_esperance_distance_simplification_variables_2>
         )
 
@@ -355,7 +335,7 @@ $ #distance_activation() = bb(E)abs(#activation() - #activation_limit()), $ nous
         D'où,
         #numbered_equation($ bb(P)(#simultaneous_spikes_event) <= #spiking_probability. $, <majoration_probability_simultaneous_spikes_event>)
 
-        En utilisant @majoration_probability_alone_spike_event_final pour majorer $bb(P)(#alone_spike_event)$, et @majoration_probability_simultaneous_spikes_event pour borner $bb(P)(#simultaneous_spikes_event)$, nous transformons @decomposition_esperance_distance_simplification_variables_2 en :
+        En utilisant (...) pour majorer $#proba(alone_spike_event)$, et @majoration_probability_simultaneous_spikes_event pour borner $bb(P)(#simultaneous_spikes_event)$, nous transformons @decomposition_esperance_distance_simplification_variables_2 en :
         #numbered_equation($ #esperance_distance_simplification_variables <= #spiking_probability (#distance_activation(i: $j$) + #distance_potential()), $, 
         <majoration_esperance_distance_simplification_variables>
         )

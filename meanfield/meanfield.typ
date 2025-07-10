@@ -91,9 +91,9 @@ Comme les deux processus limites #neuron_limit() prennent leurs valeurs dans des
 
 #let spiking_function_lip_raw = $phi.alt^*$
 #theorem([Propagation du chaos avec une fonction de spiking modifiée])[
-    Étant donné l'existence du processus limite donné dans le @theorem_existence_processus_limite et son #unknown_expectation() associé, et une nouvelle fonction #spiking_function_lip_raw, prise lipschitz, et approchant #spiking_function_raw, nous avons
-    $ #expectation_absolute($#membrane_potential() - #membrane_potential_limit()$) + #expectation_absolute($#activation() - #activation_limit()$) <= C_T / sqrt(N). $
-    $C_T$ est ici une constante qui fait intervenir les #unknown_expectation() et donc qui dépend de la fenêtre temporelle #time_window.
+    Étant donné l'existence du processus limite donné dans le @theorem_existence_processus_limite et son #unknown_expectation() associé, et une nouvelle fonction #spiking_function_lip_raw, prise lipschitz et de constante $L$, et approchant #spiking_function_raw, nous avons
+    $ #expectation_absolute($#membrane_potential() - #membrane_potential_limit()$) + #expectation_absolute($#activation() - #activation_limit()$) <= Kappa/ sqrt(N). $
+    $Kappa$ est ici une constante définie grâce aux paramètres du modèle et de la constante de lipschitz $L$. 
 ]<theorem_propagation_chaos>
 
 Le @theorem_propagation_chaos possède un corollaire direct (@theoreme_convergence_processus), formalisant la convergence des processus finis vers leur version limite.
@@ -192,7 +192,7 @@ Le @theorem_propagation_chaos possède un corollaire direct (@theoreme_convergen
     === Majoration de #distance_potential(t: $t+1$)
     De la définition, il vient :
     $ #distance_potential(t: $t+1$) = bb(E)abs(#membrane_potential(t: $t+1$) - #membrane_potential_limit(t: $t+1$)),\
-    &= bb(E)underbrace(abs(#non_spiking_indicator (#membrane_potential() + 1/N sum_(j=1)^N #network_contributions(i: $j$)) - #non_spiking_indicator_limit (#membrane_potential_limit() + bb(E)[#network_contributions_limit()])), "= f pour simplifier l'écriture par la suite"). $
+    = bb(E)underbrace(abs(#non_spiking_indicator (#membrane_potential() + 1/N sum_(j=1)^N #network_contributions(i: $j$)) - #non_spiking_indicator_limit (#membrane_potential_limit() + bb(E)[#network_contributions_limit()])), "= f pour simplifier l'écriture par la suite"). $
 
     Nous pouvons ici aussi utiliser les trois événements disjoints #simultaneous_spikes_event, #alone_spike_event et #no_spike_event définis précédemment pour écrire :
     #numbered_equation(
@@ -302,16 +302,17 @@ Le @theorem_propagation_chaos possède un corollaire direct (@theoreme_convergen
     Pour conclure la majoration de $bb(E)[f|#no_spike_event]$, il reste uniquement à majorer le terme #esperance_distance_simplification_variables.
 
     #proposition()[
-        $ #esperance_distance_simplification_variables <= #spiking_probability (#distance_activation() + #distance_potential()). $
+        $ #esperance_distance_simplification_variables <= (L + 1) #distance_activation(). $
     ] <proposition_majoration_esperance_distance_simplification_variables>
     #proof()[
         Commençons par réécrire #esperance_distance_simplification_variables en utilisant les trois événements #simultaneous_spikes_event, #alone_spike_event et #no_spike_event mais cette fois appliqués au neurone $j$.\
-        Pour alléger l'écriture, notons également $g = abs(#activation(i: $j$)#spiking_indicator(i: $j$) - #activation_limit(i: $j$)#spiking_indicator_limit(i: $j$))$
+        Pour alléger l'écriture, notons également $g = abs(#activation(i: $j$)#spiking_indicator(i: $j$) - #activation_limit(i: $j$)#spiking_indicator_limit(i: $j$))$.
     
         Écrivons grâce à ces événements :
-        #numbered_equation($ #proba(simultaneous_spikes_event)#expectation_conditional($g$, simultaneous_spikes_event) + #proba(alone_spike_event)#expectation_conditional($g$, alone_spike_event) + #proba(no_spike_event)#expectation_conditional($g$, no_spike_event) $,
+        #numbered_equation($ #proba(simultaneous_spikes_event)#expectation_conditional($g$, simultaneous_spikes_event) + #proba(alone_spike_event)#expectation_conditional($g$, alone_spike_event) + #proba(no_spike_event)#expectation_conditional($g$, no_spike_event), $,
         <decomposition_esperance_distance_simplification_variables>
         )
+        puis observons les effets de chacun sur $g$.
 
         - Si l'événement #simultaneous_spikes_event est vérifié, alors les indicatrices de spike valent toutes les deux un ($#spiking_indicator(i: $j$) = #spiking_indicator_limit(i: $j$) = 1$), ce qui nous donne :
             $ #expectation_conditional($g$, simultaneous_spikes_event) = #expectation_absolute($#activation(i: $j$) - #activation_limit(i: $j$)$) = #distance_activation(i: $j$). $
@@ -327,43 +328,31 @@ Le @theorem_propagation_chaos possède un corollaire direct (@theoreme_convergen
             $ #esperance_distance_simplification_variables = bb(P)(#simultaneous_spikes_event)#distance_activation(i : $j$) + #proba(alone_spike_event). $,
             <decomposition_esperance_distance_simplification_variables_2>
         )
-
-        Pour borner $bb(P)(#simultaneous_spikes_event)$, repartons de sa définition @definition_simultaneous_spikes_event et utilisons le fait que la variable #auxiliary_uniform() est indépendante de toutes les autres variables aléatoires.\
-        Ainsi,  
-        $ bb(P)(#simultaneous_spikes_event) &= bb(P)(0 < #auxiliary_uniform(t: $t+1$) < #spiking_probability) bb(P)(#membrane_potential() = #membrane_potential_limit() = #max_potential),\
-        &= #spiking_probability bb(P)(#membrane_potential() = #membrane_potential_limit() = #max_potential). $
-        D'où,
-        #numbered_equation($ bb(P)(#simultaneous_spikes_event) <= #spiking_probability. $, <majoration_probability_simultaneous_spikes_event>)
-
-        En utilisant (...) pour majorer $#proba(alone_spike_event)$, et @majoration_probability_simultaneous_spikes_event pour borner $bb(P)(#simultaneous_spikes_event)$, nous transformons @decomposition_esperance_distance_simplification_variables_2 en :
-        #numbered_equation($ #esperance_distance_simplification_variables <= #spiking_probability (#distance_activation(i: $j$) + #distance_potential()), $, 
-        <majoration_esperance_distance_simplification_variables>
-        )
+        
+        En utilisant @majoration_probability_alone_spike_event pour majorer #proba(alone_spike_event) et en majorant #proba(simultaneous_spikes_event) par $1$, nous transformons @decomposition_esperance_distance_simplification_variables_2 :
+        $ #esperance_distance_simplification_variables <= (L + 1) #distance_activation(), $
         ce qui conclut la preuve.
     ]
 
-    Enfin, en reprenant @majoration_distance_potential_4 avec les éléments précédents et @proposition_majoration_esperance_distance_simplification_variables, nous avons :
+    Enfin, en reprenant @majoration_distance_potential_4 avec la @proposition_majoration_esperance_distance_simplification_variables, nous obtenons :
     #numbered_equation(
-        $ bb(E)[f|#no_spike_event] <= #distance_potential() + #spiking_probability (#distance_activation() + #distance_potential()) + 1/(2 sqrt(N)). $,
+        $ #expectation_conditional($f$, no_spike_event) <= #distance_potential() + (L+1)#distance_activation() + 1 / (2sqrt(N)). $,
         <majoration_distance_potential_knowing_no_spike_event_final>
     )
 
     Ultimement, pour écrire la majoration définitive de #distance_potential(t: $t+1$), nous pouvons repartir de @majoration_distance_potential_2 et utiliser @majoration_distance_potential_knowing_no_spike_event_final pour écrire :
-    $ #distance_potential(t: $t+1$) &<= #spiking_probability#max_potential#distance_potential() + (#distance_potential() + #spiking_probability (#distance_activation() + #distance_potential()) + 1 /(2 sqrt(N))), $
+    $ #distance_potential(t: $t+1$) &<= L(#max_potential + 1)#distance_activation() + #distance_potential() + (L+1)#distance_activation() + 1 / (2sqrt(N)),\
+    #distance_potential(t: $t+1$) &<= #distance_potential() + (L(#max_potential + 2) + 1)#distance_activation() + 1 / (2sqrt(N)), $
+    soit :
     #numbered_equation(
-        $ #distance_potential(t: $t+1$) <= (#spiking_probability #max_potential + (1 + #spiking_probability))#distance_potential() + #spiking_probability #distance_activation() + 1/(2 sqrt(N)). $,
+        $ #distance_potential(t: $t+1$) &<= (L(#max_potential + 1) + 1) #distance_globale() + 1/(2sqrt(N)). $,
         <majoration_distance_potential_finale>
     )
 
-    Nous pouvons écrire que
-    #numbered_equation($ #distance_potential(t: $t+1$) <= c'#distance_globale() + 1/(2 sqrt(N)), $, <majoration_distance_globale_2>)
-    où $c' = #spiking_probability #max_potential + 1 + #spiking_probability$.
-
-    Si nous combinons la première pièce @majoration_distance_globale_1 avec la seconde pièce du puzzle @majoration_distance_globale_2, nous obtenons enfin,
-
-    $ #distance_globale(t: $t+1$) &<= c'#distance_globale() + c#distance_globale() + 1/(2 sqrt(N)),\
+    Si nous combinons la première pièce du puzzle @majoration_distance_globale_1 avec la seconde @majoration_distance_potential_finale, nous obtenons enfin,
+    $ #distance_globale(t: $t+1$) &<= L(#max_potential + 1) + 1)#distance_globale() + 1/(2 sqrt(N)) + (1 + L + #deactivation_probability)#distance_activation(),\
     &<= C #distance_globale() + 1/(2 sqrt(N)), $
-    avec $C$ la constante suivante : $C = max(c', c)$.
+    avec $C$ la constante suivante : $C = max(L(#max_potential + 1) + 1, 1 + L + #deactivation_probability)$.
 
     Rappellons-nous que les processus sont initialisés de la même façon, ce qui signifique que $#distance_globale(t: $0$) = 0$.\
     Ainsi, en $t=1$ : 
@@ -375,11 +364,8 @@ Le @theorem_propagation_chaos possède un corollaire direct (@theoreme_convergen
     Ce qui nous fait aboutir à :
     $ #distance_globale() <= (sum_(k=0)^(t-1)C^k) 1/(2 sqrt(N)). $
 
-    Or puisque $C$ est une combinaison finie d'opérations sur des paramètres finis de notre modèle, et que nous nous sommes placés sur une fenêtre temporelle finie, soit $t in [0, T]$, pour tout $T in bb(N) "avec" T > 0$.\
-    Ainsi un polynôme en $C$ de degré $t-1$ est nécessairement fini, c'est-à-dire $sum_(k=0)^(t-1)C^k < oo$, impliquant finalement que,
-    $ #distance_globale() ->_(N -> oo) 0. $
-
-    Ce qui parachève la preuve du @theoreme_convergence_processus ! #place(right, $square.stroked$)
+    Or puisque $C$ est une combinaison finie d'opérations sur des paramètres finis de notre modèle, et que nous nous sommes placés sur une fenêtre temporelle finie, alors $sum_(k=0)^(t-1)C^k < oo$.\
+    En notant $Kappa = sum_(k=0)^(t-1)C^k$, nous voilà arrivé au bout de la preuve du @theorem_propagation_chaos ! #place(right, $square.stroked$)
 ]
 
 == Mesure invariante

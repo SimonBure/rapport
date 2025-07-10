@@ -4,6 +4,8 @@
 #let expectation(u) = $bb(E)[#u]$
 #let expectation_absolute(variable) = $bb(E)abs(#variable)$
 #let expectation_conditional(variable, condition) = expectation($#variable|#condition$)
+#let variance(variable) = $"Var"[#variable]$
+#let covariance(v1, v2) = $"Cov"[#v1, #v2]$
 #let proba(variable) = $bb(P)(#variable)$
 #let indicator(event) = $bold(1)_({#event})$
 #let dirac(state) = $delta_#state$

@@ -8,9 +8,27 @@
 #let remark = thmbox("theorem", "Remarque", base_level: 1, stroke: gray + 1.4pt)
 #let proof = thmproof("proof", "Preuve")
 
+#set math.equation(numbering: "1.")
+
+#let check-labels() = context {
+  let targets = query(ref).map(x => x.target)
+  let unreferenced = query(selector.or(
+    figure,
+    math.equation,
+    // ... add other referencable elements here
+  )).map(x => x.at("label", default: none))
+    .filter(x => x != none and x not in targets)
+
+  if unreferenced.len() > 0 {
+    panic("Unreferenced labels found in the document. Please check the following labels:",
+      unreferenced.map(str).join(", ")
+    )
+  }
+}
+
 // Numbered equation
 #let numbered_equation(content, label) = [#set math.equation(numbering: "(1)")
-#content #label
+  #content #label
 ]
 
 // Define a TO-DO

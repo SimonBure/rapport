@@ -57,7 +57,10 @@ $ #membrane_potential_limit(t: $t+1$) = #non_spiking_indicator_limit (#membrane_
 #let space_value_potential_limit = ${0, gamma, 2 gamma, dots, #max_potential_limit}$
 La variable aléatoire #membrane_potential() avait été définie comme à valeurs dans $#space_value_potential subset bb(N)$. Or nous voyons désormais que #membrane_potential_limit() ne respecte plus cette définition, notamment car #expectation(network_contributions_limit()) est un *nombre réel* et dépendant du temps $t$.\
 Supposons que
-#numbered_equation($ #unknown_expectation() = #expectation(network_contributions_limit()). $, <definition_unknown_expectation>)
+#numbered_equation(
+    $ #unknown_expectation() = #expectation(network_contributions_limit()). $, <definition_unknown_expectation>
+)
+
 Intuitivement, cela signifie qu'à chaque pas de temps, le potentiel de membrane limite #membrane_potential_limit() augmente d'une quantité fixée #unknown_expectation(), inconnue et dépendante du temps.
 
 Cependant, comme nous travaillons sur une fenêtre temporelle fixée #time_window, les valeurs de #unknown_expectation() sont fixées, et au nombre de $T+1$. Elles peuvent s'écrire, par exemple,
@@ -123,7 +126,7 @@ Le @theorem_propagation_chaos possède un corollaire direct (@theoreme_convergen
     #let no_spike_event = $bold(0)$
     Remarquons que les trois événements suivants sont disjoints :
     - L'événement $#simultaneous_spikes_event = {"processus finis et limites spikent simultanément en" t+1}$ peut s'écrire formellement :
-        #numbered_equation($ #simultaneous_spikes_event = {#auxiliary_uniform(t: $t+1$) < min(#spiking_function(v: membrane_potential()), #spiking_function(v: membrane_potential_limit()))}. $, <definition_simultaneous_spikes_event>)
+        $ #simultaneous_spikes_event = {#auxiliary_uniform(t: $t+1$) < min(#spiking_function(v: membrane_potential()), #spiking_function(v: membrane_potential_limit()))}. $
 
     - L'évévement $#alone_spike_event = {"processus fini ou (exclusif) limite spike en" t+1}$ qui s'écrit formellement :
     #numbered_equation($ #alone_spike_event_def. $, <definition_spike_exclusif>)
@@ -237,9 +240,8 @@ Le @theorem_propagation_chaos possède un corollaire direct (@theoreme_convergen
         <majoration_probability_alone_spike_event>
     )
 
-
     Si nous reprenons @majoration_distance_activation_2 avec @majoration_probability_alone_spike_event et en majorant #proba(no_spike_event) par $1$, nous obtenons :
-    #numbered_equation($ #distance_activation(t : $t+1$) <=  (1 + #spiking_steepness/2 + #deactivation_probability)#distance_activation(). $, <majoration_distance_activation_finale>)
+    $ #distance_activation(t : $t+1$) <=  (1 + #spiking_steepness/2 + #deactivation_probability)#distance_activation(). $
 
     Grâce à cette dernière ligne, nous avons désormais la première pièce du puzzle. Si nous réécrivons @distance_globale, nous pouvons dire que :
     #numbered_equation(
@@ -455,15 +457,16 @@ $ #time_before_regen = inf{t > 0 : #chain() = #regenering_state "sachant que" #c
 
 Pour calculer #mean_time_before_regen, il suffit de remarquer que la chaîne #chain(), pour retourner en #regenering_state en partant de #regenering_state va nécessairement d'abord effectuer #max_potential_limit sauts successifs, de taille #unknown_expectation_inf chacun. Ensuite, elle devra attendre un temps aléatoire avant d'émettre un potentiel d'action. Ce temps aléatoire suit une loi géométrique de paramètre #spiking_probability.\
 Alors,
-#numbered_equation($ #mean_time_before_regen = #value_mean_time_before_regen. $ , <valeur_temps_avant_regen>)
+#numbered_equation(
+    $ #mean_time_before_regen = #value_mean_time_before_regen. $,
+    <valeur_temps_avant_regen>
+)
 
 // Pour plus de clarté, notons à partir de maintenant $#max_potential_limit = K$.
 // #let max_potential_limit = $K$
 
 Cela nous permet de définir la *mesure stationnaire* de notre processus limite de la façon suivante. Prenons $v in #space_value_potential$ et $a in #space_value_activation$ :
-#numbered_equation(
-  $ #mesure_stationnaire() = 1 / #mean_time_before_regen #mean_time_spent_in_state(state: $(v, a)$). $, <definition_mesure_stationnaire>
-)
+$ #mesure_stationnaire() = 1 / #mean_time_before_regen #mean_time_spent_in_state(state: $(v, a)$). $
 #todo("Justifier définition mesure stationnaire")
 
 La variable aléatoire #time_spent_in_state() représente le *temps passsé* dans l'état $(v, 1)$ par la chaîne.\
@@ -474,11 +477,11 @@ Son calcul, et celui de #mean_time_spent_in_state() va dépendre des valeurs pri
 #let probability_no_deactivation_before_v = $(1 - #deactivation_probability)^v$
 Dans le cas présent, #time_spent_in_state() vaut exactement un si le neurone ne subit aucune désactivation avant la couche $v$, ce qui arrive avec probabilité #probability_no_deactivation_before_v. S'il se désactive avant $v$, alors #time_spent_in_state() est nulle.\
 Ainsi, pour $v < #max_potential_limit #unknown_expectation_inf$,
-#numbered_equation($ #mean_time_spent_in_state() = #probability_no_deactivation_before_v. $, <valeur_temps_moyen_passe_etat_v_1>)
+$ #mean_time_spent_in_state() = #probability_no_deactivation_before_v. $
 
 #let probability_deactivation_before_v = $1 - #probability_no_deactivation_before_v$
 De façon similaire, pour $a = 0$, #time_spent_in_state(state: $(v, 0)$) vaut un si le neurone subit une désactivation avant la couche $v$, ce qui arrive avec probabilité #probability_deactivation_before_v. Sinon, le temps passé dans l'état $(v, 0)$ est nul. D'où,
-#numbered_equation($ #mean_time_spent_in_state(state: $(v, 0)$) = #probability_deactivation_before_v. $, <valeur_temps_moyen_passe_etat_v_0>)
+$ #mean_time_spent_in_state(state: $(v, 0)$) = #probability_deactivation_before_v. $
 
 Finalelement, nous avons
 $ forall v < K gamma,space  #mesure_stationnaire(state: $(v, 1)$) = #probability_no_deactivation_before_v / #value_mean_time_before_regen, $
@@ -511,7 +514,6 @@ Trouver les équilibres de la mesure stationnaire revient à (...)
 Nous cherchons donc les points tel que
 $ #mesure_stationnaire() = #unknown. $
 
-
 Développons en se rappellant de @definition_unknown_expectation :
 $ #unknown = #expectation(network_contributions_limit(t: time_inf)) &= #expectation($#spiking_function(v: membrane_potential_limit(t: time_inf)) #activation_limit(t: time_inf)$),\
 &= sum_(a=0)^1 sum_(k = 0)^#max_potential_limit #spiking_function(v: $k #unknown$) dot a dot #mesure_stationnaire(state: $(k #unknown, a)$). $
@@ -531,7 +533,9 @@ Premièrement, pour $#unknown -> 0$, l'@equation_equilibre admet une solution, t
 Cependant, nous sommes à la recherche d'équilibres non nuls, qui pourraient correspondre à (...).
 #todo([Interpréter solution des équilibres])
 
-Grâce à @allure_f_gamma, et à @equation_equilibre, nous pouvons voir que $f$ est une fonction *croissante* et *continue par morceau*. Pour annuler $f$, nous allons chercher des valeurs de #unknown, où $f < 0$. Puis, #unknown augmentant, la croissance linéaire de $f$ la fera nécessairement croise l'axe des abscisses.
+Grâce à @allure_f_gamma, et à @equation_equilibre, nous pouvons voir que $f$ est une fonction *croissante* et *continue par morceau*.
+
+Énonçons la proposition @existence_equilibres, nous donnant une condition suffisante pour assurer l'existence d'un équilibre non trivial à @equation_equilibre.
 
 #figure(image("../figures/allure_f_gamma.png"), caption: [Représentation de $f$ pour #unknown compris entre $0$ et $1$, avec $#max_potential = 3$, $#spiking_probability = 0.9$ et $#deactivation_probability = 0.09$.])<allure_f_gamma>
 
@@ -548,7 +552,7 @@ Grâce à @allure_f_gamma, et à @equation_equilibre, nous pouvons voir que $f$ 
 
     Et donc si jamais l'équilibre #point_eq_1 se trouve aussi dans #intervalle_continue, alors il sera nécessairement atteint, puisque la fonction est continue sur ce même intervalle. D'où la condition suffisante suivante :
     $ #max_potential < #point_eq_1, $
-    concluant la preuve. Le tout est illustré 
+    concluant la preuve. Le tout est illustré sur la @f_gamma_un_equilibre.
 ]
 
 #remark([$f$ peut admettre d'autres équilibres grâce aux sauts de $#fonction_sauts$])[
@@ -565,3 +569,4 @@ Grâce à @allure_f_gamma, et à @equation_equilibre, nous pouvons voir que $f$ 
 #figure(image("../figures/f_gamma_many_equilibres.png"), caption: [Illustration de la présence de plusieurs équilibres. Ici $#max_potential = 0.5$, $#spiking_probability = 0.9$ et $#deactivation_probability = 0.09$, donnant $#max_potential > #point_eq_1$. Pourtant, $f(#unknown)$ s'annule deux fois dans l'intervalle $(0, #max_potential]$.])<f_gamma_plsrs_equilibres>
 
 
+#check-labels()

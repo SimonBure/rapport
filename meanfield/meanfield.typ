@@ -87,7 +87,6 @@ Comme les deux processus limites #neuron_limit() prennent leurs valeurs dans des
 
 
 == Convergence vers les processus limites
-#todo("À mettre à jour puisque la preuve s'est effondrée")
 
 #let spiking_function_lip_raw = $phi.alt^*$
 #theorem([Propagation du chaos avec une fonction de spiking modifiée])[
@@ -110,15 +109,7 @@ Le @theorem_propagation_chaos possède un corollaire direct (@theoreme_convergen
     Enfin nous pouvons écrire la *distance globale* entre le processus de neurone et sa limite comme 
     #numbered_equation($ #distance_globale() = #distance_potential() + #distance_activation(). $, <distance_globale>)
 
-    #todo("Définir le nouveau phi")
-
-    // La trame de la preuve est la suivante :
-    // + Trouver des majorations de #distance_activation(t: $t+1$) et #distance_potential(t: $t+1$) qui utilisent #distance_globale().
-    // + Utiliser ces majorations pour trouver une majoration de #distance_globale(t: $t+1$) en fonction de #distance_globale() et d'une fonction de $N$ qui pourra disparaître lorsque $N$ deviendra grand.
-    // + Montrer par récurrence que #distance_globale(t: $t+1$) est bornée par une fonction de $N$ qui tend vers zéro lorsque $N$ tend vers l'infini.
-
     === Majoration de #distance_activation(t: $t+1$)
-    #todo("Afficher correctement l'équation")
     Commençons par majorer #distance_activation(t: $t+1$). De la définition, il vient :
     $ #distance_activation(t: $t+1$) &= bb(E)abs(#activation(t: $t+1$) - #activation_limit(t: $t+1$)),\
     &= bb(E)abs(#spiking_indicator() - #spiking_indicator_limit()\
@@ -134,7 +125,7 @@ Le @theorem_propagation_chaos possède un corollaire direct (@theoreme_convergen
         #numbered_equation($ #simultaneous_spikes_event = {#auxiliary_uniform(t: $t+1$) < min(#spiking_function(v: membrane_potential()), #spiking_function(v: membrane_potential_limit()))}. $, <definition_simultaneous_spikes_event>)
 
     - L'évévement $#alone_spike_event = {"processus fini ou (exclusif) limite spike en" t+1}$ qui s'écrit formellement :
-    $ #alone_spike_event_def. $
+    #numbered_equation($ #alone_spike_event_def. $, <definition_spike_exclusif>)
 
     - L'événement $#no_spike_event = {"aucun processus ne spike au temps" t+1}$, soit :
     $ {#auxiliary_uniform(t: $t+1$) > max(#spiking_function(v: membrane_potential()), #spiking_function(v: membrane_potential_limit()))}. $
@@ -169,16 +160,36 @@ Le @theorem_propagation_chaos possède un corollaire direct (@theoreme_convergen
     #numbered_equation(
         $ #distance_activation(t : $t+1$) <= #proba(alone_spike_event) + #proba(no_spike_event) (1 + #deactivation_probability)#distance_activation(). $, <majoration_distance_activation_2>
     )
-    #todo("Adapter la preuve en supposant phi lipschitz")
+
     #let probability_spike_alone_event = proba(alone_spike_event_def)
     #let distance_spiking_functions = $abs(#spiking_function(v: membrane_potential()) - #spiking_function(v: membrane_potential_limit()))$
-    Nous pouvons aller plus loin en écrivant #probability_spike_alone_event comme :
-    $ #proba(alone_spike_event_def) &= max(#spiking_function(v: membrane_potential()), #spiking_function(v: membrane_potential_limit())),\
+    Si nous utilisons la définition de $#proba(alone_spike_event)$ définie à l'@definition_spike_exclusif, combiné au fait que #auxiliary_uniform() est une variable uniforme sur $[0, 1]$ :
+    $ #proba(alone_spike_event) &= #probability_spike_alone_event,\
+    &= max(#spiking_function(v: membrane_potential()), #spiking_function(v: membrane_potential_limit())) - min(#spiking_function(v: membrane_potential()), #spiking_function(v: membrane_potential_limit())),\
     &= #distance_spiking_functions. $
-    Ainsi, en utilisant la lipschitzianité de #spiking_function_raw :
-    #numbered_equation($ #proba(alone_spike_event) <= L #distance_activation(). $,<majoration_probability_alone_spike_event>)
 
-    #todo("Utiliser la bonne constante de lipschitz")
+    C'est ici que nous comprenons pourquoi il est nécessaire de modifier la définition de la fonction #spiking_function_raw. Si #spiking_function_raw était L-lipschitz, nous pourrions majorer #distance_spiking_functions par $L abs(#membrane_potential() - #membrane_potential_limit())$.
+    Le problème est de trouver une fonction lipschitz mais qui puisse tout de même approcher le comportement de l'indicatrice présente dans #spiking_function_raw. La figure @benchmark_replace_indicator montre quelques fonctions qui ont été étudiées pour approcher l'indicatrice. La fonction retenue sera finalement une modification de la fonction tangente hyperbolique :
+
+    // Définition de la nouvelle fonction de spiking lipschitzienne
+    #let spiking_steepness = $k$
+    #let spiking_function_lipschitz_def = $1/2 (1 + tanh(#spiking_steepness (v - #max_potential)))$
+    #let spiking_function_lipschitz = $phi.alt$
+    #numbered_equation(
+        $#spiking_function_lipschitz = #spiking_function_lipschitz_def.$,
+        <def_spiking_f_lipschitz>
+    )
+    Dans @def_spiking_f_lipschitz #spiking_steepness est un paramètre de raideur qui contrôle la vitesse de transition entre les régimes de non-spiking et de spiking.\
+    Cette fonction présente l'avantage d'être infiniment dérivable et lipschitzienne avec une constante de Lipschitz $L = #spiking_steepness/4$, ce qui nous permet d'appliquer les techniques classiques de la théorie du champ moyen. De plus, en choisissant #spiking_steepness suffisamment grand, nous pouvons faire converger $#spiking_function_lipschitz$ vers la fonction indicatrice originale tout en conservant les propriétés de régularité nécessaires à la démonstration.
+
+    #figure(image("../figures/benchmark_replace_indicator.png"), caption: [Exemples de fonction lipschitz pouvant remplacer]) <benchmark_replace_indicator>
+
+    Ainsi, en utilisant la lipschitzianité de #spiking_function_raw :
+    #numbered_equation(
+        $ #proba(alone_spike_event) <= L #distance_activation(). $,
+        <majoration_probability_alone_spike_event>
+    )
+
 
     Si nous reprenons @majoration_distance_activation_2 avec @majoration_probability_alone_spike_event et en majorant #proba(no_spike_event) par $1$, nous obtenons :
     #numbered_equation($ #distance_activation(t : $t+1$) <=  (1 + L + #deactivation_probability)#distance_activation(). $, <majoration_distance_activation_finale>)
@@ -187,7 +198,7 @@ Le @theorem_propagation_chaos possède un corollaire direct (@theoreme_convergen
     #numbered_equation(
         $ #distance_globale(t: $t+1$) <= #distance_potential(t: $t+1$) + (1 + L + #deactivation_probability)#distance_activation(). $, <majoration_distance_globale_1>
     )
-    Passons à présent à la majoration de #distance_potential(t: $t+1$)
+    Passons à présent à la majoration de #distance_potential(t: $t+1$).
 
     === Majoration de #distance_potential(t: $t+1$)
     De la définition, il vient :

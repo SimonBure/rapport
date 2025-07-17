@@ -252,6 +252,7 @@ Le @theorem_propagation_chaos possède un corollaire direct (@theoreme_convergen
     $ #distance_potential(t: $t+1$) = bb(E)abs(#membrane_potential(t: $t+1$) - #membrane_potential_limit(t: $t+1$)),\
     = bb(E)underbrace(abs(#non_spiking_indicator (#membrane_potential() + 1/N sum_(j=1)^N #network_contributions(i: $j$)) - #non_spiking_indicator_limit (#membrane_potential_limit() + bb(E)[#network_contributions_limit()])), "= f pour simplifier l'écriture par la suite"). $
 
+    === Séparation en événements disjoints
     Nous pouvons ici aussi utiliser les trois événements disjoints #simultaneous_spikes_event, #alone_spike_event et #no_spike_event définis précédemment pour écrire :
     #numbered_equation(
         $ #distance_potential(t: $t+1$) = bb(P)(#simultaneous_spikes_event)bb(E)[f|#simultaneous_spikes_event] + #proba(alone_spike_event)bb(E)[f|#alone_spike_event] + #proba(no_spike_event)bb(E)[f|#no_spike_event]. $,
@@ -274,11 +275,13 @@ Le @theorem_propagation_chaos possède un corollaire direct (@theoreme_convergen
 
     En reprenant @majoration_distance_potential_1 avec ces résultats ainsi que @majoration_probability_alone_spike_event et $#proba(no_spike_event) <= 1$, nous obtenons :
     #numbered_equation(
-        $ #distance_potential(t: $t+1$) <= L (#max_potential + 1) #distance_activation() + bb(E)[f|#no_spike_event]. $,
+        $ #distance_potential(t: $t+1$) <= #spiking_steepness/2 (#max_potential + 1) #distance_activation() + bb(E)[f|#no_spike_event]. $,
         <majoration_distance_potential_2>
     )
+    Maintenant, nous allons développer $bb(E)[f|#no_spike_event]$.
 
-    Maintenant, nous allons développer $bb(E)[f|#no_spike_event]$. Ajoutons et retirons $1/N sum_(j=1)^N #network_contributions_limit(i: $j$)$ :
+    === Développement de $bb(E)[f|#no_spike_event]$
+    Ajoutons et retirons $1/N sum_(j=1)^N #network_contributions_limit(i: $j$)$ :
     $ bb(E)[f|#no_spike_event] = bb(E)abs(#membrane_potential() + 1/N sum_(j=1)^N #network_contributions(i: $j$) - (#membrane_potential_limit() + bb(E)[#network_contributions_limit()])\
     + 1/N sum_(j=1)^N #network_contributions_limit(i: $j$) - 1/N sum_(j=1)^N #network_contributions_limit(i: $j$) ), $
 
@@ -296,7 +299,8 @@ Le @theorem_propagation_chaos possède un corollaire direct (@theoreme_convergen
     #let esperance_distance_simplification_variables = $bb(E)#distance_simplification_variables$
     ce qui aboutit à :
     #numbered_equation(
-        $ bb(E)[f|#no_spike_event] <= bb(E)abs(#membrane_potential() -       #membrane_potential_limit()) + 1/N sum_(j=1)^N #esperance_distance_simplification_variables + 1/N bb(E)abs(#martingale()). $, <majoration_distance_potential_3>
+        $ bb(E)[f|#no_spike_event] <= bb(E)abs(#membrane_potential() - #membrane_potential_limit()) &+ 1/N sum_(j=1)^N #esperance_distance_simplification_variables \
+        &+ 1/N bb(E)abs(#martingale()). $, <majoration_distance_potential_3>
     )
 
     Pour majorer cette quantité, nous aurons besoin de la @proposition_majoration_martingale :
@@ -351,18 +355,20 @@ Le @theorem_propagation_chaos possède un corollaire direct (@theoreme_convergen
         et enfin conclure la preuve en réutilisant @majoration_martingale_jensen_concave :
         $ #expectation_martingale <= sqrt(N) / 2. $
     ]
+
     On reprend @majoration_distance_potential_3, avec la @proposition_majoration_martingale, pour écrire :
     #numbered_equation(
         $ bb(E)[f|#no_spike_event] <= #distance_potential() + bb(E)abs(#network_contributions() - #network_contributions_limit()) + 1/(2 sqrt(N)). $,
         <majoration_distance_potential_4>
     )
 
-    Pour conclure la majoration de $bb(E)[f|#no_spike_event]$, il reste uniquement à majorer le terme #esperance_distance_simplification_variables.
+    Pour conclure la majoration de $bb(E)[f|#no_spike_event]$, il reste uniquement à majorer le terme #esperance_distance_simplification_variables. Énonçant pour cela la proposition suivante :
 
     #proposition()[
-        $ #esperance_distance_simplification_variables <= (L + 1) #distance_activation(). $
+        $ #esperance_distance_simplification_variables <= (#spiking_steepness/2 + 1) #distance_activation(). $
     ] <proposition_majoration_esperance_distance_simplification_variables>
     #proof()[
+        === Séparation en événements disjoints
         Commençons par réécrire #esperance_distance_simplification_variables en utilisant les trois événements #simultaneous_spikes_event, #alone_spike_event et #no_spike_event mais cette fois appliqués au neurone $j$.\
         Pour alléger l'écriture, notons également $g = abs(#activation(i: $j$)#spiking_indicator(i: $j$) - #activation_limit(i: $j$)#spiking_indicator_limit(i: $j$))$.
     
@@ -388,29 +394,30 @@ Le @theorem_propagation_chaos possède un corollaire direct (@theoreme_convergen
         )
         
         En utilisant @majoration_probability_alone_spike_event pour majorer #proba(alone_spike_event) et en majorant #proba(simultaneous_spikes_event) par $1$, nous transformons @decomposition_esperance_distance_simplification_variables_2 :
-        $ #esperance_distance_simplification_variables <= (L + 1) #distance_activation(), $
+        $ #esperance_distance_simplification_variables <= (#spiking_steepness/2 + 1) #distance_activation(), $
         ce qui conclut la preuve.
     ]
 
     Enfin, en reprenant @majoration_distance_potential_4 avec la @proposition_majoration_esperance_distance_simplification_variables, nous obtenons :
     #numbered_equation(
-        $ #expectation_conditional($f$, no_spike_event) <= #distance_potential() + (L+1)#distance_activation() + 1 / (2sqrt(N)). $,
+        $ #expectation_conditional($f$, no_spike_event) <= #distance_potential() + (#spiking_steepness/2 + 1) #distance_activation() + 1 / (2sqrt(N)). $,
         <majoration_distance_potential_knowing_no_spike_event_final>
     )
 
     Ultimement, pour écrire la majoration définitive de #distance_potential(t: $t+1$), nous pouvons repartir de @majoration_distance_potential_2 et utiliser @majoration_distance_potential_knowing_no_spike_event_final pour écrire :
-    $ #distance_potential(t: $t+1$) &<= L(#max_potential + 1)#distance_activation() + #distance_potential() + (L+1)#distance_activation() + 1 / (2sqrt(N)),\
-    #distance_potential(t: $t+1$) &<= #distance_potential() + (L(#max_potential + 2) + 1)#distance_activation() + 1 / (2sqrt(N)), $
-    soit :
+    $ #distance_potential(t: $t+1$) &<= #spiking_steepness/2 (#max_potential + 1)#distance_activation() + #distance_potential() + (#spiking_steepness/2 + 1)#distance_activation() + 1 / (2sqrt(N)),\
+    #distance_potential(t: $t+1$) &<= #distance_potential() + (#spiking_steepness/2 (#max_potential + 2) + 1)#distance_activation() + 1 / (2sqrt(N)), $
+    soit, en utilisant le fait que $#distance_potential() <= (#spiking_steepness/2 (#max_potential + 2) + 1)#distance_potential()$ :
     #numbered_equation(
-        $ #distance_potential(t: $t+1$) &<= (L(#max_potential + 1) + 1) #distance_globale() + 1/(2sqrt(N)). $,
+        $ #distance_potential(t: $t+1$) &<= (#spiking_steepness/2 (#max_potential + 2) + 1) #distance_globale() + 1/(2sqrt(N)). $,
         <majoration_distance_potential_finale>
     )
 
     Si nous combinons la première pièce du puzzle @majoration_distance_globale_1 avec la seconde @majoration_distance_potential_finale, nous obtenons enfin,
-    $ #distance_globale(t: $t+1$) &<= L(#max_potential + 1) + 1)#distance_globale() + 1/(2 sqrt(N)) + (1 + #spiking_steepness/2 + #deactivation_probability)#distance_activation(),\
-    &<= C #distance_globale() + 1/(2 sqrt(N)), $
-    avec $C$ la constante suivante : $C = max(L(#max_potential + 1) + 1, 1 + L + #deactivation_probability)$.
+    $ #distance_globale(t: $t+1$) <= (#spiking_steepness/2 (#max_potential + 2) + 1)#distance_globale() + 1/(2 sqrt(N)) + (1 + #spiking_steepness/2 + #deactivation_probability)#distance_activation(), $
+    soit, en utilisant que $#distance_activation() <= #distance_globale()$ :
+    $ #distance_globale(t: $t+1$) <= C #distance_globale() + 1/(2 sqrt(N)), $
+    avec $C$ la constante suivante : $C = max(#spiking_steepness/2 (#max_potential + 2) + 1, #spiking_steepness/2 +1 + #deactivation_probability)$.
 
     Rappellons-nous que les processus sont initialisés de la même façon, ce qui signifique que $#distance_globale(t: $0$) = 0$.\
     Ainsi, en $t=1$ : 

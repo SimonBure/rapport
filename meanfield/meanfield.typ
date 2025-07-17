@@ -88,7 +88,7 @@ Comme les deux processus limites #neuron_limit() prennent leurs valeurs dans des
 
 == Convergence vers les processus limites
 
-#let spiking_function_lip_raw = $phi.alt^*$
+#let spiking_function_lip_raw = $phi.alt_*$
 #theorem([Propagation du chaos avec une fonction de spiking modifiée])[
     Étant donné l'existence du processus limite donné dans le @theorem_existence_processus_limite et son #unknown_expectation() associé, et une nouvelle fonction #spiking_function_lip_raw, prise lipschitz et de constante $L$, et approchant #spiking_function_raw, nous avons
     $ #expectation_absolute($#membrane_potential() - #membrane_potential_limit()$) + #expectation_absolute($#activation() - #activation_limit()$) <= Kappa/ sqrt(N). $
@@ -116,6 +116,7 @@ Le @theorem_propagation_chaos possède un corollaire direct (@theoreme_convergen
     &+ #activation()#non_spiking_indicator (1 - #deactivation_indicator) - #activation_limit()#non_spiking_indicator_limit (1 - #deactivation_indicator)),\
     &= expectation(e) "pour simplifier l'écriture pour la suite." $
     
+    === Séparation en évévements disjoints
     #let simultaneous_spikes_event = $bold(2)$
     #let alone_spike_event = $bold(1)$
     #let alone_spike_event_def = ${min(#spiking_function(v: membrane_potential()), #spiking_function(v: membrane_potential_limit())) < #auxiliary_uniform(t: $t+1$) < max(#spiking_function(v: membrane_potential()), #spiking_function(v: membrane_potential_limit()))}$
@@ -168,35 +169,81 @@ Le @theorem_propagation_chaos possède un corollaire direct (@theoreme_convergen
     &= max(#spiking_function(v: membrane_potential()), #spiking_function(v: membrane_potential_limit())) - min(#spiking_function(v: membrane_potential()), #spiking_function(v: membrane_potential_limit())),\
     &= #distance_spiking_functions. $
 
+    === La nécessité d'une fonction de spiking lipschitzienne
     C'est ici que nous comprenons pourquoi il est nécessaire de modifier la définition de la fonction #spiking_function_raw. Si #spiking_function_raw était L-lipschitz, nous pourrions majorer #distance_spiking_functions par $L abs(#membrane_potential() - #membrane_potential_limit())$.
-    Le problème est de trouver une fonction lipschitz mais qui puisse tout de même approcher le comportement de l'indicatrice présente dans #spiking_function_raw. La figure @benchmark_replace_indicator montre quelques fonctions qui ont été étudiées pour approcher l'indicatrice. La fonction retenue sera finalement une modification de la fonction tangente hyperbolique :
+    Le problème est de trouver une fonction qui soit lipschitz mais qui puisse tout de même approcher le comportement de l'indicatrice présente dans #spiking_function_raw. La figure @benchmark_replace_indicator montre quelques fonctions qui ont été étudiées pour approcher l'indicatrice. La fonction retenue sera finalement #spiking_function_lip_raw une modification de la fonction tangente hyperbolique :
 
     // Définition de la nouvelle fonction de spiking lipschitzienne
     #let spiking_steepness = $k$
     #let spiking_function_lipschitz_def = $1/2 (1 + tanh(#spiking_steepness (v - #max_potential)))$
-    #let spiking_function_lipschitz = $phi.alt$
+    #let spiking_function_lipschitz = $#spiking_function_lip_raw (v)$
     #numbered_equation(
-        $#spiking_function_lipschitz = #spiking_function_lipschitz_def.$,
+        $ #spiking_function_lipschitz = #spiking_function_lipschitz_def. $,
         <def_spiking_f_lipschitz>
     )
-    Dans @def_spiking_f_lipschitz #spiking_steepness est un paramètre de raideur qui contrôle la vitesse de transition entre les régimes de non-spiking et de spiking.\
-    Cette fonction présente l'avantage d'être infiniment dérivable et lipschitzienne avec une constante de Lipschitz $L = #spiking_steepness/4$, ce qui nous permet d'appliquer les techniques classiques de la théorie du champ moyen. De plus, en choisissant #spiking_steepness suffisamment grand, nous pouvons faire converger $#spiking_function_lipschitz$ vers la fonction indicatrice originale tout en conservant les propriétés de régularité nécessaires à la démonstration.
+    Dans @def_spiking_f_lipschitz, #spiking_steepness est un paramètre de raideur qui contrôle la vitesse de transition entre les régimes de non-spiking et de spiking.\
 
     #figure(image("../figures/benchmark_replace_indicator.png"), caption: [Exemples de fonction lipschitz pouvant remplacer]) <benchmark_replace_indicator>
 
-    Ainsi, en utilisant la lipschitzianité de #spiking_function_raw :
+    // Variables pour la preuve
+    #let lipschitz_constant = $L$
+
+    #proposition([Lipschitzianité de la fonction de spiking lissée])[
+        La fonction $#spiking_function_lipschitz = 1/2 (1 + tanh(#spiking_steepness (v - #max_potential)))$ est lipschitzienne avec une constante de Lipschitz $#lipschitz_constant = #spiking_steepness/2$.
+    ]<prop_spiking_function_lipschitz>
+
+    #proof()[
+        Pour démontrer la lipschitzianité de #spiking_function_lip_raw, nous allons montrer que sa dérivée est bornée, puis appliquer le théorème des accroissements finis.
+
+        === Calcul de la dérivée
+
+        Calculons d'abord la dérivée de #spiking_function_lip_raw :
+        #let deriv_spiking_function_lip_raw = $attach(#spiking_function_lip_raw, tr: ')$
+        #let deriv_spiking_function_lipschitz = $#deriv_spiking_function_lip_raw (v)$
+        $ 
+        #deriv_spiking_function_lipschitz &= frac(d, d x) [1/2 (1 + tanh(#spiking_steepness (x - #max_potential)))],\
+        &= #spiking_steepness/2 [1 - tanh(#spiking_steepness (v - #max_potential))^2].
+        $
+
+        === Majoration de la dérivée
+
+        Comme $tanh(u) in (-1, 1)$ pour tout $u in #reals$, nous avons :
+        $ tanh^2(u) in [0, 1). $
+
+        Par conséquent :
+        $ #deriv_spiking_function_lipschitz <= #spiking_steepness/2. $
+
+        === Application du théorème des accroissements finis
+
+        Maintenant que nous avons montré que $#deriv_spiking_function_lipschitz <= #spiking_steepness/2$ pour tout $x in #reals$, nous pouvons appliquer le théorème des accroissements finis.
+
+        Pour tous $x, y in #reals$, il existe $xi in [min(x,y), max(x,y)]$ tel que :
+        $ #spiking_function_lip_raw (x) - #spiking_function_lip_raw (y) = #deriv_spiking_function_lip_raw (xi)(x - y) $
+
+        En prenant la valeur absolue : 
+        $ |#spiking_function_lip_raw (x) - #spiking_function_lip_raw (y)| = |#deriv_spiking_function_lip_raw (xi)| dot |x - y| <= #spiking_steepness/2 dot |x - y|. $
+
+        La fonction $#spiking_function_lipschitz$ est donc lipschitzienne avec une constante de Lipschitz $#lipschitz_constant = #spiking_steepness/2$.
+    ]
+    
+    /*
+    #remark([Optimalité de la constante de Lipschitz])[
+        La constante $#lipschitz_constant = #spiking_steepness/2$ est optimale car elle est effectivement atteinte. En effet, considérons les points $x_1 = #max_potential - epsilon/#spiking_steepness$ et $x_2 = #max_potential + epsilon/#spiking_steepness$ pour $epsilon$ petit. Quand $epsilon -> 0$, le rapport $frac(|#spiking_function_lipschitz (x_2) - #spiking_function_lipschitz (x_1)|, |x_2 - x_1|)$ tend vers $#spiking_steepness/2$.
+    */
+
+    Ainsi, en appliquant @prop_spiking_function_lipschitz pour majorer #proba(alone_spike_event) :
     #numbered_equation(
-        $ #proba(alone_spike_event) <= L #distance_activation(). $,
+        $ #proba(alone_spike_event) <= #spiking_steepness/2 #distance_activation(). $,
         <majoration_probability_alone_spike_event>
     )
 
 
     Si nous reprenons @majoration_distance_activation_2 avec @majoration_probability_alone_spike_event et en majorant #proba(no_spike_event) par $1$, nous obtenons :
-    #numbered_equation($ #distance_activation(t : $t+1$) <=  (1 + L + #deactivation_probability)#distance_activation(). $, <majoration_distance_activation_finale>)
+    #numbered_equation($ #distance_activation(t : $t+1$) <=  (1 + #spiking_steepness/2 + #deactivation_probability)#distance_activation(). $, <majoration_distance_activation_finale>)
 
     Grâce à cette dernière ligne, nous avons désormais la première pièce du puzzle. Si nous réécrivons @distance_globale, nous pouvons dire que :
     #numbered_equation(
-        $ #distance_globale(t: $t+1$) <= #distance_potential(t: $t+1$) + (1 + L + #deactivation_probability)#distance_activation(). $, <majoration_distance_globale_1>
+        $ #distance_globale(t: $t+1$) <= #distance_potential(t: $t+1$) + (1 + #spiking_steepness/2 + #deactivation_probability)#distance_activation(). $, <majoration_distance_globale_1>
     )
     Passons à présent à la majoration de #distance_potential(t: $t+1$).
 
@@ -361,7 +408,7 @@ Le @theorem_propagation_chaos possède un corollaire direct (@theoreme_convergen
     )
 
     Si nous combinons la première pièce du puzzle @majoration_distance_globale_1 avec la seconde @majoration_distance_potential_finale, nous obtenons enfin,
-    $ #distance_globale(t: $t+1$) &<= L(#max_potential + 1) + 1)#distance_globale() + 1/(2 sqrt(N)) + (1 + L + #deactivation_probability)#distance_activation(),\
+    $ #distance_globale(t: $t+1$) &<= L(#max_potential + 1) + 1)#distance_globale() + 1/(2 sqrt(N)) + (1 + #spiking_steepness/2 + #deactivation_probability)#distance_activation(),\
     &<= C #distance_globale() + 1/(2 sqrt(N)), $
     avec $C$ la constante suivante : $C = max(L(#max_potential + 1) + 1, 1 + L + #deactivation_probability)$.
 

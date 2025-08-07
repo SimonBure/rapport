@@ -435,7 +435,7 @@ Le @theorem_propagation_chaos possède un corollaire direct (@theoreme_convergen
     En notant $Kappa = sum_(k=0)^(t-1)C^k$, nous voilà arrivé au bout de la preuve du @theorem_propagation_chaos ! #place(right, $square.stroked$)
 ]
 
-== Mesure invariante
+== Mesure stationnaire
 #let regenering_state = $(0, 1)$
 #let time_before_regen = $T_#regenering_state$
 
@@ -448,8 +448,22 @@ Le @theorem_propagation_chaos possède un corollaire direct (@theoreme_convergen
 
 #let mesure_stationnaire(state: $(v, a)$) = $pi^#max_potential_limit (#state)$
 
-L'objectif de cette section est de calculer la mesure invariante, ou stationnaire, associée à la chaîne de Markov limite $#chain_limit() = #neuron_limit()$ étudiée dans la partie précédente.
+Cette section répond à plusieurs objectifs :
++ introduire et définir la mesure invariante, ou stationnaire, associée à notre chaîne de Markov limite $#chain_limit() = #neuron_limit()$.
++ faire émerger une condition suffisante sur les paramètres du modèle pour garantir l'existence d'une activité persistente pour la chaîne limite (rappellons qu'activité persistente signifie stockage de l'information à court-terme dans la mémoire de travail).
 
+De façon générale pour notre modèle, la mesure stationnaire est une *mesure de probabilité* descriptive de l'état "moyen" de la chaîne de Markov, dans l'hypothèse de champ moyen (infinité de neurones en interaction). Dans notre contexte, elle représente la *proportion de temps* qu'un neurone passe dans chaque état $(v, a)$. Il est aussi possible de la voir comme la *proportion de neurones* dans chaque état $(v, a)$.
+
+=== Définition
+Cela nous permet de définir la *mesure stationnaire* de notre processus limite de la façon suivante. Prenons $v in #space_value_potential$ et $a in #space_value_activation$ :
+$ #mesure_stationnaire() = 1 / #mean_time_before_regen #mean_time_spent_in_state(state: $(v, a)$). $
+#todo("Justifier définition mesure stationnaire")
+
+La variable aléatoire #time_spent_in_state() représente le *temps passsé* dans l'état $(v, 1)$ par la chaîne.\
+
+Nous avons besoin des concepts d'état régénrant et de temps moyen passé dans l'état.
+
+=== État régénérant
 Pour la chaîne de Markov $#chain() = #neuron()$, l'état #regenering_state est un *état de régénération*, pour lequel la chaîne perd tout lien avec le passé.
 
 Introduisons maintenant $#time_before_regen$, le temps, *aléatoire*, que met #chain() pour arriver à l'état #regenering_state en partant de celui-ci. Formellement :
@@ -465,11 +479,7 @@ Alors,
 // Pour plus de clarté, notons à partir de maintenant $#max_potential_limit = K$.
 // #let max_potential_limit = $K$
 
-Cela nous permet de définir la *mesure stationnaire* de notre processus limite de la façon suivante. Prenons $v in #space_value_potential$ et $a in #space_value_activation$ :
-$ #mesure_stationnaire() = 1 / #mean_time_before_regen #mean_time_spent_in_state(state: $(v, a)$). $
-#todo("Justifier définition mesure stationnaire")
 
-La variable aléatoire #time_spent_in_state() représente le *temps passsé* dans l'état $(v, 1)$ par la chaîne.\
 
 Son calcul, et celui de #mean_time_spent_in_state() va dépendre des valeurs prises par $v$.
 
@@ -508,6 +518,7 @@ $ #mesure_stationnaire(state: $(K gamma, 0)$) = 1 - (sum_(a=0)^1 sum_(v=0)^((K-1
 
 === Équilibres de la mesure stationnaire
 Trouver les équilibres de la mesure stationnaire revient à (...)
+Mesure stationnaire (k*gamma, 0 ou 1) = proportion du temps qu'un neurone passe dans un état donné (k*gamma, 1) 
 #todo("Justifier l'étude des équilibres avec la mémoire")
 
 #let unknown = $gamma$
@@ -528,12 +539,12 @@ Ainsi trouver les points d'équilibre de la mesure stationnaire revient à réso
 #numbered_equation($ f(#unknown) = #unknown - #point_eq = 0. $, <equation_equilibre>)
 
 À cause de la fonction partie entière, cette équation n'est pas triviale à résoudre.\
-Premièrement, pour $#unknown -> 0$, l'@equation_equilibre admet une solution, triviale, correspondant à l'absorption du système en zéro.
+Premièrement, pour $#unknown -> 0$, l'@equation_equilibre admet une solution, triviale, correspondant à l'absorption du système en zéro. Cette absorption correspond à l'état d'oubli de l'élément mémoriel.
 
 Cependant, nous sommes à la recherche d'équilibres non nuls, qui pourraient correspondre à (...).
 #todo([Interpréter solution des équilibres])
 
-Grâce à @allure_f_gamma, et à @equation_equilibre, nous pouvons voir que $f$ est une fonction *croissante* et *continue par morceau*.
+Grâce à @allure_f_gamma, et à @equation_equilibre, nous pouvons voir que $f$ est une fonction *continue par morceau* et *croissante*.
 
 Énonçons la proposition @existence_equilibres, nous donnant une condition suffisante pour assurer l'existence d'un équilibre non trivial à @equation_equilibre.
 

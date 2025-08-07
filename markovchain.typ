@@ -1,7 +1,7 @@
 #import "rules.typ": *
 #import "global_variables.typ": *
 // Rule to avoid references error in sub-chapters when compiling local file
-#show: no-ref
+// #show: no-ref
 
 // Display settings for theorems and proofs
 #show: thmrules.with(qed-symbol: $square$)
@@ -43,6 +43,14 @@ Pour compter le nombre d'états possibles, il suffit de se référer au problèm
 $ abs(cal(X)) = vec(N - 2#max_potential + 1, 2#max_potential + 1). $
 #todo("Donner exemple avec 5 étoiles et 2 barres ?")
 
+== Modéliser la mémoire de travail
+Ce que nous voulons pour représenter un groupe de neurones impliqué dans une tâche de mémorisation à court terme, c'est qu'ils puissent conjointement soutenir une activité neuronale sur un temps arbitrairement long. L'interruption de cette activité, traduirait une perturbation de cette mémorisation, et donc un oubli de l'information d'intérêt.\
+Nous allons petit à petit définir ce que "soutenir une activité neuronale sur un temps arbitrairement long" signifie en termes mathématiques.\
+Tout d'abord, cela signifie que la chaîne de Markov représentant notre système de neurones, ne doit pas être absorbée sur la fenêtre temporelle #time_window sur laquelle nous l'étudions. Ensuite, cela veut dire que sur #time_window, #chain() doit être capable d'émettre en continu des potentiels d'action.\
+Ainsi, pour étudier la mémoire de travail, nous allons nous étudier la chaîne de Markov #chain() sur un espace d'états $cal(X)$ qui ne contient pas les états absorbants.\
+
+Définissons maintenant les états et espaces absorbants.
+
 == Espace absorbant
 === États absorbants
 Le système n'émettra plus aucun saut lorsque :
@@ -72,15 +80,9 @@ Pour $k = 0$, nous avons le cas particulier suivant :
 $ #absorbing_subspace(k: $0$) = {X in #chain_space : mu(#max_potential, 0) + sum_(l=0)^#max_potential mu(l, 1) < #max_potential}. $
  
 #let complement_absorbing_space = $attach(#absorbing_space, tr: complement)$
-Ce que nous voulons pour représenter un groupe de neurones impliqué dans une tâche de mémorisation à court terme, c'est qu'ils puissent conjointement soutenir une activité neuronale sur un temps arbitrairement long. L'interruption de cette activité, traduirait une perturbation de cette mémorisation, et donc un oubli de l'information d'intérêt.\
-Nous allons petit à petit définir ce que "soutenir une activité neuronale sur un temps arbitrairement long" signifie en termes mathématiques.\
-Tout d'abord, cela signifie que la chaîne de Markov représentant notre système de neurones, ne doit pas être absorbée sur la fenêtre temporelle #time_window sur laquelle nous l'étudions. Ensuite, cela veut dire que sur #time_window, #chain() doit être capable d'émettre en continu des potentiels d'action :
+Pour modéliser la fonction de mémoire court-terme, nous étudierons notre chaîne de Markov neuronale sur l'espace complémentaire #complement_absorbing_space, où elle pourra effectivement connaître une activité de spikes indéfiniment.
 
-Pour modéliser la fonction de mémoire court-terme, nous étudierons notre chaîne de Markov neuronale sur l'espace complémentaire #complement_absorbing_space. , où elle pourra effectivement connaître une activité de spikes indéfiniment. Mais cela n'est pas suffisant
-
-#todo("TERMINER L'INTERPRÉTATION MÉMORIELLE & PLACER AU BON ENDROIT")
-
-Étudions maintenant l'irréductibilité de la chaîne de Markov sur cet espace .
+Étudions maintenant l'irréductibilité de la chaîne de Markov sur cet espace.
 
 == Irréductibilité
 === États transitoires et espace transitoire

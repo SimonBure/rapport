@@ -6,6 +6,8 @@
 // Display settings for theorems and proofs
 #show: thmrules.with(qed-symbol: $square$)
 
+#todo("Bien intercaler dans le reste et introduire le besoin de tous les concepts maths")
+
 == Espace des états dans lequel évolue la chaîne
 Chaque neurone peut prendre des valeurs dans l'espace ${0,1,...,#max_potential}times{0,1}$. Le nombre d'état possible est ainsi $2(#max_potential + 1)$. Pour un système à N neurones évoluant dans l'espace $cal(X) = ({0,1,...,#max_potential}times{0,1})^N$, le nombre d'états est donc $abs(cal(X)) = 2(#max_potential + 1)N$.
 
@@ -28,6 +30,7 @@ Par exemple, pour un système contenant $N=10$ neurones dans les bonnes configur
 #let mesure_empirique(state: $x$, v: $v$, a: $a$) = $#state^N_(#v, #a)$
 #let mesure_couche(state: $x$, v: $v$) = mesure_empirique(state: state, v: v, a: $dot$)
 
+#todo("Commencer par introduire besoin d'une mesure empirique")
 La mesure empirique associée à une chaîne de Markov permet de représenter d'une nouvelle façon notre système de neurones. Cette représentation se focalise sur les _couches_ de potentiel de membrane plutôt que sur les neurones individuels (total de $#max_potential + 1$ couches).\
 En language classique, notre mesure empirique permet de compter le nombre de neurones présent à une couche $v$ et dans un état d'activation $a$ quelconques.\
 Dans le cas présent, la mesure empirique est elle-même une chaîne de Markov définie en plus sur un espace d'états plus petit. L'explication sera donnée un peu plus tard.
@@ -44,10 +47,10 @@ $ abs(cal(X)) = vec(N - 2#max_potential + 1, 2#max_potential + 1). $
 #todo("Donner exemple avec 5 étoiles et 2 barres ?")
 
 == Modéliser la mémoire de travail
-Ce que nous voulons pour représenter un groupe de neurones impliqué dans une tâche de mémorisation à court terme, c'est qu'ils puissent conjointement soutenir une activité neuronale sur un temps arbitrairement long. L'interruption de cette activité, traduirait une perturbation de cette mémorisation, et donc un oubli de l'information d'intérêt.\
-Nous allons petit à petit définir ce que "soutenir une activité neuronale sur un temps arbitrairement long" signifie en termes mathématiques.\
-Tout d'abord, cela signifie que la chaîne de Markov représentant notre système de neurones, ne doit pas être absorbée sur la fenêtre temporelle #time_window sur laquelle nous l'étudions. Ensuite, cela veut dire que sur #time_window, #chain() doit être capable d'émettre en continu des potentiels d'action.\
-Ainsi, pour étudier la mémoire de travail, nous allons nous étudier la chaîne de Markov #chain() sur un espace d'états $cal(X)$ qui ne contient pas les états absorbants.\
+#todo("Déplacer ?")
+Ce que nous voulons pour représenter un groupe de neurones impliqué dans une tâche de mémorisation à court terme, c'est qu'ils puissent conjointement soutenir une activité neuronale sur un temps arbitrairement long. L'interruption de cette activité, traduirait une perturbation de cette mémorisation, et donc un oubli de l'information d'intérêt.
+
+Nous avons donc besoin que #chain() soit capable d'émettre en continu des potentiels d'action sur la fenêtre temporelle d'étude #time_window. Comme nous travaillons avec une chaîne de Markov, il vient assez naturellement que nous allons avoir besoin d'étudier l'*absorption* de #chain(). Nous pourrons alors ensuite *conditionner* la chaîne à sa *non-absorption*, impliquant ainsi qu'elle deviendra capable de soutenir une activité persistente de sauts aussi longtemps que nécessaire.\
 
 Définissons maintenant les états et espaces absorbants.
 
@@ -73,6 +76,8 @@ Nous notons #absorbing_space, l'*espace rassemblant les états absorbants et pre
 Pour chaque couche $k$ du système de neurones, nous allons définir un sous-ensemble #absorbing_subspace() et définir #absorbing_space de la façon suivante :
 $ #absorbing_space = union.big_(k=0)^#max_potential #absorbing_subspace(). $
 
+#todo("Donner exemple jouet")
+
 Chaque sous-ensemble #absorbing_subspace() impose une contrainte sur le nombre de neurones actifs dans les couches $l <= k$, de façon à ce que le système ne puisse pas se maintenir dans le temps et finisse nécessairement par tomber dans un état réellement absorbant.\
 Définissons à présent les #absorbing_subspace(). $forall k <= #max_potential$ :
 $ #absorbing_subspace() = {X in #chain_space : space sum_(l = k)^#max_potential mu (l, 1) <= #max_potential - k }. $
@@ -80,25 +85,32 @@ Pour $k = 0$, nous avons le cas particulier suivant :
 $ #absorbing_subspace(k: $0$) = {X in #chain_space : mu(#max_potential, 0) + sum_(l=0)^#max_potential mu(l, 1) < #max_potential}. $
  
 #let complement_absorbing_space = $attach(#absorbing_space, tr: complement)$
-Pour modéliser la fonction de mémoire court-terme, nous étudierons notre chaîne de Markov neuronale sur l'espace complémentaire #complement_absorbing_space, où elle pourra effectivement connaître une activité de spikes indéfiniment.
+Nous venons de caractériser l'espace absorbant #absorbing_space : les configurations où le système finira inévitablement par s'éteindre et perdre toute activité neuronale. Pour modéliser la mémoire de court-terme, nous nous intéressons naturellement au comportement sur l'espace complémentaire #complement_absorbing_space : où le système peut maintenir une activité de spikes indéfiniment.
 
-Étudions maintenant l'irréductibilité de la chaîne de Markov sur cet espace.
+Cependant, la *non-absorption ne suffit pas*. Imaginons un réseau qui, bien que capable de spiker indéfiniment, se retrouve "piégé" dans une région particulière de l'espace d'états sans pouvoir explorer d'autres configurations. Un tel système pourrait maintenir une activité neuronale, mais cette activité serait rigide, incapable de s'adapter ou de représenter différents items mémoriels. Le comportement d'un tel système serait aussi fortement dépendant des conditions initiales, faisant varier la région piège.
+
+Nous voyons ainsi apparaître un nouveau critère pour notre modèle : la nécessité de "flexibilité"; de pouvoir passer d'une configuration à une autre sans se "coincer" dans une sous-région de l'espace des états. Mathématiquement, cela correspond à la notion d'*irréductibilité* : tous les états communiquent entre eux et les conditions de départ n'importent pas sur le comportement à long-terme de la chaîne de Markov. De plus, comme nous le verrons plus loin dans la @section_qsd l'irréductibilité nous garantira l'existence et l'unicité de la *distribution quasi-stationnaire* de notre système, qui permettra de décrire l'activité persistente de notre modèle, comme décrit dans @andreQuasiStationaryApproachMetastability2025.
+
+C'est cette propriété d'irréductibilité que nous allons maintenant établir pour #chain() à partir de la structure même de notre modèle.
 
 == Irréductibilité
-=== États transitoires et espace transitoire
-Certains états du système de neurones ne font pas partie de $cal(A)^complement$ mais ne sont pourtant pas atteignables à partir d'autres états non-absorbants. Nous appellerons les états de ce types les états _transitoires_. Le seul moyen pour notre système de se trouver dans un état transitoire, c'est de commencer dans cet état via les conditions initiales.\
+Comme nous venons de l'expliquer, l'irréducibilité est une propriété essentielle pour garantir la possiblité de #chain() de visiter tous les états de l'espace #complement_absorbing_space. Cependant, du fait de la construction de notre modèle, certains états du système de neurones ne font pas partie de #complement_absorbing_space mais ne sont pourtant pas atteignables à partir d'autres états non-absorbants. C'est par exemple le cas de l'état ne contenant aucun neurone dans la couche $0$ et tous les neurones activés dans la couche $#max_potential$, c'est-à-dire $x$ tel que $x_(0, dot) = 0$ et $x_(#max_potential, 1) = N$. Comme il possède tous ses neurones capables de spiker, c'est bien un état qui n'est pas absorbant. Pourtant, il ne pourra jamais être visité à nouveau car après chaque spike, par définition, il y aura toujours un neurone dans la couche $0$.
 
-Pour illustrer notre propos, prenons l'état ne contenant aucun neurone dans la couche $0$ et tous les neurones activés dans la couche $#max_potential$, c'est-à-dire $x$ tel que $x_(0, dot) = 0$ et $x_(#max_potential, 1) = N$. Comme il possède tous ses neurones capables de spiker, c'est bien un état qui n'est pas absorbant. Il est pourtant transitoire car après son premier spike, et pour toujours après, il y aura toujours un neurone dans la couche $0$, par définition des spikes.\
-Autre exemple : l'état tel que $x_(#max_potential, 1) = N - 1$ et $x_(0, 1) = 1$ est aussi transitoire. En fait, *tout état* qui possède plus de $N - #max_potential$ neurones dans une de ses couches *est transitoire*. Cela est dû au fait qu'il n'est possible de rassembler au maximum que $N - #max_potential$ neurones dans la couche $#max_potential$. À cause des $#max_potential + 1$ couches, il faut un nombre de spikes égal à $#max_potential$ pour amener tous les neurones dans la couche $#max_potential$. Cependant, les $#max_potential$ spikes qui viennt d'être effectués entraînent la dispersion de $#max_potential$ neurones dans les couches inférieures (de $0$ à $#max_potential - 1$).
+Nous appellerons les états de ce types les états _transitoires_, qui ne pourront être atteints autrement que via les conditions initiales du système. Détaillons tout de suite leur définition.
+
+=== États transitoires et espace transitoire
+Un autre exemple d'état transitoire est le suivant : $x_(#max_potential, 1) = N - 1$ et $x_(0, 1) = 1$. Plus généralement, *tout état* qui possède plus de $N - #max_potential$ neurones dans une de ses couches *est transitoire*. Cela est dû au fait que notre modélisation impose l'existence de $#max_potential + 1$ couches, ce qui signifie qu'au moins #max_potential spikes efficaces sont nécessaires pour rassembler les neurones dans la couche #max_potential. Ces #max_potential spikes, entraînent la dispersion de #max_potential neurones dans les couches inférieures. Ainsi #max_potential neurones ne pourront jamais être rassemblés avec les autres et donc au maximum, il ne sera possible de rassembler que $N - #max_potential$ neurones dans une même couche.
+
+#todo("Illustration ?")
 
 Nous définissons donc l'*ensemble des états transitoires* comme suit :
 $ cal(T) = {x in cal(X) : x_(0, dot) = 0} union {x in cal(X) : x_(v, dot) > N - #max_potential, forall v = 0, dots, #max_potential}. $\
 
 #let space_irreducible = $cal(X)_("irr")$
-Pour prouver l'irréductibilité de la chaîne de Markov, nous nous placerons donc sur l'*ensemble des états irréductibles* $#space_irreducible = cal(A)^complement inter cal(T)^complement$.
+Pour prouver formellement l'irréductibilité de la chaîne de Markov, nous nous placerons donc sur l'*ensemble des états irréductibles* $#space_irreducible = cal(A)^complement inter cal(T)^complement$.
 
 #theorem("Irréductibilité chaîne de Markov conditionnellement à la non-absorption")[
-  Conditionnellement à sa présence sur #space_irreducible, la chaîne de Markov $#chain() = #neuron()$ est *irréductible*.
+  La chaîne de Markov $#chain() = #neuron()$ est *irréductible* sur l'espace #space_irreducible.
 ]<theoreme_irreductibilite>
 
 // Opérations des sauts élémentaires
@@ -107,6 +119,18 @@ Pour prouver l'irréductibilité de la chaîne de Markov, nous nous placerons do
 #let operation_deactivation(k: $k$, v: $v$) = $O_d^(#k, #v)$
 
 #proof[
+  #todo("Commencer par expliquer le plan de la preuve")
+  Il nous faut prouver que, pour tout état $x in #space_irreducible$, il existe un nombre fini d'opérations de spikes efficaces, de spikes inefficaces et de désactivations qui permettent d'atteindre n'importe quel autre état $y in #space_irreducible$.
+
+  #todo("Relire et reformuler si besoin")
+  La preuve se présente comme suit :
+  + Définition des opérations élémentaires de sauts de notre chaîne #chain() 
+  + Introduction d'un état de référence $x'''$, atteignable à partir de n'importe quel état $x$ avec quelques opérations.
+  + Définition d'une suite d'états $y^l$, où $y^(l+1)$ est atteignable à partir de $y^l$ avec un nombre fini d'opérations.
+  + Preuve qu'il est possible d'atteinre $y^0$ à partir de $x'''$.
+  + Preuve que $y$ s'atteint grâce à la suite des $y^l$.
+
+  #todo("Illustrer la preuve avec un dessin dans un cas simple à N = 3 et #max_potential = 1")
   Pour la lisibilité de cette preuve, nous commençons par noter : 
   - #operation_efficient_spike() : l'opération de $k$ spikes efficaces,
   - #operation_inefficient_spike() : l'opération de $k$ sauts inefficaces,

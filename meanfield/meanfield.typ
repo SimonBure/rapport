@@ -1,7 +1,7 @@
 #import "../rules.typ": *
 #import "../global_variables.typ": *
 // Rule to avoid references error in sub-chapters when compiling local file
-// #show: no-ref
+#show: no-ref
 
 // Display settings for theorems and proofs
 #show: thmrules.with(qed-symbol: $square$)
@@ -23,17 +23,25 @@
 #let max_potential_limit = $K^#unknown_expectation(t: $$)$
 #let max_potential_limit_val = $ceil(#max_potential/#unknown_expectation_inf)$
 
+Dans les sections précédentes, nous avons introduit un système fini de N neurones et expliqué ses dynamiques de base. Nous avons ensuite vu pourquoi nous avions besoin de propriétés clés comme le conditionnement à la non-absorption et l'irréductibilité pour modéliser la mémoire de travail. Cependant, cette approche présente deux limitations, une opérationnelle et l'autre conceptuelle.
++ *Limitation computationnelle* : l'espace d'états de notre chaîne de Markov #chain() croît exponentiellement avec $N$ ($abs(#chain_space) = 2(#max_potential + 1)^N)$, rendant l'analyse directe impraticable $N$ augmentant.
++ *Réalisme neurobiologique* : un cortex réaliste contient des milliards de neurones, chacun interagissant potentiellement avec un très grand nombre d'autres neurones via leurs synapses. Dans ce contexte, l'influence d'un neurone particulier sur un autre diminue au profit d'une influence "moyenne" de tous les neurones voisins.
 
-L'hypothèse de champ moyen que nous allons faire dans cette partie consiste à considérer un grand nombre de neurones $N$ et à les considérer comme étant tous *identiques*, c'est-à-dire indiscernables et avec les même valeurs pour conditions initiales :
-$ forall (v, a) in {0, 1, dots, #max_potential} times {0, 1},\
-X_0^N = vec((v, a), (v, a), dots.v, (v, a)). $
+L'utilisation de l'hypothèse de champ moyen découle naturellement de ces deux considérations : considérer un *grand nombre* $N$ de neurones identiques et remplacer l'apport individuel de chaque neurone en une interaction "moyenne", identique pour tous.
 
+Cette hypothèse entraînera la nécessité de modifications techniques sur les équations et sur les espaces, pour pouvoir continuer à utiliser le modèle lorsque $N$ tendra vers l'infini, et que #chain() vers un modèle.\
+Ce *modèle limite*, qu'il nous faudra définir formellement, prendra en compte seulement la masse moyenne d'une *infinité* de neurones. Nous verrons que son existence ne pose pas de problème mathématique.\
+Ensuite, toujours dans l'objectif de proposer un modèle rigoureux, nous réaliserons la preuve complète de la convergence du modèle fini vers le modèle limite. Nous verrons que cela nécessitera une modification de la fonction de spike #spiking_function_raw pour que la preuve puisse être réalisable.\
+Enfin, nous étudierons la mesure stationnaire qui nous permettra de décrire le comportement en temps long du modèle limite.
+
+== Spécifications techniques liées à l'hypothèse de champ moyen
+Sous l'hypothèse de champ moyen, les $N$ neurones ont tous les même conditions initiales suivantes :\
+Pour tout $(v, a) in #space_potentiel times {0, 1}$,
+$ X_0^N = vec((v, a), (v, a), dots.v, (v, a)). $
 #set math.vec(delim: none)
 
-Comme les neurones sont indiscernables, nous pouvons les compter simplement et au lieu d'écrire $sum_vec(j = 0, j != i)^N$, écrire directement $sum_(j = 1)^N$.
-
 #let space_potentiel_mf = $attach(#space_potentiel, tr: N)$
-Avec le modèle utilisé dans les parties précédentes, lorsque nous ferons tendre $N$ vers l'infini, la somme $sum_(j = 1)^N #activation()#spiking_indicator()$ explosera. Pour conserver l'intégrité du modèle, nous allons ajouter un facteur $1/N$ pour normaliser cette somme.\
+Avec le modèle fini présenté dans la @section_modele, lorsque nous ferons tendre $N$ vers l'infini, la somme $sum_(j = 1)^N #activation()#spiking_indicator()$ explosera. Pour conserver l'intégrité du modèle, nous allons ajouter un facteur $1/N$ pour normaliser cette somme.\
 Conséquemment à l'ajout de ce terme, l'espace de #membrane_potential() se voit altéré. De $#space_potentiel = #space_value_potential$, discret et incrémenté de 1, il deviendra incrémenté de $1/N$, soit $#space_potentiel_mf = {0, 1/N, 2/N, dots, 1, dots, theta}$. $N$ allant à l'infini, l'espace #space_potentiel_mf deviendra *continu*.
 
 Ainsi l'équation de la dynamique du potentiel de membrane,
@@ -85,9 +93,6 @@ Comme les deux processus limites #neuron_limit() prennent leurs valeurs dans des
 #theorem("Existence des processus limites")[
     Pour tout $t in #time_window$, il existe un unique processus #neuron_limit() avec un #unknown_expectation() associé.
 ]<theorem_existence_processus_limite>
-
-#todo("À valider + développer si besoin preuve existence")
-
 
 == Convergence vers les processus limites
 
@@ -447,6 +452,24 @@ Le @theorem_propagation_chaos possède un corollaire direct (@theoreme_convergen
 #let value_mean_time_before_regen = $#max_potential_limit + 1/#spiking_probability$
 
 #let mesure_stationnaire(state: $(v, a)$) = $pi^#max_potential_limit (#state)$
+
+#todo("Créer le besoin d'une mesure stationnaire")
+Notre modèle de champ moyen décrit la dynamique temporelle des neurones, mais pour comprendre la mémoire de court-terme, nous devons répondre à une question fondamentale : comment se comporte le système à long terme ?
+L'enjeu biologique : La mémoire de court-terme se caractérise par sa capacité à maintenir une information active pendant une durée limitée mais significative. Mathématiquement, cela signifie que le système doit pouvoir soutenir une activité neuronale non-triviale sur des temps longs, avant de finalement "oublier" et retourner au silence.
+Le paradoxe apparent : D'un côté, notre modèle inclut un mécanisme de désactivation (paramètre λ) qui pousse vers l'extinction. De l'autre, le mécanisme de facilitation synaptique (spike → activation) tend à maintenir l'activité. Quelle dynamique l'emporte ? Dans quelles conditions ?
+Questions concrètes que nous devons résoudre :
+
+Existe-t-il des configurations où le système maintient indéfiniment une activité soutenue ?
+Si oui, quelle est la distribution typique des états neuronaux dans ce régime ?
+Comment les paramètres biologiques (β, λ, θ) déterminent-ils cette distribution ?
+
+L'outil mathématique naturel : La mesure stationnaire π de notre processus limite encode précisément cette "distribution typique à long terme". Elle nous dira :
+
+π((v,1)) : la proportion de temps qu'un neurone passe activé au niveau de potentiel v
+π((v,0)) : la proportion de temps désactivé à ce niveau
+
+L'insight crucial : Les points fixes de cette mesure (où γ = E[contributions réseau] reste constant) correspondent aux régimes de mémoire stable. Analyser ces équilibres nous révélera les conditions d'existence de la mémoire dans notre modèle.
+C'est pourquoi nous allons maintenant calculer explicitement cette mesure stationnaire et étudier ses propriétés.
 
 Cette section répond à plusieurs objectifs :
 + introduire et définir la mesure invariante, ou stationnaire, associée à notre chaîne de Markov limite $#chain_limit() = #neuron_limit()$.

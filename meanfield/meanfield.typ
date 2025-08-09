@@ -453,38 +453,30 @@ Le @theorem_propagation_chaos possède un corollaire direct (@theoreme_convergen
 
 #let mesure_stationnaire(state: $(v, a)$) = $pi^#max_potential_limit (#state)$
 
-#todo("Créer le besoin d'une mesure stationnaire")
-Notre modèle de champ moyen décrit la dynamique temporelle des neurones, mais pour comprendre la mémoire de court-terme, nous devons répondre à une question fondamentale : comment se comporte le système à long terme ?
-L'enjeu biologique : La mémoire de court-terme se caractérise par sa capacité à maintenir une information active pendant une durée limitée mais significative. Mathématiquement, cela signifie que le système doit pouvoir soutenir une activité neuronale non-triviale sur des temps longs, avant de finalement "oublier" et retourner au silence.
-Le paradoxe apparent : D'un côté, notre modèle inclut un mécanisme de désactivation (paramètre λ) qui pousse vers l'extinction. De l'autre, le mécanisme de facilitation synaptique (spike → activation) tend à maintenir l'activité. Quelle dynamique l'emporte ? Dans quelles conditions ?
-Questions concrètes que nous devons résoudre :
+La mémoire de travail est un maintien actif d'une information via l'activité persistente des neurones. Si l'activité est perturbée ou si l'information n'est plus nécessaire, elle est oubliée, libérant les neurones. D'un côté, notre modèle inclut un mécanisme de désactivation (paramètre #deactivation_probability) qui pousse la chaîne #chain() vers l'extinction. De l'autre, le mécanisme de facilitation synaptique (spike → activation) tend à maintenir l'activité. Des questions viennent ainsi naturellement : Quelle dynamique l'emporte ? Existe-il un équilibre ? Dans quelles conditions ?
 
-Existe-t-il des configurations où le système maintient indéfiniment une activité soutenue ?
-Si oui, quelle est la distribution typique des états neuronaux dans ce régime ?
-Comment les paramètres biologiques (β, λ, θ) déterminent-ils cette distribution ?
+Notre modèle limite de champ moyen décrit la dynamique temporelle des neurones, mais nous voyons que pour comprendre la mémoire de travail, il faut pouvoir décrire la dynamique à long-terme de ces neurones et voir les comportements typiques qui en émergent. Le comportement qui nous intéresse particulièrement est celui où le système peut soutenir une activité persistente. D'un point de vue mathématique, cela peut s'aborder comme un questionnement sur l'existence d'*états d'équilibres actifs* (autre que les états d'absorption) où le système limite pourrait rester indéfiniment (et donc émettre des potentiels d'action indéfiniment).
 
-L'outil mathématique naturel : La mesure stationnaire π de notre processus limite encode précisément cette "distribution typique à long terme". Elle nous dira :
+La notion d'analyse de l'activité à long-terme (à entendre dans un sens mathématique) de notre chaîne de Markov nous amène à devoir considérer la notion de *mesure stationnaire* pour notre chaîne de Markov.
 
-π((v,1)) : la proportion de temps qu'un neurone passe activé au niveau de potentiel v
-π((v,0)) : la proportion de temps désactivé à ce niveau
+Dans cette optique, cette section répondra à plusieurs objectifs :
++ Introduire et définir la mesure invariante, ou stationnaire pour notre chaîne de Markov $#chain_limit() = #neuron_limit()$.
++ Prouver son existence à l'aide de résultats classiques. 
++ La calculer pour tous les états du système.
++ Étudier l'existence de ses équilibres et en faire émerger une condition sur les paramètres du modèle.
 
-L'insight crucial : Les points fixes de cette mesure (où γ = E[contributions réseau] reste constant) correspondent aux régimes de mémoire stable. Analyser ces équilibres nous révélera les conditions d'existence de la mémoire dans notre modèle.
-C'est pourquoi nous allons maintenant calculer explicitement cette mesure stationnaire et étudier ses propriétés.
+=== Définition et exitence
+De façon générale pour notre modèle, la mesure stationnaire est une *mesure de probabilité* descriptive de l'état "moyen" de la chaîne de Markov #chain(), dans l'hypothèse de champ moyen (infinité de neurones en interaction). Dans notre contexte, elle représente la *proportion de temps* qu'un neurone passe dans chaque état $(v, a)$. Il est aussi possible de la voir comme la *proportion de neurones* dans chaque état $(v, a)$.
 
-Cette section répond à plusieurs objectifs :
-+ introduire et définir la mesure invariante, ou stationnaire, associée à notre chaîne de Markov limite $#chain_limit() = #neuron_limit()$.
-+ faire émerger une condition suffisante sur les paramètres du modèle pour garantir l'existence d'une activité persistente pour la chaîne limite (rappellons qu'activité persistente signifie stockage de l'information à court-terme dans la mémoire de travail).
+#todo("Existence avec résultats théoriques classiques (à mettre en perspective avec la QSD ?)")
 
-De façon générale pour notre modèle, la mesure stationnaire est une *mesure de probabilité* descriptive de l'état "moyen" de la chaîne de Markov, dans l'hypothèse de champ moyen (infinité de neurones en interaction). Dans notre contexte, elle représente la *proportion de temps* qu'un neurone passe dans chaque état $(v, a)$. Il est aussi possible de la voir comme la *proportion de neurones* dans chaque état $(v, a)$.
-
-=== Définition
 Cela nous permet de définir la *mesure stationnaire* de notre processus limite de la façon suivante. Prenons $v in #space_value_potential$ et $a in #space_value_activation$ :
 $ #mesure_stationnaire() = 1 / #mean_time_before_regen #mean_time_spent_in_state(state: $(v, a)$). $
-#todo("Justifier définition mesure stationnaire")
+#todo("Justifier définition mesure stationnaire par un résulat théorique classique")
 
 La variable aléatoire #time_spent_in_state() représente le *temps passsé* dans l'état $(v, 1)$ par la chaîne.\
 
-Nous avons besoin des concepts d'état régénrant et de temps moyen passé dans l'état.
+Nous avons besoin des concepts d'état régénérant et de temps moyen passé dans l'état.
 
 === État régénérant
 Pour la chaîne de Markov $#chain() = #neuron()$, l'état #regenering_state est un *état de régénération*, pour lequel la chaîne perd tout lien avec le passé.

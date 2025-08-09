@@ -1,7 +1,7 @@
 #import "rules.typ": *
 #import "global_variables.typ": *
 // Rule to avoid references error in sub-chapters when compiling local file
-// #show: no-ref
+#show: no-ref
 
 // Display settings for theorems and proofs
 #show: thmrules.with(qed-symbol: $square$)
@@ -29,6 +29,7 @@ Par exemple, pour un système contenant $N=10$ neurones dans les bonnes configur
 // Variables
 #let mesure_empirique(state: $x$, v: $v$, a: $a$) = $#state^N_(#v, #a)$
 #let mesure_couche(state: $x$, v: $v$) = mesure_empirique(state: state, v: v, a: $dot$)
+#let mesure_activation(state: $x$, a: $a$) = mesure_empirique(state: state, v: $dot$, a: a)
 
 #todo("Commencer par introduire besoin d'une mesure empirique")
 La mesure empirique associée à une chaîne de Markov permet de représenter d'une nouvelle façon notre système de neurones. Cette représentation se focalise sur les _couches_ de potentiel de membrane plutôt que sur les neurones individuels (total de $#max_potential + 1$ couches).\
@@ -93,7 +94,7 @@ Nous voyons ainsi apparaître un nouveau critère pour notre modèle : la néces
 
 C'est cette propriété d'irréductibilité que nous allons maintenant établir pour #chain() à partir de la structure même de notre modèle.
 
-== Irréductibilité
+== Irréductibilité <section_irr>
 Comme nous venons de l'expliquer, l'irréducibilité est une propriété essentielle pour garantir la possiblité de #chain() de visiter tous les états de l'espace #complement_absorbing_space. Cependant, du fait de la construction de notre modèle, certains états du système de neurones ne font pas partie de #complement_absorbing_space mais ne sont pourtant pas atteignables à partir d'autres états non-absorbants. C'est par exemple le cas de l'état ne contenant aucun neurone dans la couche $0$ et tous les neurones activés dans la couche $#max_potential$, c'est-à-dire $x$ tel que $x_(0, dot) = 0$ et $x_(#max_potential, 1) = N$. Comme il possède tous ses neurones capables de spiker, c'est bien un état qui n'est pas absorbant. Pourtant, il ne pourra jamais être visité à nouveau car après chaque spike, par définition, il y aura toujours un neurone dans la couche $0$.
 
 Nous appellerons les états de ce types les états _transitoires_, qui ne pourront être atteints autrement que via les conditions initiales du système. Détaillons tout de suite leur définition.
@@ -119,15 +120,13 @@ Pour prouver formellement l'irréductibilité de la chaîne de Markov, nous nous
 #let operation_deactivation(k: $k$, v: $v$) = $O_d^(#k, #v)$
 
 #proof[
-  #todo("Commencer par expliquer le plan de la preuve")
-  Il nous faut prouver que, pour tout état $x in #space_irreducible$, il existe un nombre fini d'opérations de spikes efficaces, de spikes inefficaces et de désactivations qui permettent d'atteindre n'importe quel autre état $y in #space_irreducible$.
-
-  #todo("Relire et reformuler si besoin")
+  Il nous faut prouver que, pour tout état $x in #space_irreducible$, il est possible d'atteindre n'importe quel autre état $y in #space_irreducible$ avec probabilité positive. Autrement dit, il existe un nombre fini d'opérations de spikes efficaces, de spikes inefficaces ou de désactivations qui permettent d'atteindre n'importe quel état $y$ en partant de $x$. Toutes ces opérations peuvent advenir avec probabilité positive, car la chaîne #chain() évolue sur l'espace #space_irreducible où, nous l'avons vu en @section_irr, elle est capable de soutenir indéfiniment une activité de sauts.
+  
   La preuve se présente comme suit :
-  + Définition des opérations élémentaires de sauts de notre chaîne #chain() 
-  + Introduction d'un état de référence $x'''$, atteignable à partir de n'importe quel état $x$ avec quelques opérations.
+  + Définition des notations utilisées pour représenter les opérations élémentaires de sauts de notre chaîne #chain().
+  + Introduction d'un état de référence $x'''$, atteignable à partir de n'importe quel état $x$ en quelques opérations.
   + Définition d'une suite d'états $y^l$, où $y^(l+1)$ est atteignable à partir de $y^l$ avec un nombre fini d'opérations.
-  + Preuve qu'il est possible d'atteinre $y^0$ à partir de $x'''$.
+  + Preuve qu'il est possible d'atteindre $y^0$ à partir de $x'''$.
   + Preuve que $y$ s'atteint grâce à la suite des $y^l$.
 
   #todo("Illustrer la preuve avec un dessin dans un cas simple à N = 3 et #max_potential = 1")
@@ -136,29 +135,31 @@ Pour prouver formellement l'irréductibilité de la chaîne de Markov, nous nous
   - #operation_inefficient_spike() : l'opération de $k$ sauts inefficaces,
   - #operation_deactivation() : l'opération de désactivation de $k$ neurones à la couche $v$.
 
-  Pour un état $x in #space_irreducible$, ces opérations peuvent advenir avec une probabilité positive puisque l'espace #space_irreducible peut supporter un nombre $k$ arbitraire de spikes.
+  Ainsi la notation $#operation_efficient_spike() (x)$ désigne l'opération de $k$ spikes efficaces depuis l'état $x$. Ces $k$ spikes peuvent advenir tous en un seul pas de temps, si l'état $x$ le permet (i.e. s'il possède au moins $k$ neurones en couche #max_potential). Mais ils peuvent être également effectué dans un ordre quelconque. Lorsque la distinction est nécessaire, cela sera précisé.
 
-  Ainsi la notation $#operation_efficient_spike() (x)$ désigne l'opération de $k$ spikes efficaces depuis l'état $x$. Ces $k$ spikes peuvent advenir tous en un seul pas de temps, si l'état $x$ le permet (i.e. s'il possède au moins $k$ neurones en couche #max_potential). Mais ils peuvent être également effectué dans un ordre quelconque. Lorsque la distinction est nécessaire, cela sera précisé.\
-
-  Soit $x, y in #space_irreducible$. Notons $m = x_(dot, 0)$, le nombre de neurones désactivés de l'état $x$. Nous allons montrer que nous pouvons toujours atteindre en un nombre fini d'opérations, un état $x'''$ où tous les neurones sont activés (soit $x'''_(dot, 1) = N$) et avec $N - #max_potential$ neurones à la couche $#max_potential$ ($x'''_(#max_potential, 1) = N - #max_potential$) ainsi qu'un neurone par couche inférieure ($x'''_(v, 1) = 1, space forall v = 0, 1, dots, #max_potential - 1$). Cela se produit comme suit :
+  Montrons d'abord que nous pouvons toujours atteindre en un nombre fini d'opérations, un état $x'''$ où tous les neurones sont activés (soit $#mesure_activation(state: $x'''$,a: $1$) = N$) et avec $N - #max_potential$ neurones à la couche $#max_potential$ ($#mesure_activation(state: $x'''$,a: $1$) = N - #max_potential$) ainsi qu'un neurone par couche inférieure ($#mesure_empirique(state: $x'''$, a: $1$) = 1, space forall v = 0, 1, dots, #max_potential - 1$). Notons $m = #mesure_activation(state: $x'''$,a: $0$)$, le nombre de neurones désactivés de l'état $x$. L'état $x'''$ s'atteint de la façon suivante :
   $ &x' = #operation_efficient_spike(k: max_potential) (x),\
   & x'' =  #operation_inefficient_spike(k: $m$) (x') "où" m "est le nombre de neurones désactivés",\
   & x''' = underbrace(#operation_efficient_spike(k: $1$) compose #operation_efficient_spike(k: $1$) dots compose #operation_efficient_spike(k: $1$), #max_potential "fois") (x''). $
 
-  D'où $x'''$ tel que $x'''_(#max_potential, 1) = N - #max_potential$ et $x'''_(v, 1) = 1, space forall v = 0, 1, dots, #max_potential - 1$.
+  D'où $x'''$ tel que $#mesure_empirique(state: $x'''$, v: max_potential, a: $1$) = N - #max_potential$ et $#mesure_empirique(state: $x'''$, v: $v$, a: $1$) = 1, space forall v = 0, 1, dots, #max_potential - 1$.
   
-  À partir de cet état $x'''$, montrons que nous pouvons atteindre l'état $y$ en un nombre fini d'opérations. Cet état $y in #space_irreducible$ se définit de façon très générale par son nombre de neurones dans chaque couche.\
-  Ainsi, $forall v in #space_potentiel$ :
-  $ y = vec((#mesure_empirique(state: $y$, v: max_potential, a: 0), #mesure_empirique(state: $y$, v: max_potential, a: 0)), dots.v, (#mesure_empirique(state: $y$, a: 0), #mesure_empirique(state: $y$, a: 0)), dots.v, (#mesure_empirique(state: $y$, v: $0$, a: 0), #mesure_empirique(state: $y$, v: $0$, a: 0))) $
+  À partir de cet état $x'''$, montrons que nous pouvons atteindre l'état $y$ en un nombre fini d'opérations à travers une suite d'états $y^l$. Depuis l'état $x'''$, il est possible d'atteindre le premier élément de la suite $y^0$. Puis, à partir de chaque élément $y^l$, l'élement suivant $y^(l+1)$ s'atteint avec toujours la même séquence d'opérations. La suite se poursuit jusqu'à ce que $l = #max_potential$. Enfin, à partir de $y^#max_potential$, l'état quelconque d'arrivée $y$ s'atteint également en quelques opérations de désactivation.
+  
+  Cet état $y in #space_irreducible$ se définit de façon très générale par son nombre de neurones dans chaque couche. Ainsi, $forall v in #space_potentiel$ :
+  $ y = vec((#mesure_empirique(state: $y$, v: max_potential, a: 0), #mesure_empirique(state: $y$, v: max_potential, a: 0)), dots.v, (#mesure_empirique(state: $y$, a: 0), #mesure_empirique(state: $y$, a: 0)), dots.v, (#mesure_empirique(state: $y$, v: $0$, a: 0), #mesure_empirique(state: $y$, v: $0$, a: 0))). $
 
-  Nous allons prouver cela en définissant une suite $y^l$ qui permet, depuis $x'''$, d'atteindre l'état $y$ avec une probabilité positive. La suite se définit de la façon suivante : pour obtenir $y^(l+1)$ à partir de $y^l$, on désactive à la couche #max_potential $#mesure_couche(state: $y$, v: $#max_potential - l$) - 1$ neurones (soit le nombre total de neurones à la couche $#max_potential - l$ moins un) puis on fait *ce même nombre de spikes inefficaces*. Ces deux opérations permettent de récupérer $#mesure_couche(state: $y$, v: $#max_potential - l$) - 1$ neurones en couche $(0, 1)$.
-  Nous construisons de cette façon progressivement l'état $y$ en amenant l'exacte quantité de neurones qu'il possède à chaque couche à la bonne couche finale. Cela commence par ailleurs pour l'étape $l=0$ par amener #mesure_couche(state: $y$, v: max_potential) en $(0, 1)$.
-  Enfin, on fait *un spike efficace* pour monter les #mesure_couche(state: $y$, v: $#max_potential - l$) neurones à la couche supérieure.\ Formellement, cela donne initialement :
+  Définissons tout d'abord la suite d'états $y^l$. Pour obtenir $y^(l+1)$ à partir de $y^l$, on désactive à la couche #max_potential le nombre $#mesure_couche(state: $y$, v: $#max_potential - l$) - 1$ de neurones (soit le nombre total de neurones à la couche $#max_potential - l$ moins un) puis on fait *ce même nombre de spikes inefficaces*. Ces deux opérations permettent de récupérer $#mesure_couche(state: $y$, v: $#max_potential - l$) - 1$ neurones en couche $(0, 1)$.\
+  Nous construisons de cette façon progressivement l'état $y$ en amenant l'exacte quantité de neurones qu'il possède à chaque couche à la bonne couche finale. Cela commence par ailleurs pour l'étape $l=0$ par amener #mesure_couche(state: $y$, v: max_potential) en $(0, 1)$.\
+  Enfin, on fait *un spike efficace* pour monter les #mesure_couche(state: $y$, v: $#max_potential - l$) neurones à la couche supérieure.\
+  
+  Formellement, cela donne initialement :
   $ y^0 = #operation_inefficient_spike(k: mesure_couche(state: $y$, v: max_potential)) compose #operation_deactivation(k: mesure_couche(state: $y$, v: max_potential), v: max_potential) (x'''), $
   ainsi que plus généralement :
   $ forall l in {0, dots, #max_potential - 1}, space y^(l+1) = #operation_efficient_spike(k: $1$) compose #operation_inefficient_spike(k: $#mesure_couche(state: $y$, v: $#max_potential - l$) - 1$) compose #operation_deactivation(k: $#mesure_couche(state: $y$, v: $#max_potential - l$) - 1$, v: max_potential) (y^l). $
 
-  Enfin, nous désactivons le bon nombre de neurones dans toutes les couches pour arriver à $y$ : $ y = O_(d, v)^(y_(v, 0)) (y^#max_potential), space forall v = 0, dots, #max_potential. $
+  Enfin, nous désactivons le bon nombre de neurones dans toutes les couches pour arriver à $y$ :
+  $ forall v = 0, dots, #max_potential, space y = #operation_deactivation(k: 1, v: $v$) (y^#max_potential). $
 
   Ce qui conclut la preuve.
 ]

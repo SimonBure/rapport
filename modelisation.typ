@@ -1,11 +1,13 @@
 #import "rules.typ" : *
 #import "global_variables.typ": *
+// Rule to avoid references error in sub-chapters when compiling local file
+// #show: no-ref
 
 == Définition du système
 Nous définissons l'état du système de neurones par le processus stochastique suivant $ X_t = vec(X_t^1, dots.v, X_t^N) $ où $ X_t^i = #neuron(). $
 Chaque neurone $i$ est donc représenté par un couple #neuron() où :
 - La variable aléatoire $#membrane_potential()$ représente le _potentiel de membrane_ ou _voltage_, au temps $t$, avec $#membrane_potential() in #space_value_potential$.
-- La variable aléatoire $#activation()$ représente l'état d'_activation_ de la synapse du neurone au temps $t$, avec $#activation() in #space_value_activation$.
+- La variable aléatoire $#activation()$ représente l'état d'_activation_ de la synapse du neurone au temps $t$, avec $#activation() in #space_value_activation$. Elle permet de rendre compte de la plasticité synaptique à court-terme, mécanisme important dans le phénomène cognitif de la mémoire de travail.
 Notons $cal(F_t)$ la filtration associée au processus global.\
 Notre modélisation se fait en temps discret. Pour un $T in bb(N)$ tel que $T > 0$, nous définissons :
 $ t in #time_interval. $
@@ -23,7 +25,6 @@ Ainsi en utilisant $phi.alt$ et la variable auxiliaire uniforme #auxiliary_unifo
 Nous appelerons l'_indicatrice de spike_ le terme #spiking_indicator() et à l'inverse _indicatrice d'absence de spike_ le terme #non_spiking_indicator.\
 Nous pouvons donc résumer la dynamique du potentiel de membrane du neurone $i$ à travers le temps par l'équation suivante :
 #potential_dynamics
-
 
 === Désactivation
 La dynamique d'activation des neurones par deux événements : le *spike* et la *désactivation*. Lorsque le neurone $i$ émet un spike au temps $t+1$, il devient *systématiquement activé*, c'est-à-dire que $#activation(t: $t+1$) = 1$.\

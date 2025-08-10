@@ -9,11 +9,11 @@
 #todo("Bien intercaler dans le reste et introduire le besoin de tous les concepts maths")
 
 == Espace des états dans lequel évolue la chaîne
-Chaque neurone peut prendre des valeurs dans l'espace ${0,1,...,#max_potential}times{0,1}$. Le nombre d'état possible est ainsi $2(#max_potential + 1)$. Pour un système à N neurones évoluant dans l'espace $cal(X) = ({0,1,...,#max_potential}times{0,1})^N$, le nombre d'états est donc $abs(cal(X)) = 2(#max_potential + 1)N$.
+Chaque neurone peut prendre des valeurs dans l'espace ${0,1,...,#max_potential}times{0,1}$. Le nombre d'état possible est ainsi $2(#max_potential + 1)$. Pour un système à N neurones évoluant dans l'espace $#chain_space = ({0,1,...,#max_potential}times{0,1})^N$, le nombre d'états est donc $abs(#chain_space) = 2(#max_potential + 1)N$.
 
 == Transitions de la chaîne de Markov
-Soit $x in cal(X)$ un état possible du système de neurones. Nous notons $ x = vec(x_1, dots.v, x_N) "avec" x_i = (v_i, a_i). $ Nous avons bien sûr $x_i in {0, 1, dots, #max_potential}times{0, 1}, space forall i in {1, dots, N}$.\
-Depuis cet état $x$, nous définissons trois transitions élémentaires possibles, vers un état $y in cal(X)$ :
+Soit $x in #chain_space$ un état possible du système de neurones. Nous notons $ x = vec(x_1, dots.v, x_N) "avec" x_i = (v_i, a_i). $ Nous avons bien sûr $x_i in #space_potentiel times {0, 1}, space forall i in {1, dots, N}$.\
+Depuis cet état $x$, nous définissons trois transitions élémentaires possibles, vers un état $y in #chain_space$ :
 - *Spike inefficace menant à l'activation d'un neurone* : notons $i$ l'indice du neurone effectuant le spike. La transition suivante survient avec probabilité $beta$ : $ vec((v_1, a_1), (v_2, a_2), dots.v, (v_i, a_i) = (#max_potential, 0), dots.v, (v_N, a_N)) --> vec((v_1, a_1), (v_2, a_2), dots.v, (v_i, a_i) = (0, 1), dots.v, (v_N, a_N)). $
 
 - *Désactivation d'un neurone* : ici aussi, $i$ est l'indice $i$ du neurone se désactivant. Le système subit la transition suivante avec probabilité $lambda$, $ vec((v_1, a_1), dots.v, (v_i, a_i) = (v_i, 1), dots.v, (v_N, a_N)) --> vec((v_1, a_1), dots.v, (v_i, a_i) = (v_i, 0), dots.v, (u_N, f_N)). $
@@ -44,7 +44,7 @@ Introduisons également la notation suivante #mesure_couche(), qui nous sera uti
 #numbered_equation($ #mesure_couche() = sum_(i = 1)^N #dirac($(#membrane_potential(), #activation())$) (v, 0) + #dirac($(#membrane_potential(), #activation())$) (v, 1). $, <def_mesure_couche>)
  
 Pour compter le nombre d'états possibles, il suffit de se référer au problème canonique de combinatoire : le nombre de façon de séparer un nombre $n$ de $star$ par un nombre $m$ de $|$. Cela donne
-$ abs(cal(X)) = vec(N - 2#max_potential + 1, 2#max_potential + 1). $
+$ abs(#chain_space) = vec(N - 2#max_potential + 1, 2#max_potential + 1). $
 #todo("Donner exemple avec 5 étoiles et 2 barres ?")
 
 == Modéliser la mémoire de travail
@@ -105,9 +105,9 @@ Un autre exemple d'état transitoire est le suivant : $x_(#max_potential, 1) = N
 #todo("Illustration ?")
 
 Nous définissons donc l'*ensemble des états transitoires* comme suit :
-$ cal(T) = {x in cal(X) : x_(0, dot) = 0} union {x in cal(X) : x_(v, dot) > N - #max_potential, forall v = 0, dots, #max_potential}. $\
+$ cal(T) = {x in #chain_space : x_(0, dot) = 0} union {x in #chain_space : x_(v, dot) > N - #max_potential, forall v = 0, dots, #max_potential}. $\
 
-#let space_irreducible = $cal(X)_("irr")$
+#let space_irreducible = $attach(#chain_space, br: "irr")$
 Pour prouver formellement l'irréductibilité de la chaîne de Markov, nous nous placerons donc sur l'*ensemble des états irréductibles* $#space_irreducible = cal(A)^complement inter cal(T)^complement$.
 
 #theorem("Irréductibilité chaîne de Markov conditionnellement à la non-absorption")[

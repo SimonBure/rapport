@@ -57,3 +57,20 @@
 #let potential_dynamics = [#set math.vec(delim: none)
   $ #membrane_potential(t: $t+1$) = #non_spiking_indicator (#membrane_potential() + sum_vec(j=0, j!=i)^N #activation(i: $j$)#spiking_indicator(i: $j$)). $
 ]
+
+// Champ moyen
+#let membrane_potential(t: $t$, i: $i$) = $V_#t^(#i, N)$
+#let activation(t: $t$, i: $i$) = $A_#t^(#i, N)$
+
+#let distance_activation(t: $t$, i: $i$) = $delta_#t^(#i, N)$
+#let distance_potential(t: $t$) = $d_#t^(i, N)$
+#let distance_globale(t: $t$) = $D_#t^(i, N)$
+
+#let network_contributions(t: $t$, i: $i$) = $#spiking_indicator(t: t, i: i)#activation(t: t, i: i)$
+#let network_contributions_limit(t: $t$, i: $i$) = $#spiking_indicator_limit(i: i)#activation_limit(t: t, i: i)$
+#let non_spiking_indicator_limit = $#indicator($#auxiliary_uniform(t: $t+1$) > #spiking_function(v: membrane_potential_limit())$)$
+
+#let unknown_expectation(t: $t$) = $gamma_#t$
+#let unknown_expectation_inf = $#unknown_expectation(t: $$)^*$
+#let max_potential_limit = $K^#unknown_expectation(t: $$)$
+#let max_potential_limit_val = $ceil(#max_potential/#unknown_expectation_inf)$

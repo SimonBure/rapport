@@ -67,20 +67,24 @@
 @bremaudDiscreteProbabilityModels2017
 @darrochQuasiStationaryDistributionsAbsorbing1965
 
-= Modélisation
+= Modélisation <section_modele>
 #include "modelisation.typ"
 
-= Étude de la chaîne de Markov associée
+= Étude de la chaîne de Markov associée <section_markov>
 #include "markovchain.typ"
 
-= Limite en champ moyen du processus
-#include "meanfield/meanfield.typ"
+= Limite en champ moyen du processus <section_mf>
+#include "meanfield.typ"
+
+= Mesure stationnaire du modèle limite <section_mesure_sta>
+#include "mesure_sta.typ"
+
+= Distribution quasi-stationnaire <section_qsd>
 
 = Conclusion
 #include "conclusion.typ"
 
-= Références
-#bibliography("biblio.bib", title: "Références", style: "ieee")
+#bibliography("biblio.bib", title: "Références", style: "apa")
 
-= Appendice
+= Annexes
 #include "appendix.typ"

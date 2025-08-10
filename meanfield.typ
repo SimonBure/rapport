@@ -31,7 +31,6 @@ Ainsi l'équation de la dynamique du potentiel de membrane,
 s'écrit désormais 
 $ #membrane_potential(t: $t+1$) = #non_spiking_indicator (#membrane_potential() + 1/N sum_(j=1)^N #network_contributions(i: $j$)) $
 
-
 == Processus limites
 Nous allons noter #membrane_potential_limit() et #activation_limit() les valeurs des *processus limites* de potentiel de membrane et d'activation pour le neurone $i$ au temps $t$. Remarquons de suite que les processus #membrane_potential() et #membrane_potential_limit() partagent tous les deux la même variable #auxiliary_uniform().
 
@@ -53,7 +52,11 @@ Supposons que
     $ #unknown_expectation() = #expectation(network_contributions_limit()). $, <definition_unknown_expectation>
 )
 
-Intuitivement, cela signifie qu'à chaque pas de temps, le potentiel de membrane limite #membrane_potential_limit() augmente d'une quantité fixée #unknown_expectation(), inconnue et dépendante du temps.
+Intuitivement, cela signifie qu'à chaque pas de temps, le potentiel de membrane limite #membrane_potential_limit() augmente d'une quantité fixée #unknown_expectation(), inconnue et dépendante du temps. Remarquons d'ailleurs que :
+
+#remark("Non-absorption de la chaîne limite")[
+  Grâce à l'ajout des contributions moyennes #unknown_expectation() à chaque pas de temps, la chaîne limite #chain_limit() ne peut jamais être absorbée.
+] <rmk_non_absorption_chaine_limite>
 
 Cependant, comme nous travaillons sur une fenêtre temporelle fixée #time_window, les valeurs de #unknown_expectation() sont fixées, et au nombre de $T+1$. Elles peuvent s'écrire, par exemple,
 $ #unknown_expectation(t: $0$), #unknown_expectation(t: $1$), dots, #unknown_expectation(t: $T$). $
@@ -62,12 +65,13 @@ Parmi ces $T+1$ valeurs, notons #unknown_expectation_inf la plus petite :
 $ #unknown_expectation_inf = inf{#unknown_expectation(), forall t in #time_window}, $
 et #time_inf le temps où $#unknown_expectation() = #unknown_expectation_inf.$
 
+Ceci permet de fixer les valeurs prises par la variable aléatoire #membrane_potential_limit() sur la fenêtre temporelle #time_window. Notons d'ailleurs #space_potentiel_limite(), l'espace de ces valeurs. #space_potentiel_limite() reste un espace discret, mais indescriptible car dépendant de toutes les valeurs inconnues de #unknown_expectation(). Cela en fait un espace beaucoup plus grand que l'espace #space_potentiel où évolue #membrane_potential(). 
 
-Ceci permet de fixer les valeurs prises par la variable aléatoire #membrane_potential_limit() sur la fenêtre temporelle #time_window. Notons d'ailleurs #space_potentiel_limite(), l'espace de ces valeurs.
+Nous noterons #space_chain_limit l'espace des états de #chain_limit().
 
 Le potentiel limite #membrane_potential_limit() se comporte de la même façon que le potentiel fini. Comme lui, il sera en capacité d'émettre un potentiel d'action après avoir dépassé le potentiel seuil $#max_potential$.\
 Notons #max_potential_limit, la valeur maximale, qui dépendra des #unknown_expectation(), que peut prendre le potentiel de membrane limite. #max_potential_limit correspond au nombre minimal de pas nécessaires à #membrane_potential_limit() pour dépasser #max_potential. #max_potential_limit est donc un *entier positif*, défini de la façon suivante : 
-$ #max_potential_limit = #max_potential_limit_val. $
+#numbered_equation($ #max_potential_limit = #max_potential_limit_val. $, <def_max_potential_limite>)
 
 
 == Existence des processus limites

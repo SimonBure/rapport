@@ -23,7 +23,7 @@ La mémoire de travail est un maintien actif d'une information via l'activité p
 
 Notre modèle limite de champ moyen décrit la dynamique temporelle des neurones, mais nous voyons que pour comprendre la mémoire de travail, il faut pouvoir décrire la dynamique à long-terme de ces neurones et voir les comportements typiques qui en émergent. Le comportement qui nous intéresse particulièrement est celui où le système peut soutenir une activité persistente. D'un point de vue mathématique, cela peut s'aborder comme un questionnement sur l'existence d'*états d'équilibres actifs* (autre que les états d'absorption) où le système limite pourrait rester indéfiniment (et donc émettre des potentiels d'action indéfiniment).
 
-La notion d'analyse de l'activité à long-terme (à entendre dans un sens mathématique) de notre chaîne de Markov nous amène à devoir considérer la notion de *mesure stationnaire* pour notre chaîne de Markov.
+La notion d'analyse de l'activité à long-terme (à entendre dans un sens mathématique) de notre chaîne de Markov limite amène l'étude de la  *mesure stationnaire* associée à notre chaîne de Markov limite #chain_limit().
 
 Dans cette optique, cette section répondra à plusieurs objectifs :
 + Introduire et définir la mesure invariante, ou stationnaire pour notre chaîne de Markov $#chain_limit() = #neuron_limit()$.
@@ -36,7 +36,23 @@ De façon générale pour notre modèle, la mesure stationnaire est une *mesure 
 
 Pour prouver l'*existence* de cette mesure et garantir son *unicité*, appuyons-nous sur les résultats classiques en probabilités. Si nous pouvons montrer que notre chaîne de Markov limite #chain_limit() est irréductible et apériodique sur son espace d'états fini $#space_potentiel_mf times {0, 1}$, nous aurons montré qu'une unique mesure stationnaire existe.
 
+#theorem("Irréductibilité de la chaîne limite")[
+  La chaîne de Markov #chain_limit() est irréductible sur son espace d'état #space_chain_limit.
+] <thm_chaine_limite_irr>
+#proof()[
+  Cette preuve est philosophiquement similaire à la preuve du @theoreme_irreductibilite. Elle reste cependant plus simple grâce à plusieurs points importants. La @rmk_non_absorption_chaine_limite nous dit que la chaîne limite #chain_limit() ne peut pas être absorbée du fait de l'ajout des contributions moyennes #unknown_expectation() à chaque pas de temps. Il n'y a donc pas d'états absorbants ou presque-absorbants qui pourraient poser problème. Par le même argument, il n'y a pas non plus d'états transitoires qu'il faudrait éviter pour avoir une irréducibilité formelle.
 
+  Par contrainte temporelle, ce qui est proposé ici est seulement une ébauche de preuve. Nous allons montrer qu'il est possible, à partir d'un état quelconque $x in #space_chain_limit$ d'atteindre un état de référence $y$ avec probabilité positive. Ensuite, nous établirons qu'à partir d'$y$, n'importe quel état $z in #space_chain_limit$ est atteignable avec probabilité positive.
+
+  // Nous utiliserons les même notations pour les opérations que pour la preuve du @theoreme_irreductibilite. Ces opérations peuvent toujours advenir avec probabilité positive, puisque notre chaîne limite #chain_limit() ne peut jamais être absorbée.
+
+  Soit $y$ l'état où :
+  - tous les neurones sont dans la couche la plus haute définie en @def_max_potentiel_limite (c'est-à-dire #max_potential_limit dans le cas de la chaîne limite #chain_limit()) : $#mesure_couche(state: $y$, v: max_potential_limit) = N$.
+  - tous les neurons sont actifs : $#mesure_activation(state: $y$, a: $1$) = N$.
+  Cet état est facilement atteignable à partir de n'importe quel état $x$. Il suffit d'abord d'attendre #max_potential_limit pas de temps sans aucun saut, amenant tous les neurones à la couche #max_potential_limit. Puis ensuite d'effectuer $N$ sauts, activant tous les neurones. Enfin, dans le cas où $N < #max_potential_limit$, il suffit d'attendre encore $#max_potential_limit - N$ pas de temps pour avoir de nouveau tous les neurones dans la couche #max_potential_limit. Toutes les étapes précédentes ont une probabilité positive d'advenir par construction du modèle limite.
+
+  Finalelement, nous pouvons nous douter (et c'est la partie moins formelle de cette preuve) qu'atteindre un état $z$ soit possible à partir de $y$ en faisant spiker les neurones dans le bon ordre pour que tous atteignent leur couche finale dans $z$ (tout en corrigeant pour prendre en compte les ajouts #unknown_expectation() à chaque pas de temps). Nous n'irons malheureusement pas plus loin par manque de temps.
+]
 
 Il existe plusieurs résultats très classiques pour définir la mesure stationnaire.
 Cela nous permet de définir la *mesure stationnaire* de notre processus limite de la façon suivante. Prenons $v in #space_potentiel_limite()$ et $a in #space_value_activation$ :

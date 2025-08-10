@@ -59,6 +59,11 @@
   $ #membrane_potential(t: $t+1$) = #non_spiking_indicator (#membrane_potential() + sum_vec(j=0, j!=i)^N #activation(i: $j$)#spiking_indicator(i: $j$)). $
 ]
 
+// Mesures empiriques
+#let mesure_empirique(state: $x$, v: $v$, a: $a$) = $#state^N_(#v, #a)$
+#let mesure_couche(state: $x$, v: $v$) = mesure_empirique(state: state, v: v, a: $dot$)
+#let mesure_activation(state: $x$, a: $a$) = mesure_empirique(state: state, v: $dot$, a: a)
+
 // Champ moyen
 #let membrane_potential(t: $t$, i: $i$) = $V_#t^(#i, N)$
 #let activation(t: $t$, i: $i$) = $A_#t^(#i, N)$
@@ -77,3 +82,5 @@
 #let max_potential_limit_val = $ceil(#max_potential/#unknown_expectation_inf)$
 
 #let time_inf = $t^*$
+
+#let space_chain_limit = overline(chain_space)

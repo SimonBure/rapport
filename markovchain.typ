@@ -6,8 +6,6 @@
 // Display settings for theorems and proofs
 #show: thmrules.with(qed-symbol: $square$)
 
-#todo("Bien intercaler dans le reste et introduire le besoin de tous les concepts maths")
-
 == Espace des états dans lequel évolue la chaîne
 Chaque neurone peut prendre des valeurs dans l'espace ${0,1,...,#max_potential}times{0,1}$. Le nombre d'état possible est ainsi $2(#max_potential + 1)$. Pour un système à N neurones évoluant dans l'espace $#chain_space = ({0,1,...,#max_potential}times{0,1})^N$, le nombre d'états est donc $abs(#chain_space) = 2(#max_potential + 1)N$.
 
@@ -26,11 +24,6 @@ Par exemple, pour un système contenant $N=10$ neurones dans les bonnes configur
 
 
 == Mesure empirique
-// Variables
-#let mesure_empirique(state: $x$, v: $v$, a: $a$) = $#state^N_(#v, #a)$
-#let mesure_couche(state: $x$, v: $v$) = mesure_empirique(state: state, v: v, a: $dot$)
-#let mesure_activation(state: $x$, a: $a$) = mesure_empirique(state: state, v: $dot$, a: a)
-
 #todo("Commencer par introduire besoin d'une mesure empirique")
 La mesure empirique associée à une chaîne de Markov permet de représenter d'une nouvelle façon notre système de neurones. Cette représentation se focalise sur les _couches_ de potentiel de membrane plutôt que sur les neurones individuels (total de $#max_potential + 1$ couches).\
 En language classique, notre mesure empirique permet de compter le nombre de neurones présent à une couche $v$ et dans un état d'activation $a$ quelconques.\
@@ -144,7 +137,7 @@ Pour prouver formellement l'irréductibilité de la chaîne de Markov, nous nous
 
   D'où $x'''$ tel que $#mesure_empirique(state: $x'''$, v: max_potential, a: $1$) = N - #max_potential$ et $#mesure_empirique(state: $x'''$, v: $v$, a: $1$) = 1, space forall v = 0, 1, dots, #max_potential - 1$.
   
-  À partir de cet état $x'''$, montrons que nous pouvons atteindre l'état $y$ en un nombre fini d'opérations à travers une suite d'états $y^l$. Depuis l'état $x'''$, il est possible d'atteindre le premier élément de la suite $y^0$. Puis, à partir de chaque élément $y^l$, l'élement suivant $y^(l+1)$ s'atteint avec toujours la même séquence d'opérations. La suite se poursuit jusqu'à ce que $l = #max_potential$. Enfin, à partir de $y^#max_potential$, l'état quelconque d'arrivée $y$ s'atteint également en quelques opérations de désactivation.
+  À partir de cet état $x'''$, montrons que nous pouvons atteindre l'état $y$ en un nombre fini d'opérations à travers une suite d'états $y^l$. Depuis l'état $x'''$, il est possible d'atteindre le premier élément de la suite $y^0$. Puis, à partir de chaque élément $y^l$, l'élement suivant $y^(l+1)$ s'atteint avec toujours la même séquence d'opérations. La suite se poursuit jusqu'à ce que $l = #max_potential - 1$. Enfin, à partir de $y^#max_potential$, l'état quelconque d'arrivée $y$ s'atteint également en quelques opérations de désactivation.
   
   Cet état $y in #space_irreducible$ se définit de façon très générale par son nombre de neurones dans chaque couche. Ainsi, $forall v in #space_potentiel$ :
   $ y = vec((#mesure_empirique(state: $y$, v: max_potential, a: 0), #mesure_empirique(state: $y$, v: max_potential, a: 0)), dots.v, (#mesure_empirique(state: $y$, a: 0), #mesure_empirique(state: $y$, a: 0)), dots.v, (#mesure_empirique(state: $y$, v: $0$, a: 0), #mesure_empirique(state: $y$, v: $0$, a: 0))). $

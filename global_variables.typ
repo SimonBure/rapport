@@ -27,6 +27,7 @@
 
 // Espaces
 #let space_potentiel = $cal(V)$
+#let space_potentiel_mf = $attach(#space_potentiel, tr: N)$
 #let space_potentiel_limite(T: $T$) = $overline(cal(V))_#T$
 #let space_value_potential = ${0, 1, dots, #max_potential}$
 #let space_value_activation = ${0, 1}$
@@ -74,3 +75,5 @@
 #let unknown_expectation_inf = $#unknown_expectation(t: $$)^*$
 #let max_potential_limit = $K^#unknown_expectation(t: $$)$
 #let max_potential_limit_val = $ceil(#max_potential/#unknown_expectation_inf)$
+
+#let time_inf = $t^*$

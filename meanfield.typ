@@ -23,11 +23,10 @@ Pour tout $(v, a) in #space_potentiel times {0, 1}$,
 $ X_0^N = vec((v, a), (v, a), dots.v, (v, a)). $
 #set math.vec(delim: none)
 
-#let space_potentiel_mf = $attach(#space_potentiel, tr: N)$
 Avec le modèle fini présenté dans la @section_modele, lorsque nous ferons tendre $N$ vers l'infini, la somme $sum_(j = 1)^N #activation()#spiking_indicator()$ explosera. Pour conserver l'intégrité du modèle, nous allons ajouter un facteur $1/N$ pour normaliser cette somme.\
 Conséquemment à l'ajout de ce terme, l'espace de #membrane_potential() se voit altéré. De $#space_potentiel = #space_value_potential$, discret et incrémenté de 1, il deviendra incrémenté de $1/N$, soit $#space_potentiel_mf = {0, 1/N, 2/N, dots, 1, dots, theta}$. $N$ allant à l'infini, l'espace #space_potentiel_mf deviendra *continu*.
 
-Ainsi l'équation de la dynamique du potentiel de membrane,
+Ainsi l'équation de la dynamique du potentiel de membrane, 
 #potential_dynamics
 s'écrit désormais 
 $ #membrane_potential(t: $t+1$) = #non_spiking_indicator (#membrane_potential() + 1/N sum_(j=1)^N #network_contributions(i: $j$)) $
@@ -59,7 +58,6 @@ Intuitivement, cela signifie qu'à chaque pas de temps, le potentiel de membrane
 Cependant, comme nous travaillons sur une fenêtre temporelle fixée #time_window, les valeurs de #unknown_expectation() sont fixées, et au nombre de $T+1$. Elles peuvent s'écrire, par exemple,
 $ #unknown_expectation(t: $0$), #unknown_expectation(t: $1$), dots, #unknown_expectation(t: $T$). $
 
-#let time_inf = $t^*$
 Parmi ces $T+1$ valeurs, notons #unknown_expectation_inf la plus petite :
 $ #unknown_expectation_inf = inf{#unknown_expectation(), forall t in #time_window}, $
 et #time_inf le temps où $#unknown_expectation() = #unknown_expectation_inf.$
@@ -176,7 +174,7 @@ Le @theorem_propagation_chaos possède un corollaire direct (@theoreme_convergen
     )
     Dans @def_spiking_f_lipschitz, #spiking_steepness est un paramètre de raideur qui contrôle la vitesse de transition entre les régimes de non-spiking et de spiking.\
 
-    #figure(image("../figures/benchmark_replace_indicator.png"), caption: [Exemples de fonction lipschitz pouvant remplacer]) <benchmark_replace_indicator>
+    #figure(image("figures/benchmark_replace_indicator.png"), caption: [Exemples de fonction lipschitz pouvant remplacer]) <benchmark_replace_indicator>
 
     // Variables pour la preuve
     #let lipschitz_constant = $L$

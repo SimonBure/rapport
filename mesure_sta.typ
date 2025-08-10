@@ -34,13 +34,13 @@ Dans cette optique, cette section répondra à plusieurs objectifs :
 === Définition et existence
 De façon générale pour notre modèle, la mesure stationnaire est une *mesure de probabilité* descriptive de l'état "moyen" de la chaîne de Markov #chain_limit() après un temps long. Dans notre contexte, elle représente la *proportion de temps* qu'un neurone passe dans chaque état $(v, a)$. Il est aussi possible de la voir comme la *proportion de neurones* dans chaque état $(v, a)$.
 
-Pour prouver l'*existence* de cette mesure et garantir son *unicité*, appuyons-nous sur les résultats classiques en probabilités. Si nous pouvons montrer que notre chaîne de Markov limite #chain_limit() est irréductible et apériodique sur son espace d'états fini $#space_potentiel_mf times {0, 1}$, nous aurons montré qu'une unique mesure stationnaire existe.
+Pour prouver l'*existence* de cette mesure et garantir son *unicité*, appuyons-nous sur les résultats classiques en probabilités. Si nous pouvons montrer que notre chaîne de Markov limite #chain_limit() est *irréductible* et *apériodique* sur son espace d'états fini $#space_potentiel_mf times {0, 1}$, nous aurons montré qu'une unique mesure stationnaire existe.
 
-#theorem("Irréductibilité de la chaîne limite")[
+#lemma("Irréductibilité de la chaîne limite")[
   La chaîne de Markov #chain_limit() est irréductible sur son espace d'état #space_chain_limit.
 ] <thm_chaine_limite_irr>
 #proof()[
-  Cette preuve est philosophiquement similaire à la preuve du @theoreme_irreductibilite. Elle reste cependant plus simple grâce à plusieurs points importants. La @rmk_non_absorption_chaine_limite nous dit que la chaîne limite #chain_limit() ne peut pas être absorbée du fait de l'ajout des contributions moyennes #unknown_expectation() à chaque pas de temps. Il n'y a donc pas d'états absorbants ou presque-absorbants qui pourraient poser problème. Par le même argument, il n'y a pas non plus d'états transitoires qu'il faudrait éviter pour avoir une irréducibilité formelle.
+  Cette preuve est philosophiquement similaire à la preuve du @theoreme_irreductibilite. Elle reste cependant plus simple grâce à plusieurs points importants. La @rmk_non_absorption_chaine_limite nous dit que la chaîne limite #chain_limit() ne peut pas être absorbée du fait de l'ajout des contributions moyennes #unknown_expectation() à chaque pas de temps. Il n'y a donc pas d'états absorbants ou presque-absorbants qui pourraient poser problème.
 
   Par contrainte temporelle, ce qui est proposé ici est seulement une ébauche de preuve. Nous allons montrer qu'il est possible, à partir d'un état quelconque $x in #space_chain_limit$ d'atteindre un état de référence $y$ avec probabilité positive. Ensuite, nous établirons qu'à partir d'$y$, n'importe quel état $z in #space_chain_limit$ est atteignable avec probabilité positive.
 
@@ -52,6 +52,15 @@ Pour prouver l'*existence* de cette mesure et garantir son *unicité*, appuyons-
   Cet état est facilement atteignable à partir de n'importe quel état $x$. Il suffit d'abord d'attendre #max_potential_limit pas de temps sans aucun saut, amenant tous les neurones à la couche #max_potential_limit. Puis ensuite d'effectuer $N$ sauts, activant tous les neurones. Enfin, dans le cas où $N < #max_potential_limit$, il suffit d'attendre encore $#max_potential_limit - N$ pas de temps pour avoir de nouveau tous les neurones dans la couche #max_potential_limit. Toutes les étapes précédentes ont une probabilité positive d'advenir par construction du modèle limite.
 
   Finalelement, nous pouvons nous douter (et c'est la partie moins formelle de cette preuve) qu'atteindre un état $z$ soit possible à partir de $y$ en faisant spiker les neurones dans le bon ordre pour que tous atteignent leur couche finale dans $z$ (tout en corrigeant pour prendre en compte les ajouts #unknown_expectation() à chaque pas de temps). Nous n'irons malheureusement pas plus loin par manque de temps.
+]
+
+#lemma("Apériodicité de la chaîne limite")[
+  La chaîne de Markov #chain_limit() est apériodique sur son espace d'état #space_chain_limit.
+]
+#proof()[
+  Le plus simple dans notre cas est de montrer que notre chaîne de Markov #chain_limit() peut, sur un état quelconque $x in #space_chain_limit$, rester dans cet état avec probabilité positive.
+
+  Cela vient immédiatement par cons
 ]
 
 Il existe plusieurs résultats très classiques pour définir la mesure stationnaire.

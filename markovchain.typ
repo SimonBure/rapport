@@ -9,7 +9,7 @@
 == Espace des états dans lequel évolue la chaîne
 Chaque neurone peut prendre des valeurs dans l'espace ${0,1,...,#max_potential}times{0,1}$. Le nombre d'état possible est ainsi $2(#max_potential + 1)$. Pour un système à N neurones évoluant dans l'espace $#chain_space = ({0,1,...,#max_potential}times{0,1})^N$, le nombre d'états est donc $abs(#chain_space) = 2(#max_potential + 1)N$.
 
-== Transitions de la chaîne de Markov
+== Transitions de la chaîne de Markov <section_transitions>
 Soit $x in #chain_space$ un état possible du système de neurones. Nous notons $ x = vec(x_1, dots.v, x_N) "avec" x_i = (v_i, a_i). $ Nous avons bien sûr $x_i in #space_potentiel times {0, 1}, space forall i in {1, dots, N}$.\
 Depuis cet état $x$, nous définissons trois transitions élémentaires possibles, vers un état $y in #chain_space$ :
 - *Spike inefficace menant à l'activation d'un neurone* : notons $i$ l'indice du neurone effectuant le spike. La transition suivante survient avec probabilité $beta$ : $ vec((v_1, a_1), (v_2, a_2), dots.v, (v_i, a_i) = (#max_potential, 0), dots.v, (v_N, a_N)) --> vec((v_1, a_1), (v_2, a_2), dots.v, (v_i, a_i) = (0, 1), dots.v, (v_N, a_N)). $
@@ -17,25 +17,56 @@ Depuis cet état $x$, nous définissons trois transitions élémentaires possibl
 - *Désactivation d'un neurone* : ici aussi, $i$ est l'indice $i$ du neurone se désactivant. Le système subit la transition suivante avec probabilité $lambda$, $ vec((v_1, a_1), dots.v, (v_i, a_i) = (v_i, 1), dots.v, (v_N, a_N)) --> vec((v_1, a_1), dots.v, (v_i, a_i) = (v_i, 0), dots.v, (u_N, f_N)). $
 
 - *Spike efficace* : ici encore, nous notons $i$ l'indice du neurone effectuant le spike. La transition survient avec probabilité #spiking_probability, et s'écrit comme suit :
-$ vec((v_1, a_1), dots.v, (#max_potential, 1), dots.v, (v_N, a_N)) --> vec(([v_1 + 1] and #max_potential, a_1), dots.v, (0, 1), dots.v, ([v_N +1] and #max_potential, a_N)). $
+$
+  vec((v_1, a_1), dots.v, (#max_potential, 1), dots.v, (v_N, a_N)) --> vec(([v_1 + 1] and #max_potential, a_1), dots.v, (0, 1), dots.v, ([v_N +1] and #max_potential, a_N)).
+$
 
-Ces trois transitions élémentaires sont *mutuellement exclusives*, c'est-à-dire que, dans un même intervalle de temps (entre $t$ et $t+1$), un neurone d'indice $i$ ne peut pas se désactiver puis faire une spike inefficace (ou bien effectuer un spike efficace puis se désactiver). Par contre, les $N$ neurones du système dans son ensemble peuvent tout à fait tous, ou en partie, subir une transition de façon indépendante. 
+Ces trois transitions élémentaires sont *mutuellement exclusives*, c'est-à-dire que, dans un même intervalle de temps (entre $t$ et $t+1$), un neurone d'indice $i$ ne peut pas se désactiver puis faire une spike inefficace (ou bien effectuer un spike efficace puis se désactiver). Par contre, les $N$ neurones du système dans son ensemble peuvent tout à fait tous, ou en partie, subir une transition de façon indépendante.
 Par exemple, pour un système contenant $N=10$ neurones dans les bonnes configuration, nous pourrions tout à fait avoir $3$ spikes efficaces, $0$ spike inefficace, et $5$ désactivations pendant le même intervalle temporel.
 
 
 == Mesure empirique
-#todo("Commencer par introduire besoin d'une mesure empirique")
-La mesure empirique associée à une chaîne de Markov permet de représenter d'une nouvelle façon notre système de neurones. Cette représentation se focalise sur les _couches_ de potentiel de membrane plutôt que sur les neurones individuels (total de $#max_potential + 1$ couches).\
-En language classique, notre mesure empirique permet de compter le nombre de neurones présent à une couche $v$ et dans un état d'activation $a$ quelconques.\
-Dans le cas présent, la mesure empirique est elle-même une chaîne de Markov définie en plus sur un espace d'états plus petit. L'explication sera donnée un peu plus tard.
-#todo("Expliquer pourquoi la mesure empirique est aussi une chaîne de Markov")
+Jusqu'à présent, nous avons analysé notre système en suivant individuellement chaque neurone i avec son état #neuron(). Cette approche "microscopique" fournit une description complète, mais n'est pas optimale, comme nous allons le montrer avec les deux arguments suivants.
 
-Soit $x$ un état arbitraire de notre chaîne de Markov #chain() à $N$ neurones. En notant #mesure_empirique(), la mesure empirique du système, nous écrivons la définition suivante, pour tout $v in #space_value_potential$ et tout $a in #space_value_activation$ :
-#numbered_equation($ #mesure_empirique() = sum_(i=1)^N #dirac($(#membrane_potential(), #activation())$) (v, a). $, <def_mesure_empirique>)
+Pour aborder la mémoire de travail, il n'est pas nécessaire de connaître précisément l'identité de chaque neurone. Les informations importantes sur la dynamique se trouve au *niveau collectif* ou macroscopique. Ce qui nous intéresse, c'est connaître la quantité de neurones actifs ou que le nombre de neurones à chaque "marche" de l'escalier du voltage. Ce changement de point de vue entraînerait de plus une *réduction de la complexité computationnelle*, car le modèle se limiterait aux informations intéressantes.
+
+Pour représenter ce changement de paradigme, nous allons définir la *mesure empirique* de notre système et l'utiliser à la place du modèle "micro". Ce changement est possible grâce à un point fondamental et non-évident, qui découle directement de la construction de notre modèle : *la mesure empirique de notre chaîne de Markov est elle-même une chaîne de Markov* définie sur un espace plus petit. Cela permet de se concentrer sur les informations essentielles tout en gardant la cadre théorique agréable des chaînes de Markov.
+
+=== Définition formelle
+La définition de la mesure empirique est classiquement :
+$ #mesure_empirique() (v, a) = 1/N sum_(i=1)^N #dirac($(#membrane_potential(), #activation())$) (v, a). $
+
+Cependant, nous trouvons qu'il est plus clair de travailler avec le compte direct des neurones plutôt qu'avec des proportions. Ainsi, nous allons noter #compte_neurone() le nombre de neurones tels que $#neuron() = (v, a)$.\
+Il vient :\
+Pour tout $v in #space_potentiel$ et tout $a in #space_value_activation$
+$ #compte_neurone() = sum_(i=1)^N #dirac($(#membrane_potential(), #activation())$) (v, a). $
+
+Notre "mesure empirique" sera la suivante :
+$ #mesure_comptage() (v, a) = #compte_neurone(). $
 
 Introduisons également la notation suivante #mesure_couche(), qui nous sera utile pour compter le nombre de neurones possédant un potentiel de membrane $v$, toute variable d'activation confondue. Elle se définit par
-#numbered_equation($ #mesure_couche() = sum_(i = 1)^N #dirac($(#membrane_potential(), #activation())$) (v, 0) + #dirac($(#membrane_potential(), #activation())$) (v, 1). $, <def_mesure_couche>)
- 
+#numbered_equation(
+  $
+    #mesure_couche() = sum_(i = 1)^N #dirac($(#membrane_potential(), #activation())$) (v, 0) + #dirac($(#membrane_potential(), #activation())$) (v, 1).
+  $,
+  <def_mesure_couche>,
+)
+
+=== Propriété de Markov
+De façon plus formelle, remarquons :
+#remark("Propriété de Markov de la mesure empirique")[
+  La représentation de la chaîne #chain() à travers le nombre de neurones à chaque couche #compte_neurone() est elle-même une chaine de Markov.
+]
+
+L'argument est le suivant : comme est construit notre modèle, les neurones sont interchangeables sans que cela impacte la dynamique. La connaissance de la structure macroscopique nous fournit toutes les informations nécessaires pour prédire l'évolution future de la chaîne.\
+Formellement, comme vu dans @section_transitions, les probabilités de transition sont entièrement déterminés par la connaissance de la mesure empirique :
+$
+  #proba_conditional(mesure_comptage(t: $t+1$), filtration()) = #proba_conditional(mesure_comptage(t: $t+1$), mesure_comptage(t: $t+1$)).
+$
+
+Dans la suite du mémoire, lorsque nous invoquerons #chain(), cela fera référence à cette nouvelle chaîne de Markov définit à partir du compte des neurones à chaque couche.
+
+=== Taille du nouvel espace #chain_space
 Pour compter le nombre d'états possibles, il suffit de se référer au problème canonique de combinatoire : le nombre de façon de séparer un nombre $n$ de $star$ par un nombre $m$ de $|$. Cela donne
 $ abs(#chain_space) = vec(N - 2#max_potential + 1, 2#max_potential + 1). $
 #todo("Donner exemple avec 5 étoiles et 2 barres ?")
@@ -76,8 +107,10 @@ Chaque sous-ensemble #absorbing_subspace() impose une contrainte sur le nombre d
 Définissons à présent les #absorbing_subspace(). $forall k <= #max_potential$ :
 $ #absorbing_subspace() = {X in #chain_space : space sum_(l = k)^#max_potential mu (l, 1) <= #max_potential - k }. $
 Pour $k = 0$, nous avons le cas particulier suivant :
-$ #absorbing_subspace(k: $0$) = {X in #chain_space : mu(#max_potential, 0) + sum_(l=0)^#max_potential mu(l, 1) < #max_potential}. $
- 
+$
+  #absorbing_subspace(k: $0$) = {X in #chain_space : mu(#max_potential, 0) + sum_(l=0)^#max_potential mu(l, 1) < #max_potential}.
+$
+
 #let complement_absorbing_space = $attach(#absorbing_space, tr: complement)$
 Nous venons de caractériser l'espace absorbant #absorbing_space : les configurations où le système finira inévitablement par s'éteindre et perdre toute activité neuronale. Pour modéliser la mémoire de court-terme, nous nous intéressons naturellement au comportement sur l'espace complémentaire #complement_absorbing_space : où le système peut maintenir une activité de spikes indéfiniment.
 
@@ -98,7 +131,9 @@ Un autre exemple d'état transitoire est le suivant : $x_(#max_potential, 1) = N
 #todo("Illustration ?")
 
 Nous définissons donc l'*ensemble des états transitoires* comme suit :
-$ cal(T) = {x in #chain_space : x_(0, dot) = 0} union {x in #chain_space : x_(v, dot) > N - #max_potential, forall v = 0, dots, #max_potential}. $\
+$
+  cal(T) = {x in #chain_space : x_(0, dot) = 0} union {x in #chain_space : x_(v, dot) > N - #max_potential, forall v = 0, dots, #max_potential}.
+$\
 
 #let space_irreducible = $attach(#chain_space, br: "irr")$
 Pour prouver formellement l'irréductibilité de la chaîne de Markov, nous nous placerons donc sur l'*ensemble des états irréductibles* $#space_irreducible = cal(A)^complement inter cal(T)^complement$.
@@ -108,13 +143,13 @@ Pour prouver formellement l'irréductibilité de la chaîne de Markov, nous nous
 ]<theoreme_irreductibilite>
 
 // Opérations des sauts élémentaires
-#let operation_efficient_spike(k: $k$)= $O_e^#k$
+#let operation_efficient_spike(k: $k$) = $O_e^#k$
 #let operation_inefficient_spike(k: $k$) = $O_i^#k$
 #let operation_deactivation(k: $k$, v: $v$) = $O_d^(#k, #v)$
 
 #proof[
   Il nous faut prouver que, pour tout état $x in #space_irreducible$, il est possible d'atteindre n'importe quel autre état $y in #space_irreducible$ avec probabilité positive. Autrement dit, il existe un nombre fini d'opérations de spikes efficaces, de spikes inefficaces ou de désactivations qui permettent d'atteindre n'importe quel état $y$ en partant de $x$. Toutes ces opérations peuvent advenir avec probabilité positive, car la chaîne #chain() évolue sur l'espace #space_irreducible où, nous l'avons vu en @section_irr, elle est capable de soutenir indéfiniment une activité de sauts.
-  
+
   La preuve se présente comme suit :
   + Définition des notations utilisées pour représenter les opérations élémentaires de sauts de notre chaîne #chain().
   + Introduction d'un état de référence $x'''$, atteignable à partir de n'importe quel état $x$ en quelques opérations.
@@ -123,33 +158,41 @@ Pour prouver formellement l'irréductibilité de la chaîne de Markov, nous nous
   + Preuve que $y$ s'atteint grâce à la suite des $y^l$.
 
   #todo("Illustrer la preuve avec un dessin dans un cas simple à N = 3 et #max_potential = 1")
-  Pour la lisibilité de cette preuve, nous commençons par noter : 
+  Pour la lisibilité de cette preuve, nous commençons par noter :
   - #operation_efficient_spike() : l'opération de $k$ spikes efficaces,
   - #operation_inefficient_spike() : l'opération de $k$ sauts inefficaces,
   - #operation_deactivation() : l'opération de désactivation de $k$ neurones à la couche $v$.
 
   Ainsi la notation $#operation_efficient_spike() (x)$ désigne l'opération de $k$ spikes efficaces depuis l'état $x$. Ces $k$ spikes peuvent advenir tous en un seul pas de temps, si l'état $x$ le permet (i.e. s'il possède au moins $k$ neurones en couche #max_potential). Mais ils peuvent être également effectué dans un ordre quelconque. Lorsque la distinction est nécessaire, cela sera précisé.
 
-  Montrons d'abord que nous pouvons toujours atteindre en un nombre fini d'opérations, un état $x'''$ où tous les neurones sont activés (soit $#mesure_activation(state: $x'''$,a: $1$) = N$) et avec $N - #max_potential$ neurones à la couche $#max_potential$ ($#mesure_activation(state: $x'''$,a: $1$) = N - #max_potential$) ainsi qu'un neurone par couche inférieure ($#mesure_empirique(state: $x'''$, a: $1$) = 1, space forall v = 0, 1, dots, #max_potential - 1$). Notons $m = #mesure_activation(state: $x'''$,a: $0$)$, le nombre de neurones désactivés de l'état $x$. L'état $x'''$ s'atteint de la façon suivante :
-  $ &x' = #operation_efficient_spike(k: max_potential) (x),\
-  & x'' =  #operation_inefficient_spike(k: $m$) (x') "où" m "est le nombre de neurones désactivés",\
-  & x''' = underbrace(#operation_efficient_spike(k: $1$) compose #operation_efficient_spike(k: $1$) dots compose #operation_efficient_spike(k: $1$), #max_potential "fois") (x''). $
+  Montrons d'abord que nous pouvons toujours atteindre en un nombre fini d'opérations, un état $x'''$ où tous les neurones sont activés (soit $#mesure_activation(state: $x'''$, a: $1$) = N$) et avec $N - #max_potential$ neurones à la couche $#max_potential$ ($#mesure_activation(state: $x'''$, a: $1$) = N - #max_potential$) ainsi qu'un neurone par couche inférieure ($#compte_neurone(state: $x'''$, a: $1$) = 1, space forall v = 0, 1, dots, #max_potential - 1$). Notons $m = #mesure_activation(state: $x'''$, a: $0$)$, le nombre de neurones désactivés de l'état $x$. L'état $x'''$ s'atteint de la façon suivante :
+  $
+    &x' = #operation_efficient_spike(k: max_potential) (x),\
+    & x'' = #operation_inefficient_spike(k: $m$) (x') "où" m "est le nombre de neurones désactivés",\
+    & x''' = underbrace(#operation_efficient_spike(k: $1$) compose #operation_efficient_spike(k: $1$) dots compose #operation_efficient_spike(k: $1$), #max_potential "fois") (x'').
+  $
 
-  D'où $x'''$ tel que $#mesure_empirique(state: $x'''$, v: max_potential, a: $1$) = N - #max_potential$ et $#mesure_empirique(state: $x'''$, v: $v$, a: $1$) = 1, space forall v = 0, 1, dots, #max_potential - 1$.
-  
+  D'où $x'''$ tel que $#compte_neurone(state: $x'''$, v: max_potential, a: $1$) = N - #max_potential$ et $#compte_neurone(state: $x'''$, v: $v$, a: $1$) = 1, space forall v = 0, 1, dots, #max_potential - 1$.
+
   À partir de cet état $x'''$, montrons que nous pouvons atteindre l'état $y$ en un nombre fini d'opérations à travers une suite d'états $y^l$. Depuis l'état $x'''$, il est possible d'atteindre le premier élément de la suite $y^0$. Puis, à partir de chaque élément $y^l$, l'élement suivant $y^(l+1)$ s'atteint avec toujours la même séquence d'opérations. La suite se poursuit jusqu'à ce que $l = #max_potential - 1$. Enfin, à partir de $y^#max_potential$, l'état quelconque d'arrivée $y$ s'atteint également en quelques opérations de désactivation.
-  
+
   Cet état $y in #space_irreducible$ se définit de façon très générale par son nombre de neurones dans chaque couche. Ainsi, $forall v in #space_potentiel$ :
-  $ y = vec((#mesure_empirique(state: $y$, v: max_potential, a: 0), #mesure_empirique(state: $y$, v: max_potential, a: 0)), dots.v, (#mesure_empirique(state: $y$, a: 0), #mesure_empirique(state: $y$, a: 0)), dots.v, (#mesure_empirique(state: $y$, v: $0$, a: 0), #mesure_empirique(state: $y$, v: $0$, a: 0))). $
+  $
+    y = vec((#compte_neurone(state: $y$, v: max_potential, a: 0), #compte_neurone(state: $y$, v: max_potential, a: 0)), dots.v, (#compte_neurone(state: $y$, a: 0), #compte_neurone(state: $y$, a: 0)), dots.v, (#compte_neurone(state: $y$, v: $0$, a: 0), #compte_neurone(state: $y$, v: $0$, a: 0))).
+  $
 
   Définissons tout d'abord la suite d'états $y^l$. Pour obtenir $y^(l+1)$ à partir de $y^l$, on désactive à la couche #max_potential le nombre $#mesure_couche(state: $y$, v: $#max_potential - l$) - 1$ de neurones (soit le nombre total de neurones à la couche $#max_potential - l$ moins un) puis on fait *ce même nombre de spikes inefficaces*. Ces deux opérations permettent de récupérer $#mesure_couche(state: $y$, v: $#max_potential - l$) - 1$ neurones en couche $(0, 1)$.\
   Nous construisons de cette façon progressivement l'état $y$ en amenant l'exacte quantité de neurones qu'il possède à chaque couche à la bonne couche finale. Cela commence par ailleurs pour l'étape $l=0$ par amener #mesure_couche(state: $y$, v: max_potential) en $(0, 1)$.\
   Enfin, on fait *un spike efficace* pour monter les #mesure_couche(state: $y$, v: $#max_potential - l$) neurones à la couche supérieure.\
-  
+
   Formellement, cela donne initialement :
-  $ y^0 = #operation_inefficient_spike(k: mesure_couche(state: $y$, v: max_potential)) compose #operation_deactivation(k: mesure_couche(state: $y$, v: max_potential), v: max_potential) (x'''), $
+  $
+    y^0 = #operation_inefficient_spike(k: mesure_couche(state: $y$, v: max_potential)) compose #operation_deactivation(k: mesure_couche(state: $y$, v: max_potential), v: max_potential) (x'''),
+  $
   ainsi que plus généralement :
-  $ forall l in {0, dots, #max_potential - 1}, space y^(l+1) = #operation_efficient_spike(k: $1$) compose #operation_inefficient_spike(k: $#mesure_couche(state: $y$, v: $#max_potential - l$) - 1$) compose #operation_deactivation(k: $#mesure_couche(state: $y$, v: $#max_potential - l$) - 1$, v: max_potential) (y^l). $
+  $
+    forall l in {0, dots, #max_potential - 1}, space y^(l+1) = #operation_efficient_spike(k: $1$) compose #operation_inefficient_spike(k: $#mesure_couche(state: $y$, v: $#max_potential - l$) - 1$) compose #operation_deactivation(k: $#mesure_couche(state: $y$, v: $#max_potential - l$) - 1$, v: max_potential) (y^l).
+  $
 
   Enfin, nous désactivons le bon nombre de neurones dans toutes les couches pour arriver à $y$ :
   $ forall v = 0, dots, #max_potential, space y = #operation_deactivation(k: 1, v: $v$) (y^#max_potential). $

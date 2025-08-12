@@ -60,7 +60,7 @@
   ]
 )
 
-= Introduction
+= Introduction <intro>
 #include "intro.typ"
 
 @andreQuasiStationaryApproachMetastability2025
@@ -70,7 +70,7 @@
 = Modélisation <section_modele>
 #include "modelisation.typ"
 
-= Étude de la chaîne de Markov associée <section_markov>
+= Étude de la chaîne de Markov associée au modèle <section_markov>
 #include "markovchain.typ"
 
 = Limite en champ moyen du processus <section_mf>
@@ -78,8 +78,6 @@
 
 = Mesure stationnaire du modèle limite <section_mesure_sta>
 #include "mesure_sta.typ"
-
-= Distribution quasi-stationnaire <section_qsd>
 
 = Conclusion
 #include "conclusion.typ"
@@ -89,4 +87,4 @@
 = Annexes
 #include "appendix.typ"
 
-#check-labels()
+// #check-labels()

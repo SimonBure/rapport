@@ -103,7 +103,7 @@
   } else {
     outline_title = "Table of contents"
   }
-  outline(title: outline_title)
+  outline(title: outline_title, depth: 2)
   pagebreak()
 
 }

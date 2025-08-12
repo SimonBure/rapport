@@ -6,7 +6,7 @@
 // Display settings for theorems and proofs
 #show: thmrules.with(qed-symbol: $square$)
 
-Dans les sections précédentes, nous avons introduit un système fini de N neurones et expliqué ses dynamiques de base. Nous avons ensuite vu pourquoi nous avions besoin de propriétés clés comme le conditionnement à la non-absorption et l'irréductibilité pour modéliser la mémoire de travail. Cependant, cette approche présente deux limitations, une opérationnelle et l'autre conceptuelle.
+Dans @section_modele, nous avons introduit un système fini de N neurones et expliqué ses dynamiques de base. Nous avons ensuite vu (@section_markov) pourquoi nous avions besoin de propriétés clés comme le conditionnement à la non-absorption et l'irréductibilité pour modéliser la mémoire de travail. Cependant, cette approche présente deux limitations, une opérationnelle et l'autre conceptuelle.
 + *Limitation computationnelle* : l'espace d'états de notre chaîne de Markov #chain() croît exponentiellement avec $N$ ($abs(#chain_space) = 2(#max_potential + 1)^N)$, rendant l'analyse directe impraticable $N$ augmentant.
 + *Réalisme neurobiologique* : un cortex réaliste contient des milliards de neurones, chacun interagissant potentiellement avec un très grand nombre d'autres neurones via leurs synapses. Dans ce contexte, l'influence d'un neurone particulier sur un autre diminue au profit d'une influence "moyenne" de tous les neurones voisins.
 

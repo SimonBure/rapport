@@ -71,7 +71,7 @@
 
 // Mesures empiriques
 #let mesure_comptage(state: $x$, t: $t$) = $#state^N_#t$
-#let compte_neurone(state: $x$, t: $t$, v: $v$, a: $a$) = $#state^N_#t (#v, #a)$
+#let compte_neurone(state: $x$, t: $t$, v: $v$, a: $a$) = $#state^N_(#v, #a)$
 #let mesure_couche(state: $x$, v: $v$) = compte_neurone(state: state, v: v, a: $dot$)
 #let mesure_activation(state: $x$, a: $a$) = compte_neurone(state: state, v: $dot$, a: a)
 #let mesure_empirique(t: $t$) = $mu_#t^N$ 

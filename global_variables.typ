@@ -102,11 +102,11 @@
 #let regenering_state = $(0, 1)$
 #let time_before_regen = $T_#regenering_state$
 
-#let indicator_chain(state: $(v, 1)$) = $bold(1)_{X_k= #state}$
+#let indicator_chain(state: $(v, 1)$) = $bold(1)_{X_t= #state}$
 #let time_spent_in_state(state: $(v, 1)$) = $sum_(t=1)^(#time_before_regen) #indicator_chain(state: state)$
 #let mean_time_spent_in_state(state: $(v, 1)$) = $bb(E)[#time_spent_in_state(state: state)]$
 
 #let mean_time_before_regen = $bb(E)_(#regenering_state)[T_(#regenering_state)]$
 #let value_mean_time_before_regen = $#max_potential_limit + 1/#spiking_probability$
 
-#let mesure_stationnaire(state: $(v, a)$) = $pi^#max_potential_limit (#state)$
+#let mesure_stationnaire(state: $x = (v, a)$) = $pi^#max_potential_limit (#state)$

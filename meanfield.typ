@@ -70,8 +70,9 @@ Ceci permet de fixer les valeurs prises par la variable aléatoire #membrane_pot
 Nous noterons #space_chain_limit l'espace des états de #chain_limit().
 
 Le potentiel limite #membrane_potential_limit() se comporte de la même façon que le potentiel fini. Comme lui, il sera en capacité d'émettre un potentiel d'action après avoir dépassé le potentiel seuil $#max_potential$.\
-Notons #max_potential_limit, la valeur maximale, qui dépendra des #unknown_expectation(), que peut prendre le potentiel de membrane limite. #max_potential_limit correspond au nombre minimal de pas nécessaires à #membrane_potential_limit() pour dépasser #max_potential. #max_potential_limit est donc un *entier positif*, défini de la façon suivante : 
-#numbered_equation($ #max_potential_limit = #max_potential_limit_val. $, <def_max_potential_limite>)
+Notons #max_potential_limit le nombre de pas de temps minimum nécessaire à un neurone pour que son voltage parte de $0$ et atteigne une valeur supérieure à #max_potential. La valeur de #max_potential_limit dépendra de tous les #unknown_expectation() et donc du temps. Nous le définissons comme :
+#todo("Finir corriger définition")
+#numbered_equation($ #max_potential_limit = \#{tau "tel que" sum_(t=0)^tau #unknown_expectation() > #max_potential}. $, <def_max_potential_limite>)
 
 
 == Existence des processus limites

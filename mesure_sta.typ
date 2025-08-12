@@ -6,19 +6,6 @@
 // Display settings for theorems and proofs
 #show: thmrules.with(qed-symbol: $square$)
 
-// Variables for this section
-#let regenering_state = $(0, 1)$
-#let time_before_regen = $T_#regenering_state$
-
-#let indicator_chain(state: $(v, 1)$) = $bold(1)_{X_k= #state}$
-#let time_spent_in_state(state: $(v, 1)$) = $sum_(t=1)^(#time_before_regen) #indicator_chain(state: state)$
-#let mean_time_spent_in_state(state: $(v, 1)$) = $bb(E)[#time_spent_in_state(state: state)]$
-
-#let mean_time_before_regen = $bb(E)_(#regenering_state)[T_(#regenering_state)]$
-#let value_mean_time_before_regen = $#max_potential_limit + 1/#spiking_probability$
-
-#let mesure_stationnaire(state: $(v, a)$) = $pi^#max_potential_limit (#state)$
-
 La mémoire de travail est un maintien actif d'une information via l'activité persistente des neurones. Si l'activité est perturbée ou si l'information n'est plus nécessaire, elle est oubliée, libérant les neurones. D'un côté, notre modèle inclut un mécanisme de désactivation (paramètre #deactivation_probability) qui pousse la chaîne #chain_limit() vers l'extinction. De l'autre, le mécanisme de facilitation synaptique (spike → activation) tend à maintenir l'activité. Des questions viennent ainsi naturellement : Quelle dynamique l'emporte ? Existe-il un équilibre ? Dans quelles conditions ?
 
 Notre modèle limite de champ moyen décrit la dynamique temporelle des neurones, mais nous voyons que pour comprendre la mémoire de travail, il faut pouvoir décrire la dynamique à long-terme de ces neurones et voir les comportements typiques qui en émergent. Le comportement qui nous intéresse particulièrement est celui où le système peut soutenir une activité persistente. D'un point de vue mathématique, cela peut s'aborder comme un questionnement sur l'existence d'*états d'équilibres actifs* (autre que les états d'absorption) où le système limite pourrait rester indéfiniment (et donc émettre des potentiels d'action indéfiniment).
@@ -26,7 +13,7 @@ Notre modèle limite de champ moyen décrit la dynamique temporelle des neurones
 La notion d'analyse de l'activité à long-terme (à entendre dans un sens mathématique) de notre chaîne de Markov limite amène l'étude de la  *mesure stationnaire* associée à notre chaîne de Markov limite #chain_limit().
 
 Dans cette optique, cette section répondra à plusieurs objectifs :
-+ Introduire et définir la mesure invariante, ou stationnaire pour notre chaîne de Markov $#chain_limit() = #neuron_limit()$.
++ Introduire et définir la mesure invariante, ou stationnaire, pour notre chaîne de Markov $#chain_limit() = #neuron_limit()$.
 + Prouver son existence à l'aide de résultats classiques. 
 + La calculer pour tous les états du système.
 + Étudier l'existence de ses équilibres et en faire émerger une condition sur les paramètres du modèle.
@@ -36,9 +23,16 @@ De façon générale pour notre modèle, la mesure stationnaire est une *mesure 
 
 Pour prouver l'*existence* de cette mesure et garantir son *unicité*, appuyons-nous sur les résultats classiques en probabilités. Si nous pouvons montrer que notre chaîne de Markov limite #chain_limit() est *irréductible* et *apériodique* sur son espace d'états fini $#space_potentiel_mf times {0, 1}$, nous aurons montré qu'une unique mesure stationnaire existe.
 
+#theorem([Existence et unicité de la mesure stationnaire associée à #chain_limit()])[
+  Il existe une unique mesure stationnaire, notée #mesure_stationnaire(), associée à la chaîne de Markov #chain_limit().
+]<thm_unique_mesure_stationnaire>
+#proof()[
+  En prouvant @<lemme_chaine_limite_irr> et @lemme_aperiodicite plus bas, nous prouvons le @thm_unique_mesure_stationnaire.
+]
+
 #lemma("Irréductibilité de la chaîne limite")[
   La chaîne de Markov #chain_limit() est irréductible sur son espace d'état #space_chain_limit.
-] <thm_chaine_limite_irr>
+] <lemme_chaine_limite_irr>
 #proof()[
   Cette preuve est philosophiquement similaire à la preuve du @theoreme_irreductibilite. Elle reste cependant plus simple grâce à plusieurs points importants. La @rmk_non_absorption_chaine_limite nous dit que la chaîne limite #chain_limit() ne peut pas être absorbée du fait de l'ajout des contributions moyennes #unknown_expectation() à chaque pas de temps. Il n'y a donc pas d'états absorbants ou presque-absorbants qui pourraient poser problème.
 
@@ -56,40 +50,56 @@ Pour prouver l'*existence* de cette mesure et garantir son *unicité*, appuyons-
 
 #lemma("Apériodicité de la chaîne limite")[
   La chaîne de Markov #chain_limit() est apériodique sur son espace d'état #space_chain_limit.
-]
+]<lemme_aperiodicite>
 #proof()[
   Le plus simple dans notre cas est de montrer que notre chaîne de Markov #chain_limit() peut, sur un état quelconque $x in #space_chain_limit$, rester dans cet état avec probabilité positive.
 
-  Cela vient immédiatement par cons
+  Prenons l'état $x$ tel que tous les neurones soient actifs, et à la couche #max_potential_limit, soit
+  $ #mesure_activation() = #mesure_couche(v: max_potential_limit) = N. $
+  Il, peut avec probabilité positive et égale à $(1 - #deactivation_probability)^N times (1 - #spiking_probability)^N$ rester dans cet état.
 ]
 
-Il existe plusieurs résultats très classiques pour définir la mesure stationnaire.
-Cela nous permet de définir la *mesure stationnaire* de notre processus limite de la façon suivante. Prenons $v in #space_potentiel_limite()$ et $a in #space_value_activation$ :
-$ #mesure_stationnaire() = #mean_time_spent_in_state(state: $(v, a)$) / #mean_time_before_regen . $
-#todo("Justifier définition mesure stationnaire par un résulat théorique classique")
+Pour définir la *mesure stationnaire*, nous utiliserons le résultat classique suivant :\
+Si $r$ est un état régénérant pour une chaîne de Markov #chain(), alors la mesure stationnaire se définit par :\
+Soit $x$, un état quelconque du système. Notons $pi$ la mesure stationnaire associée à #chain()
+$ pi(x) = (#expectation("Temps passé en x entre deux visites de r")) / (#expectation("Temps entre deux visites de r")) $
 
-La variable aléatoire #time_spent_in_state() représente le *temps passsé* dans l'état $(v, 1)$ par la chaîne.\
+Il nous faut donc trouver un état régénérant pour notre système, afin de définir toutes les quantités nécessaire pour calculer #mesure_stationnaire().
 
-Nous avons besoin des concepts d'état régénérant et de temps moyen passé dans l'état.
+== État régénérant
+Un état est dit "régénérant" pour notre chaîne #chain_limit() si, en le visitant le processus oublie son passé et peut être considéré comme "redémarrant de zéro". Formellement, si $T_r$ est le premier temps de visite de l'état régénérant : 
+$ #proba_conditional(chain_limit(t: $T_r + s$), filtration(t: $T_r$)) = #proba_conditional(chain_limit(t: $s$), $#chain_limit(t: $0$) = r$). $
 
-=== État régénérant
-Pour la chaîne de Markov $#chain() = #neuron()$, l'état #regenering_state est un *état de régénération*, pour lequel la chaîne perd tout lien avec le passé.
+Pour notre système, remarquons que :
 
-Introduisons maintenant $#time_before_regen$, le temps, *aléatoire*, que met #chain() pour arriver à l'état #regenering_state en partant de celui-ci. Formellement :
-$ #time_before_regen = inf{t > 0 : #chain() = #regenering_state "sachant que" #chain(t: $0$) = #regenering_state}. $
+#remark()[
+  L'état #regenering_state est un état de régénération pour la chaîne #chain_limit().
+]
+Cette remarque s'établit pour plusieurs raisons structurelles :
+- Après un potentiel d'action, un neurone termine toujours dans l'état #regenering_state peu importe sa trajectoire passée.
+- Depuis #regenering_state, le neurone peut reprendre un cycle complet d'accumulation de potentiel.
+- La futur évolution à partir de #regenering_state ne dépend que de #regenering_state et non pas de son historique complet. 
 
-Pour calculer #mean_time_before_regen, il suffit de remarquer que la chaîne #chain(), pour retourner en #regenering_state en partant de #regenering_state va nécessairement d'abord effectuer #max_potential_limit sauts successifs, de taille #unknown_expectation_inf chacun. Ensuite, elle devra attendre un temps aléatoire avant d'émettre un potentiel d'action. Ce temps aléatoire suit une loi géométrique de paramètre #spiking_probability.\
-Alors,
-#numbered_equation(
-    $ #mean_time_before_regen = #value_mean_time_before_regen. $,
-    <valeur_temps_avant_regen>
-)
+Introduisons maintenant $#time_before_regen$, le temps *aléatoire* entre deux visites de la chaîne en #regenering_state. Formellement :
+$ #time_before_regen = inf{t > 0 : #chain_limit() = #regenering_state "sachant que" #chain_limit(t: $0$) = #regenering_state}. $
 
-// Pour plus de clarté, notons à partir de maintenant $#max_potential_limit = K$.
-// #let max_potential_limit = $K$
-
+En partant de #regenering_state, un neurone de notre système limite passe par deux dynamiques successives :
+- Croissance *déterministe* du potentiel : le neurone gagne à chaque pas de temps un voltage égal #unknown_expectation(), jusqu'à ce que $#membrane_potential() > #max_potential$. Cette phase dure un temps déterministe égal au nombre de #unknown_expectation() nécessaire pour dépasser #max_potential. Ce nombre a été appelé #max_potential_limit dans la @section_mf, mais nous l'appelerons simplement $K$ dans la suite de cette partie.
+#let max_potential_limit = $K$
+- Potentiel d'action *aléatoire* : le neurone peut spiker, toujours avec probabilité #spiking_probability.
+Bien sûr, il peut également toujours se désactiver avec probabilité #deactivation_probability.
 
 
+#remark()[
+  $ #mean_time_before_regen = #value_mean_time_before_regen. $
+]<valeur_temps_avant_regen>
+
+Pour calculer #mean_time_before_regen, il suffit de remarquer que la chaîne #chain_limit(), pour retourner en #regenering_state en partant de #regenering_state, va nécessairement d'abord effectuer #max_potential_limit sauts successifs, de taille #unknown_expectation_inf chacun. Ensuite, elle devra attendre un temps aléatoire avant d'émettre un potentiel d'action. Ce temps aléatoire suit une loi géométrique de paramètre #spiking_probability.\
+
+Pour plus de clarté, notons à partir de maintenant $#max_potential_limit = K$.
+
+
+== Calculs
 Son calcul, et celui de #mean_time_spent_in_state() va dépendre des valeurs prises par $v$.
 
 === Cas où $v < #max_potential_limit #unknown_expectation_inf$

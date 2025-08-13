@@ -1,7 +1,7 @@
 #import "rules.typ": *
 #import "global_variables.typ": *
 // Rule to avoid references error in sub-chapters when compiling local file
-#show: no-ref
+// #show: no-ref
 
 // Display settings for theorems and proofs
 #show: thmrules.with(qed-symbol: $square$)
@@ -157,7 +157,7 @@ Pour prouver formellement l'irréductibilité de la chaîne de Markov, nous nous
 
 #theorem("Irréductibilité chaîne de Markov conditionnellement à la non-absorption")[
   La chaîne de Markov $#chain() = #neuron()$ est *irréductible* sur l'espace #space_irreducible.
-]
+]<theoreme_irreductibilite>
 
 // Opérations des sauts élémentaires
 #let operation_efficient_spike(k: $k$) = $O_e^#k$

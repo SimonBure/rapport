@@ -1,7 +1,7 @@
 #import "rules.typ": *
 #import "global_variables.typ": *
 // Rule to avoid references error in sub-chapters when compiling local file
-#show: no-ref
+// #show: no-ref
 
 // Display settings for theorems and proofs
 #show: thmrules.with(qed-symbol: $square$)
@@ -156,7 +156,7 @@ En reprenant la définition de #unknown_expectation(), nous pourrons trouver les
 
 === Nouvelle définition de #max_potential_limit
 #let unknown = unknown_expectation(t: $$)
-À la place de @def_max_potential_limite, nous allons utiliser la définition suivante, plus maniable :
+À la place de @def_max_potentiel_limite, nous allons utiliser la définition suivante, plus maniable :
 $ #max_potential_limit = ceil(#max_potential / #unknown_expectation_inf). $
 Rappellons que #unknown_expectation_inf représente la plus petite valeur prise par #unknown_expectation() sur l'intervalle #time_window. Ainsi, #max_potential_limit devient le maximum possible de pas à effectuer pour dépasser de façon certaine le seuil de #max_potential. Cela revient par ailleurs à considérer de nouveau #membrane_potential_limit() comme prenant des valeurs sur un "escalier de potentiel", où chaque marche vaut #unknown_expectation_inf. 
 

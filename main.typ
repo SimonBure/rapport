@@ -83,6 +83,3 @@
 #include "conclusion.typ"
 
 #bibliography("biblio.bib", title: "Références", style: "apa")
-
-= Annexes
-#include "appendix.typ"

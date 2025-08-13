@@ -2,11 +2,33 @@
 // Rule to avoid references error in sub-chapters  when compiling local file
 // #show: no-ref
 
-Pour comprendre comment ce système peut soutenir la mémoire de court-terme, nous allons devoir expliquer :
+La mémoire de travail constitue l'un des piliers fondamentaux de la cognition humaine. Cette capacité à maintenir et manipuler temporairement des informations permet la prise de décision complexe @murrayWorkingMemoryDecisionMaking2017, sous-tend l'apprentissage et la formation de la mémoire à long terme, et s'avère indispensable à toute tâche nécessitant de l'intelligence. 
+
+== Caractéristiques de la mémoire de travail
+Cette fonction cognitive présente des caractéristiques remarquables : une fenêtre temporelle limitée (de quelques secondes à quelques minutes) @andreQuasiStationaryApproachMetastability2025, une forte vulnérabilité aux distractions @andreQuasiStationaryApproachMetastability2025, et surtout une capacité drastiquement restreinte. Alors que Miller avait initialement proposé une limite de "sept plus ou moins deux" éléments @millerMagicalNumberSeven1994, des études plus récentes suggèrent que cette capacité serait encore plus contrainte, se limitant à trois items simultanés @lecompteSevenMinusTwo1999.
+
+== État de l'art de la modélisation
+Ces observations comportementales ont motivé des décennies de recherche sur les mécanismes neuronaux sous-jacents. Trois paradigmes principaux ont émergé pour expliquer le maintien temporaire d'information.\
+Le mécanisme de *persistent spiking*, historiquement identifié par @fusterNeuronActivityRelated1971 dans le cortex préfrontal de primates, repose sur une activité neuronale soutenue durant la période de rétention.\
+Le modèle *activity-silent* @mongilloSynapticTheoryWorking2008 propose alternativement un stockage "silencieux" via des modifications synaptiques temporaires, exploitant la potentiation à court terme pour encoder l'information sans activité continue.\
+Plus récemment, le paradigme du *dynamical coding* @stroudOptimalInformationLoading2023 révèle une image plus complexe où l'information transite par différents régimes d'activité : phases de décharge en bouffées (*bursts*) succédant à des périodes d'activité persistante, avec des populations neuronales distinctes impliquées dans chaque phase. Le dynamical coding serait une façon optimale de stocker de l'information.
+
+Ces découvertes empiriques ont donné naissance à diverses approches de modélisation. Les *modèles déterministes* exploitent la théorie des attracteurs dynamiques, depuis les réseaux de Hopfield  @ramsauerHopfieldNetworksAll2021 optimisés pour le stockage d'items mémoriels, jusqu'aux modèles biophysiques détaillés de Wang et collaborateurs @wangSynapticReverberationUnderlying2001.\
+Parallèlement, les *approches stochastiques* intègrent le bruit neuronal inhérent, des travaux pionniers d'@amitModelGlobalSpontaneous1997 sur les réseaux bruités aux modèles contemporains combinant apprentissage et mémoire @yangSAMUnifiedSelfAdaptive2022 ainsi que le papier de Pouzat et Andre, qui sera la référence pour le travail qui sera effectué dans ce mémoire @andreQuasiStationaryApproachMetastability2025.\
+Ces efforts ont été synthétisés dans plusieurs revues influentes @durstewitzNeurocomputationalModelsWorking2000 @barakWorkingModelsWorking2014 @murrayWorkingMemoryDecisionMaking2017 @oreillyComputationalNeuroscienceModels2023.
+
+== Limitations actuelles et apports de ce mémoire
+Malgré cette richesse conceptuelle, les approches de modélisation biophysiques actuelles souffrent de limitations. La plupart demeurent essentiellement qualitatives, visant à reproduire des comportements empiriques sans fournir de cadre quantitatif rigoureux. Ces modèles "proof-of-concept" manquent de conditions d'existence explicites pour les régimes de mémoire et ne permettent pas de prédictions testables sur les paramètres biologiques critiques.
+
+Ce mémoire vise à combler cette lacune en proposant une modélisation mathématiquement rigoureuse et minimale des dynamiques neuronales sous-tendant la mémoire de court-terme, en se concentrant sur l'*activité neuronale persistente* et son interaction avec la *facilitation synaptique*.\
+Pour comprendre comment ce système peut soutenir la mémoire de court-terme, nous allons devoir expliquer au court de ce mémoire :
 + Comment les neurones peuvent maintenir une activité de spikes sur du long-terme ?
 + Quelles sont les conditions permettant à cette activité d'émerger ?
+Au niveau modélisation, notre travail s'appuie largement sur celui développé dans @andreQuasiStationaryApproachMetastability2025.
 
-== Intérêts
+Nous dépassons les modèles biophysiques traditionnels en proposant un modèle simple mais quantitativement robuste (@section_modele), basé sur la théorie markovienne (@section_markov) et avec des preuves de toutes les propriétés permettant l'émergence de la mémoire court-terme. Puis nous faisons un pas plus loin en amenant un modèle limite, basé sur un développement en champ moyen (@section_mf) et enfin en utilisant la mesure stationaire (@section_mesure_sta) pour proposer une nouvelle définition de la mémoire de travail ainsi qu'une condition facilement testable sur les paramètres biologiques pour qu'existe ce régime où les neurones peuvent soutenir une activité persistente.
 
+Ce travail fournit plusieurs apports par rapport à @andreQuasiStationaryApproachMetastability2025. Premièrement, nous développons une formulation en temps discret qui modifie la structure du processus et nécessite un développement théorique nouveau.\
+Deuxièmement, là où Pouzat et Andre se focalisaient sur l'étude de processus fini en étudiant sa métastabilité au travers de la distribution quasi-stationnaire, nous proposons une autre définition de la mémoire de travail. Celle-ci reposant plutôt sur un modèle limite type champ moyen et la mesure stationnaire associée. Nous établissons rigoureusement ce passage à la limite de champ moyen.\
+Troisièmement, nous proposons une caractérisation de la mémoire via la mesure stationnaire du modèle limite, approche plus tractable que les distributions quasi-stationnaires du système fini et offrant des conditions explicites sur les paramètres biologiques pour l'émergence de régimes où l'information peut être retenue par le réseau.
 
-== Objectifs

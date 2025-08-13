@@ -63,10 +63,6 @@
 = Introduction <intro>
 #include "intro.typ"
 
-@andreQuasiStationaryApproachMetastability2025
-@bremaudDiscreteProbabilityModels2017
-@darrochQuasiStationaryDistributionsAbsorbing1965
-
 = Modélisation <section_modele>
 #include "modelisation.typ"
 

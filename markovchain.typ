@@ -145,8 +145,6 @@ Nous appellerons les états de ce types les états _transitoires_, qui ne pourro
 === États transitoires et espace transitoire
 Un autre exemple d'état transitoire est le suivant : $x_(#max_potential, 1) = N - 1$ et $x_(0, 1) = 1$. Plus généralement, *tout état* qui possède plus de $N - #max_potential$ neurones dans une de ses couches *est transitoire*. Cela est dû au fait que notre modélisation impose l'existence de $#max_potential + 1$ couches, ce qui signifie qu'au moins #max_potential spikes efficaces sont nécessaires pour rassembler les neurones dans la couche #max_potential. Ces #max_potential spikes, entraînent la dispersion de #max_potential neurones dans les couches inférieures. Ainsi #max_potential neurones ne pourront jamais être rassemblés avec les autres et donc au maximum, il ne sera possible de rassembler que $N - #max_potential$ neurones dans une même couche.
 
-#todo("Illustration ?")
-
 Nous définissons donc l'*ensemble des états transitoires* comme suit :
 $
   cal(T) = {x in #chain_space : x_(0, dot) = 0} union {x in #chain_space : x_(v, dot) > N - #max_potential, forall v = 0, dots, #max_potential}.
@@ -173,8 +171,7 @@ Pour prouver formellement l'irréductibilité de la chaîne de Markov, nous nous
   + Définition d'une suite d'états $y^l$, où $y^(l+1)$ est atteignable à partir de $y^l$ avec un nombre fini d'opérations.
   + Preuve qu'il est possible d'atteindre $y^0$ à partir de $x'''$.
   + Preuve que $y$ s'atteint grâce à la suite des $y^l$.
-
-  #todo("Illustrer la preuve avec un dessin dans un cas simple à N = 3 et #max_potential = 1")
+  
   Pour la lisibilité de cette preuve, nous commençons par noter :
   - #operation_efficient_spike() : l'opération de $k$ spikes efficaces,
   - #operation_inefficient_spike() : l'opération de $k$ sauts inefficaces,

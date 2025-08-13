@@ -8,7 +8,7 @@
 
 Nous disposons maintenant d'un modèle mathématique précis décrivant l'évolution en temps discret de notre système de neurones via des sauts représentant les potentiels d'action et les mécanismes d'activation et de désactivation des synapses. Cette formalisation nous a mené à l'utilisation d'une chaîne de Markov #chain() = #neuron() pour réprésenter ces dynamiques, reprenant la philosophie de notre article de référence @andreQuasiStationaryApproachMetastability2025.
 
-Cette section répondra à la première question identifée dans @intro en posant les fondations mathématiques nécessaires au maintien de l'activité neuronale persistente. Ces bases seront importantes pour répondre à la seconde question dans les @section_mf et @section_mesure_sta. 
+Cette section répondra à la première question identifée dans @intro en posant les fondations mathématiques nécessaires au maintien de l'activité neuronale persistante. Ces bases seront importantes pour répondre à la seconde question dans les @section_mf et @section_mesure_sta.
 
 Nous commencerons par poser proprement la chaîne #chain() en définissant les *transitions* à sa disposition (@section_transitions), ainsi que l'*espace d'états* #chain_space dans lequel elle évolue. Cela nous amenéra à considérer un nouveau point de vue grâce à la *mesure empirique*, pour réduire cet espace d'état et ainsi diminuer la complexité computationnelle. Ensuite, pour maintenir l'activité neuronale sur #chain(), nous aurons besoin d'identifier *configurations absorbantes* (@espace_absorbant) qu'il faudra éviter pour maintenir la mémoire de travail. Enfin, nous établirons l'*irréductibilité* (@section_irr) de la chaîne sur l'espace non-absorbant, pour assurer un système flexible ne dépendant pas des conditions initiales.
 
@@ -56,7 +56,7 @@ $ #mesure_comptage() (v, a) = #compte_neurone(). $
 
 Introduisons également les notations suivantes :
 - #mesure_couche() : pour compter le nombre de neurones ayant un potentiel de $v$. Nous appelerons cela la *couche $v$* dans la suite du mémoire,
-  $ 
+  $
     #mesure_couche() = sum_(i = 1)^N #dirac(neuron()) (v, 0) + #dirac(neuron()) (v, 1).
   $
 - #mesure_activation() : pour compter le nombre de neurones actifs ou inactifs,
@@ -91,7 +91,7 @@ Comparons les tailles des deux espaces (celui microscopique et celui macroscopiq
 == Modéliser la mémoire de travail
 Ce que nous voulons pour représenter un groupe de neurones impliqué dans une tâche de mémorisation à court terme, c'est qu'ils puissent conjointement soutenir une activité neuronale sur un temps arbitrairement long. L'interruption de cette activité, traduirait une perturbation de cette mémorisation, et donc un oubli de l'information d'intérêt.
 
-Nous avons donc besoin que #chain() soit capable d'émettre en continu des potentiels d'action sur la fenêtre temporelle d'étude #time_window. Comme nous travaillons avec une chaîne de Markov, il vient assez naturellement que nous allons avoir besoin d'étudier l'*absorption* de #chain(). Nous pourrons alors ensuite *conditionner* la chaîne à sa *non-absorption*, impliquant ainsi qu'elle deviendra capable de soutenir une activité persistente de sauts aussi longtemps que nécessaire.
+Nous avons donc besoin que #chain() soit capable d'émettre en continu des potentiels d'action sur la fenêtre temporelle d'étude #time_window. Comme nous travaillons avec une chaîne de Markov, il vient assez naturellement que nous allons avoir besoin d'étudier l'*absorption* de #chain(). Nous pourrons alors ensuite *conditionner* la chaîne à sa *non-absorption*, impliquant ainsi qu'elle deviendra capable de soutenir une activité persistante de sauts aussi longtemps que nécessaire.
 
 Définissons maintenant les états et espaces absorbants.
 
@@ -171,7 +171,7 @@ Pour prouver formellement l'irréductibilité de la chaîne de Markov, nous nous
   + Définition d'une suite d'états $y^l$, où $y^(l+1)$ est atteignable à partir de $y^l$ avec un nombre fini d'opérations.
   + Preuve qu'il est possible d'atteindre $y^0$ à partir de $x'''$.
   + Preuve que $y$ s'atteint grâce à la suite des $y^l$.
-  
+
   Pour la lisibilité de cette preuve, nous commençons par noter :
   - #operation_efficient_spike() : l'opération de $k$ spikes efficaces,
   - #operation_inefficient_spike() : l'opération de $k$ sauts inefficaces,

@@ -157,7 +157,7 @@ Pour prouver formellement l'irréductibilité de la chaîne de Markov, nous nous
 
 #theorem("Irréductibilité chaîne de Markov conditionnellement à la non-absorption")[
   La chaîne de Markov $#chain() = #neuron()$ est *irréductible* sur l'espace #space_irreducible.
-]<theoreme_irreductibilite>
+]
 
 // Opérations des sauts élémentaires
 #let operation_efficient_spike(k: $k$) = $O_e^#k$

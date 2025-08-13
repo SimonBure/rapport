@@ -109,4 +109,4 @@
 #let mean_time_before_regen = $bb(E)_(#regenering_state)[T_(#regenering_state)]$
 #let value_mean_time_before_regen = $#max_potential_limit + 1/#spiking_probability$
 
-#let mesure_stationnaire(state: $x = (v, a)$) = $pi^#max_potential_limit (#state)$
+#let mesure_stationnaire(state: $(v, a)$) = $pi^#max_potential_limit (x = #state)$

@@ -48,15 +48,13 @@ Remarquons que @dynamique_a et @dynamique_v décrivent toujours des *variables a
 #let space_value_potential_limit = ${0, gamma, 2 gamma, dots, #max_potential_limit}$
 La variable aléatoire #membrane_potential() avait été définie comme à valeurs dans $#space_value_potential subset bb(N)$. Or nous voyons désormais que #membrane_potential_limit() ne respecte plus cette définition, notamment car #expectation(network_contributions_limit()) est un *nombre réel* et dépendant du temps $t$.\
 Supposons que
-#numbered_equation(
-    $ #unknown_expectation() = #expectation(network_contributions_limit()). $, <definition_unknown_expectation>
-)
+$ #unknown_expectation() = #expectation(network_contributions_limit()). $
 
 Intuitivement, cela signifie qu'à chaque pas de temps, le potentiel de membrane limite #membrane_potential_limit() augmente d'une quantité fixée #unknown_expectation(), inconnue et dépendante du temps. Remarquons d'ailleurs que :
 
 #remark("Non-absorption de la chaîne limite")[
   Grâce à l'ajout des contributions moyennes #unknown_expectation() à chaque pas de temps, la chaîne limite #chain_limit() ne peut jamais être absorbée.
-] <rmk_non_absorption_chaine_limite>
+]
 
 Cependant, comme nous travaillons sur une fenêtre temporelle fixée #time_window, les valeurs de #unknown_expectation() sont fixées, et au nombre de $T+1$. Elles peuvent s'écrire, par exemple,
 $ #unknown_expectation(t: $0$), #unknown_expectation(t: $1$), dots, #unknown_expectation(t: $T$). $
@@ -71,9 +69,7 @@ Nous noterons #space_chain_limit l'espace des états de #chain_limit().
 
 Le potentiel limite #membrane_potential_limit() se comporte de la même façon que le potentiel fini. Comme lui, il sera en capacité d'émettre un potentiel d'action après avoir dépassé le potentiel seuil $#max_potential$.\
 Notons #max_potential_limit le nombre de pas de temps minimum nécessaire à un neurone pour que son voltage parte de $0$ et atteigne une valeur supérieure à #max_potential. La valeur de #max_potential_limit dépendra de tous les #unknown_expectation() et donc du temps. Mathématiquement, #max_potential_limit est tel que :
-#numbered_equation(
-    $ #max_potential_limit =  inf_(I in #integers) {sum_(t=0)^I #unknown_expectation() > #max_potential}. $, <def_max_potential_limite>
-)
+$ #max_potential_limit =  inf_(I in #integers) {sum_(t=0)^I #unknown_expectation() > #max_potential}. $
 
 
 == Existence des processus limites

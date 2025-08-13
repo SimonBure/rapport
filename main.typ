@@ -86,5 +86,3 @@
 
 = Annexes
 #include "appendix.typ"
-
-// #check-labels()

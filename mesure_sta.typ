@@ -28,7 +28,7 @@ Pour prouver l'*existence* de cette mesure et garantir son *unicité*, appuyons-
   Il existe une unique mesure stationnaire, notée #mesure_stationnaire(), associée à la chaîne de Markov #chain_limit().
 ]<thm_unique_mesure_stationnaire>
 #proof()[
-  En prouvant @<lemme_chaine_limite_irr> et @lemme_aperiodicite plus bas, nous prouvons le @thm_unique_mesure_stationnaire.
+  En prouvant @lemme_chaine_limite_irr et @lemme_aperiodicite plus bas, nous prouvons le @thm_unique_mesure_stationnaire.
 ]
 
 #lemma("Irréductibilité de la chaîne limite")[
@@ -100,9 +100,7 @@ Ainsi, pour calculer #mean_time_before_regen, il suffit de sommer la durée de c
 Avant de pouvoir correctement définir la mesure stationnaire de #chain_limit(), nous devons définir le temps moyen passé en $x$ dans le contexte de notre système de neurones. Soit l'état quelconque $(v, a)$, ce temps vaut classiquement : #mean_time_spent_in_state(state: $(v, a)$)
 
 Avec cette information et la @valeur_temps_avant_regen, nous écrivons maintenant la définition de la mesure stationnaire de #chain_limit() :
-#numbered_equation(
-  $ #mesure_stationnaire() = #mean_time_spent_in_state(state: $(v, a)$) / #value_mean_time_before_regen. $, <mesure_stationnaire>
-)
+$ #mesure_stationnaire() = #mean_time_spent_in_state(state: $(v, a)$) / #value_mean_time_before_regen. $
 
 Maintenant que la définition est correctement posée, nous pouvons calculer cette mesure stationnaire pour les différents états possibles.
 
@@ -144,41 +142,27 @@ $ #mesure_stationnaire(state: $(K gamma, 0)$) = 1 - (sum_(a=0)^1 sum_(v=0)^((K-1
 Étudions à présent les équilibres de la mesure #mesure_stationnaire(), afin de placer la chaîne #chain_limit() dans un cadre où elle pourrait manifester une activité régulière.
 
 == Équilibres de la mesure stationnaire
-L'objectif de cette section est de faire émerger les conditions sur les paramètres afin que la chaîne #chain_limit() puisse soutenir une activité régulière. Nous entendons par régulière, que la proportion de neurones reste équilibrée sur le long-terme, afin que le système émette régulièrement des potentiels d'action. Pour que cela se réalise, la proportion de neurones présent dans tous les états $(v, a)$ sur le long-terme doit être égale dans le temps. D'après la structure de notre système limite, cela signifie que la quantité de neurones "entrante" dans l'état $(v, a)$ est égale à celle "sortante". 
-Le flux entrant de neurones est réprésenté par la quantité #unknown_expectation().
-Le seul flux de neurones entrant se fait à la couche $0$, via le nombre de neurones ayant spike entre deux pas de temps.
+L'objectif de cette section est de caractériser les *régimes de mémoire persistante* : les configurations où notre système se maintient dans une configuration constante, pour maintenir indéfiniment une activité neuronale. Nous voulons que le système garde une proportion constante de neurones à chaque niveau de potentiel, garantissant un flux régulier de potentiels d'action.
 
-Cela se traduit mathématiquement par une équation entre la mesure stationnaire et #unknown_expectation().
+Dans notre modèle limite (infinité de neurones), la proportion de neurones effectuant un spike les temps $t$ et $t+1$ est égale à #unknown_expectation(). Rappellons-nous (@section_mf) que la proportion inconnue #unknown_expectation() est aussi égale à l'ajout de potentiel entre $t$ et $t+1$ pour tous les neurones. Résumé en une ligne :
+$ "proportion de neurones spikant" = "ajout de potentiel aux potentiels de tous les neurones" = #unknown_expectation(). $
 
-Nous allons ensuite modifier cette équation pour obtenir des conditions sur les paramètres afin qu'elle soit vraie.
+Si, à long-terme, la proportion de neurones dans chaque état est égale à la proportion de neurones spikant, alors le système aura atteint une configuration "constante", se maintenant à l'identique indéfiniment. Cela se traduit par l'équation d'équilibre :
+#numbered_equation(
+  $ #mesure_stationnaire() = #unknown_expectation(), $, <eq_equilibre>
+)
 
-Trouver les équilibres de la mesure stationnaire revient à (...)
-Mesure stationnaire (k*gamma, 0 ou 1) = proportion du temps qu'un neurone passe dans un état donné (k*gamma, 1) 
-#todo("Justifier l'étude des équilibres avec la mémoire")
+En reprenant la définition de #unknown_expectation(), nous pourrons trouver les conditions sur les paramètres biologiques où @eq_equilibre admet une solution. Cependant, cela nécessite de changer la définition de #max_potential_limit pour utiliser une version utilisable dans nos calculs.
 
-Nous avons calculé la mesure stationnaire #mesure_stationnaire() qui caractérise la distribution à long terme de notre processus limite. Cependant, cette mesure dépend encore du paramètre inconnu #unknown_expectation(), défini comme l'espérance des contributions réseau au temps #time_inf. Pour que notre analyse soit complète, nous devons déterminer les valeurs que peut prendre ce paramètre.
+=== Nouvelle définition de #max_potential_limit
+#let unknown = unknown_expectation(t: $$)
+À la place de @def_max_potential_limite, nous allons utiliser la définition suivante, plus maniable :
+$ #max_potential_limit = ceil(#max_potential / #unknown_expectation_inf). $
+Rappellons que #unknown_expectation_inf représente la plus petite valeur prise par #unknown_expectation() sur l'intervalle #time_window. Ainsi, #max_potential_limit devient le maximum possible de pas à effectuer pour dépasser de façon certaine le seuil de #max_potential. Cela revient par ailleurs à considérer de nouveau #membrane_potential_limit() comme prenant des valeurs sur un "escalier de potentiel", où chaque marche vaut #unknown_expectation_inf. 
 
-*L'équation d'auto-cohérence* : Dans un régime stationnaire, le paramètre #unknown_expectation() doit être *auto-cohérent* : la valeur qu'il prend doit être exactement celle que produit le système lorsqu'il évolue selon la mesure stationnaire correspondante. Cette condition d'équilibre s'exprime mathématiquement par :
+Pour plus de simplicité, nous noterons par la suite #unknown_expectation_inf = #unknown.
 
-$ #unknown_expectation() = #expectation(network_contributions_limit(t: time_inf)). $
-
-*Développement de l'équation d'équilibre* : En utilisant la définition @definition_unknown_expectation et la loi des espérances totales, nous pouvons développer le membre de droite :
-$ #unknown_expectation() &= #expectation($#spiking_function(v: membrane_potential_limit(t: time_inf)) #activation_limit(t: time_inf)$) \
-&= sum_(a=0)^1 sum_(k = 0)^#max_potential_limit #spiking_function(v: $k #unknown_expectation_inf$) dot a dot #mesure_stationnaire(state: $(k #unknown_expectation_inf, a)$). $
-
-*Simplification cruciale* : La fonction de spiking #spiking_function(v: $v$) étant nulle pour $v < #max_potential$, tous les termes de la somme s'annulent sauf celui correspondant à $k = #max_potential_limit$. L'équation d'équilibre se réduit donc à :
-$ #unknown_expectation() = #spiking_function(v: $#max_potential_limit #unknown_expectation_inf$) #mesure_stationnaire(state: $(#max_potential_limit #unknown_expectation_inf, 1)$), $
-
-soit, en utilisant #spiking_function(v: $#max_potential_limit #unknown_expectation_inf$) = #spiking_probability :
-$ #unknown_expectation() = #spiking_probability #mesure_stationnaire(state: $(#max_potential_limit #unknown_expectation_inf, 1)$). $
-
-Cette équation relie de façon élégante le paramètre de champ moyen #unknown_expectation() à la probabilité de spike #spiking_probability et à la mesure stationnaire de l'état « critique » où les neurones sont sur le point de spiker. Résoudre cette équation nous donnera les valeurs d'équilibre possibles, correspondant aux différents régimes de mémoire persistante de notre système.
-
-#let unknown = $gamma$
-Nous cherchons donc les points tel que
-$ #mesure_stationnaire() = #unknown. $
-
-Développons en se rappellant de @definition_unknown_expectation :
+Développons @eq_equilibre en se rappellant de @definition_unknown_expectation :
 $ #unknown = #expectation(network_contributions_limit(t: time_inf)) &= #expectation($#spiking_function(v: membrane_potential_limit(t: time_inf)) #activation_limit(t: time_inf)$),\
 &= sum_(a=0)^1 sum_(k = 0)^#max_potential_limit #spiking_function(v: $k #unknown$) dot a dot #mesure_stationnaire(state: $(k #unknown, a)$). $
 Or, comme #spiking_function(v: $v$) est nulle tant que $v < #max_potential$, tous les termes, sauf celui où $k = #max_potential_limit$ vont s'annuler, laissant ainsi :
@@ -194,8 +178,7 @@ Ainsi trouver les points d'équilibre de la mesure stationnaire revient à réso
 À cause de la fonction partie entière, cette équation n'est pas triviale à résoudre.\
 Premièrement, pour $#unknown -> 0$, l'@equation_equilibre admet une solution, triviale, correspondant à l'absorption du système en zéro. Cette absorption correspond à l'état d'oubli de l'élément mémoriel.
 
-Cependant, nous sommes à la recherche d'équilibres non nuls, qui pourraient correspondre à (...).
-#todo([Interpréter solution des équilibres])
+Cependant, nous sommes à la recherche d'équilibres non nuls qui pourraient correspondre à une configuration constante avec une activité neuronale persistente.
 
 Grâce à @allure_f_gamma, et à @equation_equilibre, nous pouvons voir que $f$ est une fonction *continue par morceau* et *croissante*.
 
@@ -231,5 +214,3 @@ Grâce à @allure_f_gamma, et à @equation_equilibre, nous pouvons voir que $f$ 
 
 
 #figure(image("figures/f_gamma_many_equilibres.png"), caption: [Illustration de la présence de plusieurs équilibres. Ici $#max_potential = 0.5$, $#spiking_probability = 0.9$ et $#deactivation_probability = 0.09$, donnant $#max_potential > #point_eq_1$. Pourtant, $f(#unknown)$ s'annule deux fois dans l'intervalle $(0, #max_potential]$.])<f_gamma_plsrs_equilibres>
-
-

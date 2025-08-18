@@ -6,13 +6,16 @@
 // Display settings for theorems and proofs
 #show: thmrules.with(qed-symbol: $square$)
 
+#let membrane_potential(t: $t$, i: $i$) = $V_#t^(#i, N)$
+#let activation(t: $t$, i: $i$) = $A_#t^(#i, N)$
+
 Dans @section_modele, nous avons introduit un système fini de N neurones et expliqué ses dynamiques de base. Nous avons ensuite vu (@section_markov) pourquoi nous avions besoin de propriétés clés comme le conditionnement à la non-absorption et l'irréductibilité pour modéliser la mémoire de travail. Cependant, cette approche présente deux limitations, une opérationnelle et l'autre conceptuelle.
 + *Limitation computationnelle* : l'espace d'états de notre chaîne de Markov #chain() croît exponentiellement avec $N$ ($abs(#chain_space) = 2(#max_potential + 1)^N)$, rendant l'analyse directe impraticable $N$ augmentant.
 + *Réalisme neurobiologique* : un cortex réaliste contient des milliards de neurones, chacun interagissant potentiellement avec un très grand nombre d'autres neurones via leurs synapses. Dans ce contexte, l'influence d'un neurone particulier sur un autre diminue au profit d'une influence "moyenne" de tous les neurones voisins.
 
 L'utilisation de l'hypothèse de champ moyen découle naturellement de ces deux considérations : considérer un *grand nombre* $N$ de neurones identiques et remplacer l'apport individuel de chaque neurone en une interaction "moyenne", identique pour tous.
 
-Cette hypothèse entraînera la nécessité de modifications techniques sur les équations et sur les espaces, pour pouvoir continuer à utiliser le modèle lorsque $N$ tendra vers l'infini, et que #chain() vers un modèle.\
+Cette hypothèse entraînera la nécessité de modifications techniques sur les équations et sur les espaces, pour pouvoir continuer à utiliser le modèle lorsque $N$ tendra vers l'infini.\
 Ce *modèle limite*, qu'il nous faudra définir formellement, prendra en compte seulement la masse moyenne d'une *infinité* de neurones. Nous verrons que son existence ne pose pas de problème mathématique.\
 Ensuite, toujours dans l'objectif de proposer un modèle rigoureux, nous réaliserons la preuve complète de la convergence du modèle fini vers le modèle limite. Nous verrons que cela nécessitera une modification de la fonction de spike #spiking_function_raw pour que la preuve puisse être réalisable.\
 Enfin, nous étudierons la mesure stationnaire qui nous permettra de décrire le comportement en temps long du modèle limite.
@@ -49,16 +52,16 @@ Remarquons que @dynamique_a et @dynamique_v décrivent toujours des *variables a
 La variable aléatoire #membrane_potential() avait été définie comme à valeurs dans $#space_value_potential subset bb(N)$. Or nous voyons désormais que #membrane_potential_limit() ne respecte plus cette définition, notamment car #expectation(network_contributions_limit()) est un *nombre réel* et dépendant du temps $t$.\
 Supposons que
 #numbered_equation(
-    $ #unknown_expectation() = #expectation(network_contributions_limit()). $, <definition_unknown_expectation>
+    $ #unknown_expectation() = #expectation(network_contributions_limit()) = #expectation($#spiking_function_limit #membrane_potential_limit()$). $, <definition_unknown_expectation>
 )
 
 Intuitivement, cela signifie qu'à chaque pas de temps, le potentiel de membrane limite #membrane_potential_limit() augmente d'une quantité fixée #unknown_expectation(), inconnue et dépendante du temps. Remarquons d'ailleurs que :
 
-#remark("Non-absorption de la chaîne limite")[
-  Grâce à l'ajout des contributions moyennes #unknown_expectation() à chaque pas de temps, la chaîne limite #chain_limit() ne peut jamais être absorbée.
+#remark("Non-absorption du processus limite")[
+  Grâce à l'ajout des contributions moyennes #unknown_expectation() à chaque pas de temps, le processus limite #chain_limit() ne peut pas être absorbée à moins que $#unknown_expectation() = 0$.
 ] <rmk_non_absorption_chaine_limite>
 
-Cependant, comme nous travaillons sur une fenêtre temporelle fixée #time_window, les valeurs de #unknown_expectation() sont fixées, et au nombre de $T+1$. Elles peuvent s'écrire, par exemple,
+Cependant, comme nous travaillons sur une fenêtre temporelle fixée #time_window, les valeurs de #unknown_expectation() sont fixées, et au nombre de $T+1$. Elles peuvent s'écrire,
 $ #unknown_expectation(t: $0$), #unknown_expectation(t: $1$), dots, #unknown_expectation(t: $T$). $
 
 Parmi ces $T+1$ valeurs, notons #unknown_expectation_inf la plus petite :
@@ -67,17 +70,14 @@ et #time_inf le temps où $#unknown_expectation() = #unknown_expectation_inf.$
 
 Ceci permet de fixer les valeurs prises par la variable aléatoire #membrane_potential_limit() sur la fenêtre temporelle #time_window. Notons d'ailleurs #space_potentiel_limite(), l'espace de ces valeurs. #space_potentiel_limite() reste un espace discret, mais indescriptible car dépendant de toutes les valeurs inconnues de #unknown_expectation(). Cela en fait un espace beaucoup plus grand que l'espace #space_potentiel où évolue #membrane_potential(). 
 
-Nous noterons #space_chain_limit l'espace des états de #chain_limit().
+Nous noterons toujours #space_chain_limit l'espace des états de #chain_limit().
 
 Le potentiel limite #membrane_potential_limit() se comporte de la même façon que le potentiel fini. Comme lui, il sera en capacité d'émettre un potentiel d'action après avoir dépassé le potentiel seuil $#max_potential$.\
-Notons #max_potential_limit le nombre de pas de temps minimum nécessaire à un neurone pour que son voltage parte de $0$ et atteigne une valeur supérieure à #max_potential. La valeur de #max_potential_limit dépendra de tous les #unknown_expectation() et donc du temps. Mathématiquement, #max_potential_limit est tel que :
-#numbered_equation(
-    $ #max_potential_limit =  inf_(I in #integers) {sum_(t=0)^I #unknown_expectation() > #max_potential}. $, <def_max_potentiel_limite>
-)
 
 
 == Existence des processus limites
-Comme les deux processus limites #neuron_limit() prennent leurs valeurs dans des espaces discrets et finis, ils sont tous les deux bien définis. L'existence des processus ne pose ainsi aucun problème, et nous pouvons écrire le théorème suivant :
+
+Comme les deux processus limites #neuron_limit() prennent leurs valeurs dans des espaces discrets et finis, ils sont tous les deux bien définis. De plus et surtout, l'évolution de chaque neurone (comme décrit avec @dynamique_a et @dynamique_v) est "auto-suffisante" et ne dépend que de sa loi au temps $t$. Le neurone $i$ ne dépend plus des trajectoires des neurones restant. L'existence des processus ne pose ainsi aucun problème, et nous pouvons écrire le théorème suivant :
 
 #theorem("Existence des processus limites")[
     Pour tout $t in #time_window$, il existe un unique processus #neuron_limit() avec un #unknown_expectation() associé.

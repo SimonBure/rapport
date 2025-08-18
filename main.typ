@@ -52,11 +52,16 @@
   ),
   lang: lang,
   abstract: [
-    Ce rapport présente une modélisation mathématique du processus de mémoire de court-terme, en s'appuyant sur la théorie des chaînes de Markov. Nous étudions un modèle de neurones spiking en temps discret, où les neurones sont activés par des stimuli et peuvent se désactiver après un certain temps. Nous analysons les propriétés de ce processus, notamment sa convergence vers un état stationnaire et son comportement en champ moyen. Enfin, nous discutons des implications de ces résultats pour la compréhension des mécanismes neuronaux sous-jacents à la mémoire.
+    Ce rapport présente une modélisation mathématique de réseaux de neurones biologiques occupés à une tâche de mémoire à court-terme, en s'appuyant sur la théorie des chaînes de Markov, l'analyse de la limite de champ moyen et la mesure stationnaire d'une modèle limite.\
+    Nous développons un modèle stochastique en temps discret où les neurones évoluent selon des dynamiques de potentiel de membrane couplées à des variables d'activation synaptique. Nous développons également une version limite de notre processus grâce à la limite de champ moyen. La convergence sera rigoureusement établie.\
+    Notre nouvelle définition mathématique de la mémoire court-terme se base sur la démonstration d'existence d'une activité neuronale soutenue et persistente sur le long-terme, grâce à la mesure stationnaire de notre processus limite. Les preuves et définitions reposent sur propriétés des chaînes de Markov.\
+    Nous calculons explicitement la mesure stationnaire du processus limite en exploitant l'état de régénération naturel du système. L'étude des équilibres de cette mesure stationnaire établit des conditions quantitatives sur les paramètres biologiques (probabilité de spike, taux de désactivation, seuil de potentiel) déterminant l'apparition d'une activité neuronale soutenue.\
+    Ces résultats dépassent les approches qualitatives traditionnelles en neurosciences computationnelles en fournissant un cadre mathématiquement rigoureux pour comprendre les mécanismes sous-jacents à la mémoire de travail, avec des prédictions testables sur les conditions d'existence des régimes d'activités persistantes nécessaire au maintien de la mémoire de travail.
   ],
   cover_image: "cover.png",
   thanks: [
-    Je tiens à exprimer ma profonde gratitude à ma directrice de mémoire, Prof. Eva Löcherbach, pour son encadrement, ses conseils avisés et sa disponibilité tout au long de ce travail. Son expertise et son soutien ont été essentiels à la réalisation de ce mémoire.
+    Je tiens à exprimer ma profonde gratitude à ma directrice de mémoire, Prof. Eva Löcherbach, pour son encadrement, ses conseils avisés et sa disponibilité tout au long de ce travail. Son expertise et son soutien ont été essentiels à la réalisation de ce mémoire.\
+    Merci aux amis qui ont supporté la fin de rédaction pendant les vacances, à la peluche Dr. Penguin pour son savoir et ses conseils, ainsi qu'à toutes les molécules de glucoses qui ont alimenté mes neurones afin que je modélise d'autres neurones.
   ]
 )
 

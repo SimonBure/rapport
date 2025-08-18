@@ -10,7 +10,7 @@ Nous disposons maintenant d'un modèle mathématique précis décrivant l'évolu
 
 Cette section répondra à la première question identifée dans @intro en posant les fondations mathématiques nécessaires au maintien de l'activité neuronale persistante. Ces bases seront importantes pour répondre à la seconde question dans les @section_mf et @section_mesure_sta.
 
-Nous commencerons par poser proprement la chaîne #chain() en définissant les *transitions* à sa disposition (@section_transitions), ainsi que l'*espace d'états* #chain_space dans lequel elle évolue. Cela nous amenéra à considérer un nouveau point de vue grâce à la *mesure empirique*, pour réduire cet espace d'état et ainsi diminuer la complexité computationnelle. Ensuite, pour maintenir l'activité neuronale sur #chain(), nous aurons besoin d'identifier *configurations absorbantes* (@espace_absorbant) qu'il faudra éviter pour maintenir la mémoire de travail. Enfin, nous établirons l'*irréductibilité* (@section_irr) de la chaîne sur l'espace non-absorbant, pour assurer un système flexible ne dépendant pas des conditions initiales.
+Nous commencerons par écrire les transitions formellement les *transitions* de la chaîne #chain() (@section_transitions), ainsi que l'*espace d'états* #chain_space dans lequel elle évolue. Cela nous amenéra à considérer un nouveau point de vue grâce à la *mesure empirique*, pour réduire cet espace d'état et ainsi diminuer la complexité computationnelle. Ensuite, pour maintenir l'activité neuronale sur #chain(), nous aurons besoin d'identifier les *configurations absorbantes* (@espace_absorbant) qu'il faudra éviter pour maintenir la mémoire de travail. Enfin, nous établirons l'*irréductibilité* (@section_irr) de la chaîne sur l'espace non-absorbant, pour assurer un système flexible ne dépendant pas des conditions initiales.
 
 
 == Transitions de la chaîne de Markov <section_transitions>
@@ -38,7 +38,7 @@ Problème, pour un système un tant soit peu important ($N = 30$ et $#max_potent
 == Mesure empirique <mesure_empirique>
 Jusqu'à présent, nous avons analysé notre système en suivant individuellement chaque neurone i avec son état #neuron(). Cette approche "microscopique" fournit une description complète, mais n'est pas optimale, comme nous allons le montrer avec les deux arguments suivants.
 
-Pour aborder la mémoire de travail, il n'est pas nécessaire de connaître précisément l'identité de chaque neurone. Les informations importantes sur la dynamique se trouve au *niveau collectif* ou macroscopique. Ce qui nous intéresse, c'est connaître la quantité de neurones actifs ou que le nombre de neurones à chaque "marche" de l'escalier du voltage. Ce changement de point de vue entraînerait de plus une *réduction de la complexité computationnelle*, car le modèle se limiterait aux informations intéressantes.
+Pour aborder la mémoire de travail, il n'est pas nécessaire de connaître précisément l'identité de chaque neurone. Les informations importantes sur la dynamique se trouve au *niveau collectif* ou macroscopique. Ce qui nous intéresse, c'est connaître la quantité de neurones actifs ou le nombre de neurones à chaque "marche" de l'escalier du voltage. Ce changement de point de vue entraînerait de plus une *réduction de la complexité computationnelle*, car le modèle se limiterait aux informations intéressantes.
 
 Pour représenter ce changement de paradigme, nous allons définir la *mesure empirique* de notre système et l'utiliser à la place du modèle "micro". Ce changement est possible grâce à un point fondamental et non-évident, qui découle directement de la construction de notre modèle : *la mesure empirique de notre chaîne de Markov est elle-même une chaîne de Markov* définie sur un espace plus petit. Cela permet de se concentrer sur les informations essentielles tout en gardant la cadre théorique agréable des chaînes de Markov.
 
@@ -46,32 +46,32 @@ Pour représenter ce changement de paradigme, nous allons définir la *mesure em
 La définition de la mesure empirique est classiquement :
 $ #mesure_empirique() (v, a) = 1/N sum_(i=1)^N #dirac($(#membrane_potential(), #activation())$) (v, a). $
 
-Cependant, nous trouvons qu'il est plus clair de travailler avec le compte direct des neurones plutôt qu'avec des proportions. Ainsi, nous allons noter #compte_neurone() le nombre de neurones tels que $#neuron() = (v, a)$.\
-Il vient :\
-Pour tout $v in #space_potentiel$ et tout $a in #space_value_activation$
-$ #compte_neurone() = sum_(i=1)^N #dirac($(#membrane_potential(), #activation())$) (v, a). $
+Cependant, nous trouvons qu'il est plus clair de travailler avec le compte direct des neurones plutôt qu'avec des proportions. Si $#mesure_comptage() (v, a)$ est le nombre de neurones dans l'état $(v, a)$ au temps $t$ alors
+$ #mesure_comptage() (v, a) = sum_(i=1)^N #dirac($(#membrane_potential(), #activation())$) (v, a). $
 
-Notre "mesure empirique" #mesure_comptage() sera la suivante :
-$ #mesure_comptage() (v, a) = #compte_neurone(). $
 
-Introduisons également les notations suivantes :
+Nous voulons également :
+- Pouvoir compter les neurones avec un potentiel $v$, sans regarder leur état d'activation.
+- Pouvoir compter le nombre de neurones activés ou inactifs.
+
+Cela nous mène aux notations suivantes :
 - #mesure_couche() : pour compter le nombre de neurones ayant un potentiel de $v$. Nous appelerons cela la *couche $v$* dans la suite du mémoire,
   $
-    #mesure_couche() = sum_(i = 1)^N #dirac(neuron()) (v, 0) + #dirac(neuron()) (v, 1).
+    #mesure_couche() = #mesure_comptage() (v, 0) + #mesure_comptage() (v, 1).
   $
 - #mesure_activation() : pour compter le nombre de neurones actifs ou inactifs,
   $
-    #mesure_activation() = sum_(i = 1)^N #dirac(neuron()) (#membrane_potential(), a).
+    #mesure_activation() = sum_(v = 1)^#max_potential #mesure_comptage() (v, a).
   $
 
-=== Propriété de Markov
-De façon plus formelle, remarquons :
+
+=== Propriété de Markov (intuition)
 #remark("Propriété de Markov de la mesure empirique")[
-  La représentation de la chaîne #chain() à travers le nombre de neurones à chaque couche #compte_neurone() est elle-même une chaine de Markov.
+  La représentation de la chaîne #chain() avec la mesure de comptage #mesure_comptage() est elle-même une chaine de Markov.
 ]
 
-L'argument est le suivant : comme est construit notre modèle, les neurones sont interchangeables sans que cela impacte la dynamique. La connaissance de la structure macroscopique nous fournit toutes les informations nécessaires pour prédire l'évolution future de la chaîne.\
-Formellement, comme vu dans @section_transitions, les probabilités de transition sont entièrement déterminés par la connaissance de la mesure empirique :
+Nous allons donner l'argument de pourquoi nous pensons que cela est vraie. Cependant, cela ne constitue pas une vraie preuve. L'argument est le suivant : comme est construit notre modèle, les neurones sont interchangeables sans que cela impacte la dynamique. La connaissance de la structure macroscopique nous fournit toutes les informations nécessaires pour prédire l'évolution future de la chaîne.\
+Les probabilités de transition sont entièrement déterminés par la connaissance de la mesure de comptage :
 $
   #proba_conditional(mesure_comptage(t: $t+1$), filtration()) = #proba_conditional(mesure_comptage(t: $t+1$), mesure_comptage()).
 $
@@ -120,10 +120,10 @@ $ #absorbing_space = union.big_(k=0)^#max_potential #absorbing_subspace(). $
 
 Chaque sous-ensemble #absorbing_subspace() impose une contrainte sur le nombre de neurones actifs dans les couches $l <= k$, de façon à ce que le système ne puisse pas se maintenir dans le temps et finisse nécessairement par tomber dans un état réellement absorbant.\
 Définissons à présent les #absorbing_subspace(). $forall k <= #max_potential$ :
-$ #absorbing_subspace() = {X in #chain_space : space sum_(l = k)^#max_potential mu (l, 1) <= #max_potential - k }. $
+$ #absorbing_subspace() = {X in #chain_space : space sum_(v = k)^#max_potential #mesure_comptage() (v, 1) <= #max_potential - k }. $
 Pour $k = 0$, nous avons le cas particulier suivant :
 $
-  #absorbing_subspace(k: $0$) = {X in #chain_space : mu(#max_potential, 0) + sum_(l=0)^#max_potential mu(l, 1) < #max_potential}.
+  #absorbing_subspace(k: $0$) = {X in #chain_space : #mesure_comptage() (#max_potential, 0) + sum_(v=0)^#max_potential #mesure_comptage() (v, 1) < #max_potential}.
 $
 
 #let complement_absorbing_space = $attach(#absorbing_space, tr: complement)$
@@ -133,7 +133,7 @@ Cependant, la *non-absorption ne suffit pas*. Imaginons un réseau qui, bien que
 
 Nous voyons ainsi apparaître un nouveau critère pour notre modèle : la nécessité de "flexibilité"; de pouvoir passer d'une configuration à une autre sans se "coincer" dans une sous-région de l'espace des états. Mathématiquement, cela correspond à la notion d'*irréductibilité* : tous les états communiquent entre eux et les conditions de départ n'importent pas sur le comportement à long-terme de la chaîne de Markov.
 
-Grâce à la propriété d'irréductibilité plus le conditionnement de la chaîne #chain() à la non-absorption, il serait possible d'étudier théoriquement la *distribution quasi-stationnaire* de la chaîne #chain(). C'est un cadre théorique pertinent pour étudier les systèmes *métastables*, c'est-à-dire avec un équilibre (ici l'absorption) mais pouvant évoluer un temps arbitraire autour de cet équilibre avant d'y être attiré indéfiniment. Cette approche a été largement étudiée dans @andreQuasiStationaryApproachMetastability2025, et c'est pour cela qu'elle ne sera pas abordée plus en détail dans ce mémoire. Nous nous démarquerons en proposant une nouvelle vision pour la mémoire de travail, à travers un modèle limite et la mesure stationnaire qui en découlera.
+Grâce à la propriété d'irréductibilité plus le conditionnement de la chaîne #chain() à la non-absorption, il serait possible d'étudier théoriquement la *distribution quasi-stationnaire* de la chaîne #chain(). C'est un cadre théorique pertinent pour étudier les systèmes *métastables*, c'est-à-dire avec un équilibre (ici l'absorption) mais pouvant évoluer un temps arbitraire loin de cet équilibre avant d'y être attiré indéfiniment. Cette approche a été largement étudiée dans @andreQuasiStationaryApproachMetastability2025, et c'est pour cela qu'elle ne sera pas abordée plus en détail dans ce mémoire. Nous nous démarquerons en proposant une nouvelle vision pour la mémoire de travail, à travers un modèle limite et la mesure stationnaire qui en découlera.
 
 C'est cette propriété d'irréductibilité que nous allons maintenant établir pour #chain() à partir de la structure même de notre modèle.
 

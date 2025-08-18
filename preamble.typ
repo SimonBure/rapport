@@ -20,13 +20,8 @@
   linebreak()
 
   // Image
-  cover_image
+  image(cover_image, width: 70%)
 
-  // Abstract
-  par(justify: false)[
-    *Abstract* \
-    #abstract
-  ]
 
   if lang == "fr" {
     par(justify: false)[
@@ -82,6 +77,13 @@
   }
   // Today's date
   datetime.today().display("[day]-[month]-[year]")
+  pagebreak()
+
+  // Abstract
+  par(justify: false)[
+    *Abstract* \
+    #abstract
+  ]
   pagebreak()
 
   // Thanks

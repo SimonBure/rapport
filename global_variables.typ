@@ -70,16 +70,13 @@
 ]
 
 // Mesures empiriques
-#let mesure_comptage(state: $x$, t: $t$) = $#state^N_#t$
+#let mesure_comptage(t: $t$) = $N_#t$
 #let compte_neurone(state: $x$, t: $t$, v: $v$, a: $a$) = $#state^N_(#v, #a)$
 #let mesure_couche(state: $x$, v: $v$) = compte_neurone(state: state, v: v, a: $dot$)
 #let mesure_activation(state: $x$, a: $a$) = compte_neurone(state: state, v: $dot$, a: a)
 #let mesure_empirique(t: $t$) = $mu_#t^N$ 
 
 // Champ moyen
-#let membrane_potential(t: $t$, i: $i$) = $V_#t^(#i, N)$
-#let activation(t: $t$, i: $i$) = $A_#t^(#i, N)$
-
 #let distance_activation(t: $t$, i: $i$) = $delta_#t^(#i, N)$
 #let distance_potential(t: $t$) = $d_#t^(i, N)$
 #let distance_globale(t: $t$) = $D_#t^(i, N)$

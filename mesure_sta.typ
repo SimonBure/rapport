@@ -6,19 +6,28 @@
 // Display settings for theorems and proofs
 #show: thmrules.with(qed-symbol: $square$)
 
-La mémoire de travail est un maintien actif d'une information via l'activité persistante des neurones. Si l'activité est perturbée ou si l'information n'est plus nécessaire, elle est oubliée, libérant les neurones. D'un côté, notre modèle inclut un mécanisme de désactivation (paramètre #deactivation_probability) qui pousse la chaîne #chain_limit() vers l'extinction. De l'autre, le mécanisme de facilitation synaptique (spike → activation) tend à maintenir l'activité. Des questions viennent ainsi naturellement : Quelle dynamique l'emporte ? Existe-il un équilibre ? Dans quelles conditions ?
+Notons #max_potential_limit le nombre de pas de temps minimum nécessaire à un neurone pour que son voltage parte de $0$ et atteigne une valeur supérieure à #max_potential. La valeur de #max_potential_limit dépendra de tous les #unknown_expectation() et donc du temps. Mathématiquement, #max_potential_limit est tel que :
+#numbered_equation(
+    $ #max_potential_limit =  inf_(I in #integers) {sum_(t=0)^I #unknown_expectation() > #max_potential}. $, <def_max_potentiel_limite>
+)
+
+La mémoire de travail est un maintien actif d'une information via l'activité persistante des neurones. Si l'activité est perturbée ou si l'information n'est plus nécessaire, elle est oubliée, libérant les neurones. D'un côté, notre modèle inclut un mécanisme de désactivation (paramètre #deactivation_probability) qui pousse le modèle #chain_limit() vers l'extinction. De l'autre, le mécanisme de facilitation synaptique (spike → activation) tend à maintenir l'activité. Des questions viennent ainsi naturellement : Quelle dynamique l'emporte ? Existe-il un équilibre ? Dans quelles conditions ?
 
 Notre modèle limite de champ moyen décrit la dynamique temporelle des neurones, mais nous voyons que pour comprendre la mémoire de travail, il faut pouvoir décrire la dynamique à long-terme de ces neurones et voir les comportements typiques qui en émergent. Le comportement qui nous intéresse particulièrement est celui où le système peut soutenir une activité persistante. D'un point de vue mathématique, cela peut s'aborder comme un questionnement sur l'existence d'*états d'équilibres actifs* (autre que les états d'absorption) où le système limite pourrait rester indéfiniment et connaître une activité régulière.
 
-La notion d'analyse de l'activité à long-terme (à entendre dans un sens mathématique) de notre chaîne de Markov limite amène l'étude de la  *mesure stationnaire* associée à notre chaîne de Markov limite #chain_limit().
+La notion d'analyse de l'activité à long-terme (à entendre dans un sens mathématique) nous donne envie d'utiliser la notion de *mesure stationnaire*. Cependant, en l'état, le processus #chain_limit(), n'est pas Markovien, à cause de la dépendance temporelle des #unknown_expectation(). Nous commencerons pour cela à poser l'hypothèse afin de rendre #chain_limit() markovien, afin ensuite de travailler sur la mesure stationnaire qui y sera associée.
 
 Dans cette optique, cette section répondra à plusieurs objectifs :
-+ Introduire et définir la mesure invariante, ou stationnaire, pour notre chaîne de Markov $#chain_limit() = #neuron_limit()$.
++ Introduire et définir la mesure invariante, ou stationnaire, pour notre processus limite $#chain_limit() = #neuron_limit()$.
 + Prouver son existence à l'aide de résultats classiques.
 + La calculer pour tous les états du système.
 + Étudier l'existence de ses équilibres et en faire émerger une condition sur les paramètres du modèle.
 
 == Définition et existence
+#let gamma_stationnary = unknown_expectation(t: $$)
+Le processus limite #chain_limit() n'est, en l'état, pas markovien. C'est à cause des #unknown_expectation(), rendant #chain_limit() dépendant de toute la trajectoire temporelle. Pour retrouver le cadre markovien, nous allons faire l'hypothèse forte, qu'après un temps suffisant $tau$, le processus atteint une version *stationnaire*, où, quelque soit $t > tau$, $#unknown_expectation() = #gamma_stationnary$.\
+Délivré de cette dépendance, nous parlerons désormais de #chain_limit() comme d'une chaîne de Markov, dans une version stationnaire où $t > tau$.
+
 De façon générale pour notre modèle, la mesure stationnaire est une *mesure de probabilité* descriptive de l'état "moyen" de la chaîne de Markov #chain_limit() après un temps long. Dans notre contexte, elle représente la *proportion de temps* qu'un neurone passe dans chaque état $(v, a)$. Il est aussi possible de la voir comme la *proportion de neurones* dans chaque état $(v, a)$.
 
 Pour prouver l'*existence* de cette mesure et garantir son *unicité*, appuyons-nous sur les résultats classiques en probabilités. Si nous pouvons montrer que notre chaîne de Markov limite #chain_limit() est *irréductible* et *apériodique* sur son espace d'états fini $#space_potentiel_mf times {0, 1}$, nous aurons montré qu'une unique mesure stationnaire existe.

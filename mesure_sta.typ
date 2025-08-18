@@ -6,11 +6,6 @@
 // Display settings for theorems and proofs
 #show: thmrules.with(qed-symbol: $square$)
 
-Notons #max_potential_limit le nombre de pas de temps minimum nécessaire à un neurone pour que son voltage parte de $0$ et atteigne une valeur supérieure à #max_potential. La valeur de #max_potential_limit dépendra de tous les #unknown_expectation() et donc du temps. Mathématiquement, #max_potential_limit est tel que :
-#numbered_equation(
-    $ #max_potential_limit =  inf_(I in #integers) {sum_(t=0)^I #unknown_expectation() > #max_potential}. $, <def_max_potentiel_limite>
-)
-
 La mémoire de travail est un maintien actif d'une information via l'activité persistante des neurones. Si l'activité est perturbée ou si l'information n'est plus nécessaire, elle est oubliée, libérant les neurones. D'un côté, notre modèle inclut un mécanisme de désactivation (paramètre #deactivation_probability) qui pousse le modèle #chain_limit() vers l'extinction. De l'autre, le mécanisme de facilitation synaptique (spike → activation) tend à maintenir l'activité. Des questions viennent ainsi naturellement : Quelle dynamique l'emporte ? Existe-il un équilibre ? Dans quelles conditions ?
 
 Notre modèle limite de champ moyen décrit la dynamique temporelle des neurones, mais nous voyons que pour comprendre la mémoire de travail, il faut pouvoir décrire la dynamique à long-terme de ces neurones et voir les comportements typiques qui en émergent. Le comportement qui nous intéresse particulièrement est celui où le système peut soutenir une activité persistante. D'un point de vue mathématique, cela peut s'aborder comme un questionnement sur l'existence d'*états d'équilibres actifs* (autre que les états d'absorption) où le système limite pourrait rester indéfiniment et connaître une activité régulière.
@@ -32,6 +27,14 @@ De façon générale pour notre modèle, la mesure stationnaire est une *mesure 
 
 Pour prouver l'*existence* de cette mesure et garantir son *unicité*, appuyons-nous sur les résultats classiques en probabilités. Si nous pouvons montrer que notre chaîne de Markov limite #chain_limit() est *irréductible* et *apériodique* sur son espace d'états fini $#space_potentiel_mf times {0, 1}$, nous aurons montré qu'une unique mesure stationnaire existe.
 
+Avant tout cela, nous devons remarquer que le seuil #max_potential n'est plus valide lorsque nous travaillons avec #chain_limit(), à cause des modifications apportées à l'espace des états. Nous devons ainsi le redéfinir.
+
+=== Redéfinition du voltage seuil
+Notons #max_potential_limit le nombre de pas de temps minimum nécessaire à un neurone pour que son voltage parte de $0$ et atteigne une valeur supérieure à #max_potential. La valeur de #max_potential_limit dépendra de tous les #unknown_expectation() et donc du temps. Mathématiquement, #max_potential_limit est tel que :
+#numbered_equation(
+    $ #max_potential_limit =  inf_(I in #integers) {sum_(t=0)^I #unknown_expectation() > #max_potential}. $, <def_max_potentiel_limite>
+)
+
 === Existence
 #theorem([Existence et unicité de la mesure stationnaire associée à #chain_limit()])[
   Il existe une unique mesure stationnaire, notée #mesure_stationnaire(), associée à la chaîne de Markov #chain_limit().
@@ -51,7 +54,7 @@ Pour prouver l'*existence* de cette mesure et garantir son *unicité*, appuyons-
   // Nous utiliserons les même notations pour les opérations que pour la preuve du @theoreme_irreductibilite. Ces opérations peuvent toujours advenir avec probabilité positive, puisque notre chaîne limite #chain_limit() ne peut jamais être absorbée.
 
   Soit $y$ l'état où :
-  - tous les neurones sont dans la couche la plus haute définie en @def_max_potentiel_limite (c'est-à-dire #max_potential_limit dans le cas de la chaîne limite #chain_limit()) : $#mesure_couche(state: $y$, v: max_potential_limit) = N$.
+  - tous les neurones sont dans la couche la plus haute définie en @def_max_potentiel_limite (c'est-à-dire #max_potential_limit dans le cas de la chaîne limite #chain_limit() : $#mesure_couche(state: $y$, v: max_potential_limit) = N$.
   - tous les neurons sont actifs : $#mesure_activation(state: $y$, a: $1$) = N$.
   Cet état est facilement atteignable à partir de n'importe quel état $x$. Il suffit d'abord d'attendre #max_potential_limit pas de temps sans aucun saut, amenant tous les neurones à la couche #max_potential_limit. Puis ensuite d'effectuer $N$ sauts, activant tous les neurones. Enfin, dans le cas où $N < #max_potential_limit$, il suffit d'attendre encore $#max_potential_limit - N$ pas de temps pour avoir de nouveau tous les neurones dans la couche #max_potential_limit. Toutes les étapes précédentes ont une probabilité positive d'advenir par construction du modèle limite.
 

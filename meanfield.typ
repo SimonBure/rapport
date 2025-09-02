@@ -113,7 +113,7 @@ Le @theorem_propagation_chaos possède un corollaire direct (@theoreme_convergen
     &+ #activation()#non_spiking_indicator (1 - #deactivation_indicator) - #activation_limit()#non_spiking_indicator_limit (1 - #deactivation_indicator)),\
     &= expectation(e) "pour simplifier l'écriture pour la suite." $
     
-    === Séparation en évévements disjoints
+    === Séparation en événements disjoints
     #let simultaneous_spikes_event = $bold(2)$
     #let alone_spike_event = $bold(1)$
     #let alone_spike_event_def = ${min(#spiking_function(v: membrane_potential()), #spiking_function(v: membrane_potential_limit())) < #auxiliary_uniform(t: $t+1$) < max(#spiking_function(v: membrane_potential()), #spiking_function(v: membrane_potential_limit()))}$

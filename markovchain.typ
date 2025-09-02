@@ -6,7 +6,7 @@
 // Display settings for theorems and proofs
 #show: thmrules.with(qed-symbol: $square$)
 
-Nous disposons maintenant d'un modèle mathématique précis décrivant l'évolution en temps discret de notre système de neurones via des sauts représentant les potentiels d'action et les mécanismes d'activation et de désactivation des synapses. Cette formalisation nous a mené à l'utilisation d'une chaîne de Markov #chain() = #neuron() pour réprésenter ces dynamiques, reprenant la philosophie de notre article de référence @andreQuasiStationaryApproachMetastability2025.
+Nous disposons maintenant d'un modèle mathématique précis décrivant l'évolution en temps discret de notre système de neurones via des sauts représentant les potentiels d'action et les mécanismes d'activation et de désactivation des synapses. Cette formalisation nous a mené à l'utilisation d'une chaîne de Markov #chain() = #neuron() pour représenter ces dynamiques, reprenant la philosophie de notre article de référence @andreQuasiStationaryApproachMetastability2025.
 
 Cette section répondra à la première question identifée dans @intro en posant les fondations mathématiques nécessaires au maintien de l'activité neuronale persistante. Ces bases seront importantes pour répondre à la seconde question dans les @section_mf et @section_mesure_sta.
 
@@ -89,7 +89,7 @@ Comparons les tailles des deux espaces (celui microscopique et celui macroscopiq
 
 
 == Modéliser la mémoire de travail
-Ce que nous voulons pour représenter un groupe de neurones impliqué dans une tâche de mémorisation à court terme, c'est qu'ils puissent conjointement soutenir une activité neuronale sur un temps arbitrairement long. L'interruption de cette activité, traduirait une perturbation de cette mémorisation, et donc un oubli de l'information d'intérêt.
+Ce que nous voulons pour représenter un groupe de neurones impliqué dans une tâche de mémorisation à court-terme, c'est qu'ils puissent conjointement soutenir une activité neuronale sur un temps arbitrairement long. L'interruption de cette activité, traduirait une perturbation de cette mémorisation, et donc un oubli de l'information d'intérêt.
 
 Nous avons donc besoin que #chain() soit capable d'émettre en continu des potentiels d'action sur la fenêtre temporelle d'étude #time_window. Comme nous travaillons avec une chaîne de Markov, il vient assez naturellement que nous allons avoir besoin d'étudier l'*absorption* de #chain(). Nous pourrons alors ensuite *conditionner* la chaîne à sa *non-absorption*, impliquant ainsi qu'elle deviendra capable de soutenir une activité persistante de sauts aussi longtemps que nécessaire.
 

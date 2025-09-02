@@ -21,7 +21,7 @@ Commençons par définir les potentiels d'action, ou "spikes" du système.
 
 === Spike
 Un neurone d'indice $i$ est en capacité d'émettre un spike au temps $t+1$ si et seulement si son potentiel de membrane $#membrane_potential() = #max_potential$.\
-Un neurone capable de "spiker", spike avec probabilité $#spiking_probability$ indépendamment de l'état du système et des autres variables aléatoires. Après l'émmission d'un potentiel d'action, le potentiel de membrane du neurone est *remis à zéro* et sa variable d'activation est *remise à un*.\
+Un neurone capable de "spiker", spike avec probabilité $#spiking_probability$ indépendamment de l'état du système et des autres variables aléatoires. Après l'émission d'un potentiel d'action, le potentiel de membrane du neurone est *remis à zéro* et sa variable d'activation est *remise à un*.\
 Pour formaliser ces informations, nous allons introduire la fonction $phi.alt$, qui, à un voltage $v$ donné, associera la *probabilité de spiker* : $ phi.alt : cases(v in #space_value_potential --> [0, 1], #spiking_function(v: $v$) = #spiking_probability bold(1)_(v = #max_potential)). $
 Ainsi en utilisant $phi.alt$ et la variable auxiliaire uniforme #auxiliary_uniform() définie plus haut, le neurone $i$ effectuera un spike au temps $t+1$ si et seulement si $ #auxiliary_uniform(t: $t+1$) <= phi.alt(#membrane_potential()). $
 Nous appelerons l'_indicatrice de spike_ le terme #spiking_indicator() et à l'inverse _indicatrice d'absence de spike_ le terme #non_spiking_indicator.\
